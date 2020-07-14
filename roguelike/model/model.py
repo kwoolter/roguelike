@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import tcod as libtcod
 
 class Entity():
     def __init__(self, name:str, x:int, y:int):
@@ -9,7 +10,7 @@ class Entity():
 
     @property
     def xy(self):
-        return(self.x, self.y)
+        return self.x, self.y
 
     @xy.setter
     def xy(self, new_xy):
@@ -32,6 +33,7 @@ class Floor():
         self.height = height
         self.player = None
         self.entities = []
+        self.map = None
 
     def initialise(self):
         for i in range(10):
@@ -40,6 +42,21 @@ class Floor():
                                         y=random.randint(1,self.height)))
 
         # self.map = np.array(dtype = int)
+
+        self.floor_map = libtcod.map.Map(width=self.width, height=self.height)
+        self.floor_map.walkable[:] = True
+        self.floor_map.transparent[0:self.height,0] = False
+        self.floor_map.transparent[0:self.height, self.width-1] = False
+        self.floor_map.transparent[0, 0:self.width] = False
+        self.floor_map.transparent[self.height-1, 0:self.width] = False
+
+
+
+
+    def print(self):
+        print(f'Floor {self.name}: ({self.width},{self.height}')
+        print(str(self.floor_map.walkable))
+        print(str(self.floor_map.transparent))
 
     def add_player(self, new_player : Player, x:int = None, y:int = None):
         if x is None:
@@ -62,6 +79,9 @@ class Model():
         self.current_floor = Floor("Test", 50, 50)
         self.current_floor.initialise()
         self.current_floor.add_player(self.player)
+
+    def print(self):
+        self.current_floor.print()
 
     def tick(self):
         pass
