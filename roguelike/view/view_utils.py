@@ -1,6 +1,78 @@
 import tcod as libtcod
 import textwrap
 
+class ScreenObject:
+
+    def __init__(self, char: int, fg: int = libtcod.white, bg: int = libtcod.BKGND_NONE):
+        self.char = char
+        self.fg = fg
+        self.bg = bg
+
+    def render(self, con, x:int, y:int):
+        libtcod.console_put_char_ex(con, x, y, self.char, fore=self.fg, back=self.bg)
+
+    def clear(self, con, x, y):
+        libtcod.console_put_char(con, x, y, ' ', libtcod.BKGND_NONE)
+
+class ScreenObjectArray:
+
+    def __init__(self, chars: list, fg: int = libtcod.white, bg: int = libtcod.black):
+        self.chars = chars
+        self.fg = fg
+        self.bg = bg
+
+    def render(self, con, x:int, y:int):
+        for dy,row in enumerate(self.chars):
+            for dx,char in enumerate(row):
+                if type(char) == 'int':
+                    char = chr(char)
+                libtcod.console_put_char_ex(con, x + dx, y + dy, char, fore=self.fg, back=self.bg)
+
+    def clear(self, con, x:int, y:int):
+        for dy,row in enumerate(self.chars):
+            for dx,char in enumerate(row):
+                libtcod.console_put_char(con, x + dx, y + dy, ' ', libtcod.BKGND_NONE)
+
+
+class ScreenString:
+
+    def __init__(self, text: str, fg: int = libtcod.white, bg: int = libtcod.BKGND_NONE, alignment: int = libtcod.LEFT):
+        self.text = text
+        self.fg = fg
+        self.bg = bg
+        self.alignment = alignment
+
+    def render(self, con, x:int, y:int, alignment:int = None):
+        if alignment is None:
+            alignment = self.alignment
+        con.default_fg = self.fg
+        con.default_bg = self.bg
+        libtcod.console_print_ex(con, x, y, flag=libtcod.BKGND_OVERLAY, alignment=alignment, fmt = self.text)
+
+
+class ScreenStringRect:
+
+    def __init__(self, text: str, width: int, height:int,
+                 fg: int = libtcod.white, bg: int = libtcod.BKGND_NONE,
+                 alignment: int = libtcod.LEFT):
+        self.text = text
+        self.width = width
+        self.height = height
+        self.fg = fg
+        self.bg = bg
+        self.alignment = alignment
+
+    def render(self, con, x:int, y:int, alignment:int = None):
+        if alignment is None:
+            alignment = self.alignment
+        con.default_fg = self.fg
+        con.default_bg = self.bg
+        libtcod.console_print_rect_ex(con, x, y, self.width, self.height,
+                                      flag=libtcod.BKGND_SET,
+                                      alignment=alignment,
+                                      fmt=self.text
+                                      )
+
 class TextEntryBox:
     """:param"""
 
@@ -87,8 +159,6 @@ class TextEntryBox:
 
             # If a key was pressed...
             if key.vk != libtcod.KEY_NONE:
-
-                print(key)
 
                 # If enter pressed then we are done!
                 if key.vk in (libtcod.KEY_ENTER, libtcod.KEY_KPENTER):

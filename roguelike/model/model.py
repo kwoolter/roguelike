@@ -41,22 +41,9 @@ class Floor():
                                         x=random.randint(1,self.width),
                                         y=random.randint(1,self.height)))
 
-        # self.map = np.array(dtype = int)
-
-        self.floor_map = libtcod.map.Map(width=self.width, height=self.height)
-        self.floor_map.walkable[:] = True
-        self.floor_map.transparent[0:self.height,0] = False
-        self.floor_map.transparent[0:self.height, self.width-1] = False
-        self.floor_map.transparent[0, 0:self.width] = False
-        self.floor_map.transparent[self.height-1, 0:self.width] = False
-
-
-
 
     def print(self):
         print(f'Floor {self.name}: ({self.width},{self.height}')
-        print(str(self.floor_map.walkable))
-        print(str(self.floor_map.transparent))
 
     def add_player(self, new_player : Player, x:int = None, y:int = None):
         if x is None:
@@ -66,7 +53,6 @@ class Floor():
 
         self.player = new_player
         self.player.xy = (x,y)
-
 
 class Model():
     def __init__(self, name:str):

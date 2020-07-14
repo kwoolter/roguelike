@@ -1,7 +1,8 @@
-import tcod as libtcod
 import numpy as np
+import tcod as libtcod
+
 from roguelike import model
-from .view_utils import TextEntryBox
+from .view_utils import *
 
 
 class View():
@@ -33,14 +34,16 @@ class MainFrame():
         font_file_dir = ".\\roguelike\\view\\fonts\\"
 
         font_file_specs = {
+            "dejavu_wide16x16_gs_tc.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
             "dundalk12x12_gs_tc.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
             "polyducks_12x12.png": libtcod.FONT_LAYOUT_ASCII_INROW,
             "terminal8x12_gs_ro.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW
         }
 
         font_file = "polyducks_12x12.png"
-        font_file = "dundalk12x12_gs_tc.png"
-        # font_file = "terminal8x12_gs_ro.png"
+        font_file = "dejavu_wide16x16_gs_tc.png"
+        #font_file = "dundalk12x12_gs_tc.png"
+        #font_file = "terminal8x12_gs_ro.png"
 
         libtcod.console_set_custom_font(font_file_dir + font_file,
                                         font_file_specs[font_file]
@@ -71,37 +74,30 @@ class MainFrame():
                 [178, 32, 32, 32, 178],
                 [178, 178, 178, 178, 178])
 
-        self.con.default_fg = libtcod.white
-        self.con.default_bg = libtcod.red
-        for i, r in enumerate(box2):
-            for ii, c in enumerate(r):
-                if c == 32:
-                    continue
-                libtcod.console_put_char(self.con, x + ii, y + i, chr(int(c)), libtcod.BKGND_OVERLAY)
-
+        st = ScreenString(text="New Test", fg=libtcod.dark_green, bg=libtcod.white)
         self.con.default_fg = libtcod.dark_green
         self.con.default_bg = libtcod.white
-        self.con.print_(10, 46, "New Test", libtcod.BKGND_OVERLAY)
+        st.render(self.con, 10, 46)
         libtcod.console_set_char_foreground(self.con, 10, 46, libtcod.black)
 
         player_x, player_y = self.game.player.xy
 
-        self.con.default_fg = libtcod.lighter_blue
-        libtcod.console_put_char(self.con, player_x, player_y, '@')
-        libtcod.console_put_char(self.con, player_x, player_y + 1, chr(197))
+        so = ScreenObjectArray(['@', chr(197), chr(203)], fg=libtcod.lighter_blue)
+        so.render(self.con, player_x, player_y)
+        #libtcod.console_put_char(self.con, player_x, player_y, '@')
+        #libtcod.console_put_char(self.con, player_x, player_y + 1, chr(197))
 
         self.floor_view.draw()
 
-        # libtcod.console_blit(self.floor_view.con, 0, 0, self.width, self.height, self.con, 0, 0, ffade=0.5, bfade=0.5)
-        libtcod.console_blit(self.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=0.5, bfade=0.5)
+        libtcod.console_blit(self.floor_view.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=1, bfade=1)
+        libtcod.console_blit(self.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=1, bfade=0.5)
 
-        # libtcod.console_credits_render(30,30,1)
+        libtcod.console_credits_render(40,50,0)
 
         libtcod.console_flush()
-        libtcod.console_put_char(self.con, player_x, player_y, ' ', libtcod.BKGND_NONE)
-        libtcod.console_put_char(self.con, player_x, player_y + 1, ' ', libtcod.BKGND_NONE)
 
-        # libtcod.console_set_default_background(self.con, libtcod.white)
+        so.clear(self.con, player_x, player_y)
+
 
     def do_text_entry(self):
         text_entry_box = TextEntryBox(width=20, height=3, parent = self.con, xpos=10, ypos=10)
@@ -139,67 +135,50 @@ class FloorView(View):
 
             y += 1
 
-        libtcod.console_set_default_foreground(self.con, libtcod.dark_green)
-        libtcod.console_set_default_background(self.con, libtcod.green)
-
-        x = 10
-        y = 10
-
         box = ([218, 196, 194, 196, 191],
                [179, 32, 179, 32, 179],
                [195, 196, 197, 196, 180],
                [179, 32, 179, 32, 179],
                [192, 196, 193, 196, 217])
+        x=5
+        y=5
+        so = ScreenObjectArray(box, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        for i, r in enumerate(box):
-            for ii, c in enumerate(r):
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
-
-        x = 30
-        y = 10
+        x += 10
 
         box2 = ([201, 205, 203, 205, 187],
                 [186, 32, 186, 32, 186],
                 [204, 205, 206, 205, 185],
                 [186, 32, 186, 32, 186],
                 [200, 205, 202, 205, 188])
+        so = ScreenObjectArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        for i, r in enumerate(box2):
-            for ii, c in enumerate(r):
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
+        x += 10
 
         box3 = np.zeros((5, 5))
         box3.fill(int(178))
 
-        x = 10
-        y = 30
+        so = ScreenObjectArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        for i, r in enumerate(box3):
-            for ii, c in enumerate(r):
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
+        x += 10
 
         box3 = np.zeros((5, 5))
         box3.fill(int(177))
 
-        x = 15
-        y = 10
+        so = ScreenObjectArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        for i, r in enumerate(box3):
-            for ii, c in enumerate(r):
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
-
+        x += 10
         box3 = np.zeros((5, 5))
         box3.fill(int(176))
+        so = ScreenObjectArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        x = 10
-        y = 15
-
-        for i, r in enumerate(box3):
-            for ii, c in enumerate(r):
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
-
-        x = 30
-        y = 30
+        x = 5
+        y += 10
 
         box2 = ([178, 178, 178, 178, 178],
                 [178, 32, 32, 32, 178],
@@ -207,14 +186,10 @@ class FloorView(View):
                 [178, 32, 32, 32, 178],
                 [178, 178, 178, 178, 178])
 
-        for i, r in enumerate(box2):
-            for ii, c in enumerate(r):
-                if c == 32:
-                    continue
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
+        so = ScreenObjectArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        x = 50
-        y = 50
+        x += 10
 
         box2 = ([201, 205, 203, 205, 187],
                 [186, 224, 186, 224, 186],
@@ -222,35 +197,51 @@ class FloorView(View):
                 [186, 225, 186, 225, 186],
                 [200, 205, 202, 205, 188])
 
-        for i, r in enumerate(box2):
-            for ii, c in enumerate(r):
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
+        so = ScreenObjectArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        x = 40
-        y = 40
+        x += 10
 
         arrows = ([32, 30, 32],
                   [17, 18, 16],
                   [32, 31, 32])
 
-        for i, r in enumerate(arrows):
-            for ii, c in enumerate(r):
-                libtcod.console_print(self.con, x + ii, y + i, chr(int(c)))
+        so = ScreenObjectArray(arrows, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
-        blocks = ([229, 228, 226],
-                  [231, 230.230],
-                  [229, 32, 232])
+        x += 10
 
-        x = 40
-        y = 25
-        libtcod.console_set_default_background(self.con, (255, 0, 0))
+        blocks = ([229, 32, 228, 32, 232],
+                  [32,32,32,32,32],
+                  [231, 32, 230, 32, 230],
+                  [32, 32, 32, 32, 32],
+                  [231, 32, 228,32, 226])
 
-        for i, r in enumerate(blocks):
-            for ii, c in enumerate(r):
-                libtcod.console_put_char(self.con, x + ii, y + i, chr(int(c)))
+        so = ScreenObjectArray(blocks, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so.render(self.con, x,y)
 
         libtcod.console_set_default_background(self.con, libtcod.white)
         libtcod.console_print(self.con, 10, 40, "Hello World")
         self.con.print_(10, 45, "Test", bg_blend=libtcod.BKGND_ADD)
+
+        o = ScreenObject("K", fg=libtcod.red, bg=libtcod.yellow)
+        o.render(self.con,17,17)
+
+        s = ScreenString("Hello World", fg = libtcod.red, bg=libtcod.white)
+        s.render(self.con, 10,10)
+        s.render(self.con, 10,12, alignment=libtcod.CENTER)
+
+        bo = ScreenObjectArray(box2, fg=libtcod.orange, bg=libtcod.yellow)
+        bo.render(self.con, 40,10)
+
+        text_box = ['###','#O#','###']
+        bo = ScreenObjectArray(text_box, fg=libtcod.red, bg=libtcod.white)
+        bo.render(self.con, 40,20)
+
+        s = "This is the end. My only friend, the end. I'll never look into your eyes again!"
+        sr = ScreenStringRect(text=s, width=10, height=10,
+                              fg=libtcod.darkest_blue, bg=libtcod.lightest_lime,
+                              alignment=libtcod.CENTER)
+        sr.render(self.con, 20,20)
 
 
