@@ -25,6 +25,12 @@ class Controller():
 
         while not libtcod.console_is_window_closed():
 
+            # Loop to process game events
+            event = self.model.get_next_event()
+            while event is not None:
+                self.view.process_event(event)
+                event = self.model.get_next_event()
+
             libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
             action = self.handle_keys(key)
 
@@ -66,11 +72,13 @@ class Controller():
             te = TextEntry()
             text = te.get_text()
             print(text)
+            self.view.add_message(text)
         elif key.vk == libtcod.KEY_F11:
             text = self.view.do_text_entry()
-            print(text)
+            self.view.add_message(text)
         elif key.vk == libtcod.KEY_F10:
             self.model.new_floor()
+            self.view.add_message("New floor")
 
 
         # No key was pressed

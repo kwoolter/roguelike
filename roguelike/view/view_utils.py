@@ -1,10 +1,11 @@
 import tcod as libtcod
 import textwrap
+import numpy as np
 
 class ScreenObject:
 
     BLANK_CHAR = ' '
-    NONE_CHAR = '¬'
+    NONE_CHAR = 0
 
     def __init__(self, char: int, fg: int = libtcod.white, bg: int = libtcod.black):
         self.char = char
@@ -54,7 +55,7 @@ class ScreenObjectList:
 
 class ScreenString:
 
-    def __init__(self, text: str, fg: int = libtcod.white, bg: int = libtcod.BKGND_NONE, alignment: int = libtcod.LEFT):
+    def __init__(self, text: str, fg: int = libtcod.white, bg: int = libtcod.black, alignment: int = libtcod.LEFT):
         self.text = text
         self.fg = fg
         self.bg = bg
@@ -71,7 +72,7 @@ class ScreenString:
 class ScreenStringRect:
 
     def __init__(self, text: str, width: int, height:int,
-                 fg: int = libtcod.white, bg: int = libtcod.BKGND_NONE,
+                 fg: int = libtcod.white, bg: int = libtcod.black,
                  alignment: int = libtcod.LEFT):
         self.text = text
         self.width = width
@@ -209,3 +210,53 @@ class TextEntryBox:
             libtcod.console_flush(self.parent_console)
 
         return text
+
+
+class Boxes:
+    BORDER_DEFAULT = "default"
+    BORDER_TYPE_1 = "type1"
+    BORDER_TYPE_2 = "type2"
+
+    BORDER_TL = 0
+    BORDER_T = 1
+    BORDER_TR = 2
+    BORDER_L = 3
+    BORDER_M = 4
+    BORDER_R = 5
+    BORDER_BL = 6
+    BORDER_B = 7
+    BORDER_BR = 8
+    BORDER_H = 9
+    BORDER_V = 10
+
+    BORDER_CHAR_MAPS = {
+        BORDER_DEFAULT: (ord('#') * 11),
+        BORDER_TYPE_1: (218, 194, 191, 195, 197, 180, 192, 193, 217, 196, 179),
+        BORDER_TYPE_2: (201, 203, 187, 204, 206, 185, 200, 202, 188, 205, 186)
+    }
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def get_box(width, height, border_type: str = BORDER_DEFAULT):
+
+        border_char_map = Boxes.BORDER_CHAR_MAPS.get(border_type)
+
+        if border_char_map is None:
+            border_char_map = Boxes.BORDER_CHAR_MAPS.get(Boxes.BORDER_DEFAULT)
+
+        box = np.full((width, height), ord('#'))
+        box[0,0] = border_char_map[Boxes.BORDER_TL]
+        box[width-1, 0] = border_char_map[Boxes.BORDER_TR]
+        box[0, height-1] = border_char_map[Boxes.BORDER_BL]
+        box[width-1, height - 1] = border_char_map[Boxes.BORDER_BR]
+        box[1:-1, 0] = border_char_map[Boxes.BORDER_H]
+        box[1:-1, height-1] = border_char_map[Boxes.BORDER_H]
+        box[0,1:-1] = border_char_map[Boxes.BORDER_V]
+        box[width-1, 1:-1] = border_char_map[Boxes.BORDER_V]
+        box[1:-1, 1:-1] = 0
+
+        return box
+
+

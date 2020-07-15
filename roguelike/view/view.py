@@ -11,20 +11,33 @@ class View():
     def tick(self):
         self.tick_count += 0
 
+    def process_event(self, new_event: model.Event):
+        print(f'{__class__} processing event {new_event}')
+
     def draw(self):
         pass
 
 
-class MainFrame():
+class MainFrame(View):
 
-    def __init__(self, width: int = 80, height: int = 50):
+    CONSOLE_MESSAGE_PANEL_HEIGHT = 10
+    CONSOLE_MESSAGE_PANEL_WIDTH = 25
+
+    def __init__(self, width: int = 50, height: int = 50):
         super().__init__()
         self.width = width
         self.height = height
         self.game = None
         self.con = None
 
-        self.floor_view = FloorView(self.width, self.height, bg=libtcod.darkest_grey)
+        self.floor_view = FloorView(self.width, self.height, bg=libtcod.black)
+        self.message_panel = MessagePanel(MainFrame.CONSOLE_MESSAGE_PANEL_WIDTH,
+                                          MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
+                                          fg=libtcod.lightest_lime,
+                                          bg=libtcod.black,
+                                          border_bg=libtcod.black,
+                                          border_fg=libtcod.green)
+
         self.text_entry = TextEntryBox()
 
     def initialise(self, model: model.Model):
@@ -40,7 +53,7 @@ class MainFrame():
         }
 
         font_file = "polyducks_12x12.png"
-        font_file = "dejavu_wide16x16_gs_tc.png"
+        #font_file = "dejavu_wide16x16_gs_tc.png"
         #font_file = "dundalk12x12_gs_tc.png"
         #font_file = "terminal8x12_gs_ro.png"
 
@@ -56,6 +69,15 @@ class MainFrame():
         self.con = libtcod.console_new(self.width, self.height)
 
         self.floor_view.initialise(self.game.current_floor)
+        self.message_panel.initialise()
+        self.message_panel.add_message(f"Welcome to {self.game.name}")
+
+    def process_event(self, new_event: model.Event):
+
+        super().process_event(new_event)
+
+        self.floor_view.process_event(new_event)
+        self.message_panel.process_event(new_event)
 
     def draw(self):
 
@@ -63,11 +85,33 @@ class MainFrame():
         libtcod.console_clear(self.con)
 
         self.floor_view.draw()
+        self.message_panel.draw()
 
-        libtcod.console_blit(self.floor_view.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=1, bfade=1)
+        # Blit the current floor
+        libtcod.console_blit(self.floor_view.con,
+                             0, 0,
+                             self.floor_view.width, self.floor_view.height,
+                             0,
+                             0, 0, ffade=1, bfade=1)
+
+        # Blit the message panel
+        libtcod.console_blit(self.message_panel.con,
+                             0, 0,
+                             self.message_panel.width,
+                             self.message_panel.height,
+                             0,
+                             0, self.height-MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
+                             ffade=0.5, bfade=0.5)
+
+        # Add a title
+        box = Boxes.get_box(20,3, border_type=Boxes.BORDER_TYPE_1)
+        bo = ScreenObject2DArray(box, fg=libtcod.green, bg=libtcod.grey)
+        bo.render(0, 10, 0)
 
         libtcod.console_flush()
 
+    def add_message(self, new_message : str):
+        self.message_panel.add_message(new_message)
 
     def do_text_entry(self):
         text_entry_box = TextEntryBox(width=20, height=3, parent = self.con, xpos=10, ypos=10)
@@ -78,18 +122,28 @@ class MainFrame():
         return text_entry_box.get_text(20)
 
 class FloorView(View):
-    def __init__(self, width: int, height: int, fg = libtcod.white, bg=libtcod.grey):
+    def __init__(self, width: int, height: int, fg = libtcod.white, bg=libtcod.black):
         self.width = width
         self.height = height
+
+        self.con = None
+
+        # Appearance of the view content
         self.fg = fg
         self.bg = bg
-        self.bg_explored = libtcod.dark_gray
-        self.bg_fov = libtcod.darker_yellow
+        self.bg_lit_path = libtcod.darker_yellow
+        self.bg_lit_wall = libtcod.darkest_yellow
+        self.bg_explored_path = libtcod.darker_grey
+        self.bg_explored_wall = libtcod.darkest_grey
 
+        # Model Floor that we are going to render
         self.floor = None
 
     def initialise(self, floor: model.Floor):
+        # Connect the view to the model
         self.floor = floor
+
+        # Create a new console to draw on
         self.con = libtcod.console_new(self.width, self.height)
 
     def draw(self):
@@ -98,20 +152,38 @@ class FloorView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        # Draw the walkable areas that we have already explored
-        for x in range(self.floor.width):
-            for y in range(self.floor.height):
+        # Get the types of cells that we need to draw
+        explored_cells = self.floor.get_explored_cells()
+        fov_cells = self.floor.get_fov_cells()
+        walkable_cells = self.floor.get_walkable_cells()
 
-                if self.floor.fov_map[x,y] == True:
-                    libtcod.console_set_char_background(self.con, x, y, self.bg_fov)
+        # Loop through all of the cells that we have already explored
+        for x,y in explored_cells:
 
-                elif self.floor.map[x,y] > 0 and self.floor.explored[x,y] == True:
-                    libtcod.console_set_char_background(self.con, x, y, self.bg_explored)
-
+            # For the cells in the current FOV
+            if (x, y) in fov_cells:
+                # Lit path
+                if (x,y) in walkable_cells:
+                    libtcod.console_set_char_background(self.con, x, y, self.bg_lit_path)
+                # Else lit wall
+                else:
+                    libtcod.console_set_char_background(self.con, x, y, self.bg_lit_wall)
+            else:
+                # Unlit path
+                if (x,y) in walkable_cells:
+                    libtcod.console_set_char_background(self.con, x, y, self.bg_explored_path)
+                # Else unlit wall
+                else:
+                    libtcod.console_set_char_background(self.con, x, y, self.bg_explored_wall)
 
         # Draw the player
-        so = ScreenObject('@', fg=libtcod.black, bg=self.bg_fov)
+        so = ScreenObject('@', fg=libtcod.dark_sea, bg=self.bg_lit_path)
         so.render(self.con, x=self.floor.player.x, y=self.floor.player.y)
+
+        # Draw name of current room
+        room_name = self.floor.current_room.name if self.floor.current_room is not None else "???"
+        s = ScreenString(room_name, fg = libtcod.red, bg=libtcod.white)
+        s.render(self.con, 0,0, alignment=libtcod.LEFT)
 
 
     def draw_old(self):
@@ -263,3 +335,62 @@ class FloorView(View):
 
 
 
+
+class MessagePanel(View):
+
+    BORDER_TYPE1 = "type1"
+    BORDER_TYPE2 = "type2"
+
+    def __init__(self, width: int, height: int,
+                 fg = libtcod.white, bg=libtcod.black,
+                 border_fg = libtcod.white, border_bg=libtcod.black):
+
+        self.width = width
+        self.height = height
+        self.fg = fg
+        self.bg = bg
+        self.border_fg = border_fg
+        self.border_bg = border_bg
+
+        self.con = None
+        self.messages=[]
+
+        self.border_type = MessagePanel.BORDER_TYPE1
+        self.border = None
+
+    def initialise(self):
+        self.con = libtcod.console_new(self.width, self.height)
+        self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+    def add_message(self, new_message : str):
+        self.messages.append(new_message)
+        if len(self.messages) > self.height:
+            del self.messages[0]
+            #print(self.messages)
+
+    def process_event(self, new_event: model.Event):
+        self.add_message(new_event.description)
+
+    def draw(self):
+
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+
+        # Draw the border
+        bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
+        bo.render(self.con, 0, 0)
+
+        panel_text = ""
+        for message in self.messages[-1:0:-1]:
+            panel_text += message+"\n"
+
+        # Print the panel text
+        so = ScreenStringRect(panel_text,
+                              width = self.width-2, 
+                              height = self.height-2,
+                              fg=self.fg,
+                              bg=self.bg)
+
+        so.render(self.con, 1, 1)
+        
