@@ -6,7 +6,7 @@ class ScreenObject:
     BLANK_CHAR = ' '
     NONE_CHAR = '¬'
 
-    def __init__(self, char: int, fg: int = libtcod.white, bg: int = libtcod.BKGND_NONE):
+    def __init__(self, char: int, fg: int = libtcod.white, bg: int = libtcod.black):
         self.char = char
         self.fg = fg
         self.bg = bg

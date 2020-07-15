@@ -69,6 +69,8 @@ class Controller():
         elif key.vk == libtcod.KEY_F11:
             text = self.view.do_text_entry()
             print(text)
+        elif key.vk == libtcod.KEY_F10:
+            self.model.new_floor()
 
 
         # No key was pressed

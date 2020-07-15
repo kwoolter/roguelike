@@ -1,5 +1,4 @@
 import numpy as np
-import tcod as libtcod
 
 from roguelike import model
 from .view_utils import *
@@ -25,7 +24,7 @@ class MainFrame():
         self.game = None
         self.con = None
 
-        self.floor_view = FloorView(self.width, self.height)
+        self.floor_view = FloorView(self.width, self.height, bg=libtcod.darkest_grey)
         self.text_entry = TextEntryBox()
 
     def initialise(self, model: model.Model):
@@ -60,45 +59,14 @@ class MainFrame():
 
     def draw(self):
 
-        self.con.default_bg = libtcod.dark_grey
+        self.con.default_bg = libtcod.black
         libtcod.console_clear(self.con)
-
-        libtcod.console_set_char_background(self.con, 0, 0, libtcod.red)
-
-        # x = 30
-        # y = 30
-        #
-        # box2 = ([178, 178, 178, 178, 178],
-        #         [178, 32, 32, 32, 178],
-        #         [178, 32, 32, 32, 178],
-        #         [178, 32, 32, 32, 178],
-        #         [178, 178, 178, 178, 178])
-        #
-        # so = ScreenObject2DArray(box2, fg=libtcod.dark_crimson, bg=libtcod.dark_grey)
-        # so.render(self.con, 10,30)
-        #
-        # st = ScreenString(text="New Test", fg=libtcod.dark_green, bg=libtcod.white)
-        # self.con.default_fg = libtcod.dark_green
-        # self.con.default_bg = libtcod.white
-        # st.render(self.con, 10, 46)
-        # libtcod.console_set_char_foreground(self.con, 10, 46, libtcod.black)
-
-        player_x, player_y = self.game.player.xy
-        player_string = np.array(['@', chr(197), chr(203)])
-        player_string.shape=(1,3)
-        so = ScreenObject2DArray(player_string, fg=libtcod.lighter_blue)
-        so.render(self.con, player_x, player_y)
 
         self.floor_view.draw()
 
         libtcod.console_blit(self.floor_view.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=1, bfade=1)
-        libtcod.console_blit(self.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=1, bfade=0.5)
-
-        #libtcod.console_credits_render(40,50,0)
 
         libtcod.console_flush()
-
-        so.clear(self.con, player_x, player_y)
 
 
     def do_text_entry(self):
@@ -110,9 +78,14 @@ class MainFrame():
         return text_entry_box.get_text(20)
 
 class FloorView(View):
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int, fg = libtcod.white, bg=libtcod.grey):
         self.width = width
         self.height = height
+        self.fg = fg
+        self.bg = bg
+        self.bg_explored = libtcod.dark_gray
+        self.bg_fov = libtcod.darker_yellow
+
         self.floor = None
 
     def initialise(self, floor: model.Floor):
@@ -120,6 +93,28 @@ class FloorView(View):
         self.con = libtcod.console_new(self.width, self.height)
 
     def draw(self):
+
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+
+        # Draw the walkable areas that we have already explored
+        for x in range(self.floor.width):
+            for y in range(self.floor.height):
+
+                if self.floor.fov_map[x,y] == True:
+                    libtcod.console_set_char_background(self.con, x, y, self.bg_fov)
+
+                elif self.floor.map[x,y] > 0 and self.floor.explored[x,y] == True:
+                    libtcod.console_set_char_background(self.con, x, y, self.bg_explored)
+
+
+        # Draw the player
+        so = ScreenObject('@', fg=libtcod.black, bg=self.bg_fov)
+        so.render(self.con, x=self.floor.player.x, y=self.floor.player.y)
+
+
+    def draw_old(self):
 
         for e in self.floor.entities:
             x, y = e.xy
@@ -245,9 +240,9 @@ class FloorView(View):
                               fg=libtcod.darkest_blue, bg=libtcod.lightest_lime,
                               alignment=libtcod.CENTER)
         sr.render(self.con, 20,20)
-        
-        libtcod.console_clear(self.con)
 
+        libtcod.console_set_default_background(self.con, self.bg)
+        libtcod.console_clear(self.con)
 
         for room in self.floor.map_rooms.values():
             box = np.array([['#' for y in range(room.height+2)] for x in range(room.width+2)])
@@ -255,8 +250,8 @@ class FloorView(View):
             bo = ScreenObject2DArray(box, fg=room.fg, bg=room.bg)
             bo.render(self.con, room.x-1, room.y-1)
 
-            s = ScreenString(room.name, fg = libtcod.red, bg=libtcod.white)
-            s.render(self.con, room.x-1,room.y-2, alignment=libtcod.LEFT)
+            # s = ScreenString(room.name, fg = libtcod.red, bg=libtcod.white)
+            # s.render(self.con, room.x-1,room.y-2, alignment=libtcod.LEFT)
 
         for tunnel in self.floor.map_tunnels:
             so = ScreenObjectList(char=ScreenObject.BLANK_CHAR,
@@ -265,12 +260,6 @@ class FloorView(View):
                                   bg=tunnel.bg)
             so.render(self.con)
 
-
-
-
-        # box = [['$' for y in range(8)] for x in range(3)]
-        # bo = ScreenObject2DArray(box)
-        # bo.render(self.con, 1,1)
 
 
 

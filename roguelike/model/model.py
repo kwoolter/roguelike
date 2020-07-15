@@ -2,6 +2,7 @@ import random
 import tcod as libtcod
 import pygame.rect as rect
 import random
+import numpy as np
 
 import pygame.rect as rect
 import tcod as libtcod
@@ -106,29 +107,46 @@ class Floor():
         self.height = height
         self.rect = rect.Rect(0,0,width,height)
         self.player = None
+        self.first_room = None
         self.room_count = 15
         self.map_rooms = {}
         self.map_tunnels = []
         self.entities = []
+
         self.map = None
+        self.explored = None
+
+        self.fov_map = None
+        self.fov_radius = 5
 
     def initialise(self):
+
+        self.map_rooms = {}
+        self.map_tunnels = []
+        self.fov_map = None
+
         for i in range(10):
             self.entities.append(Entity(name="NPC",
                                         x=random.randint(1,self.width),
                                         y=random.randint(1,self.height)))
 
         last_room = None
+        self.first_room = None
+
         for i in range(self.room_count):
             new_room = Room(f'Room{i}', random.randint(3,6),random.randint(3,6))
             if self.add_map_room(new_room) is True:
                 if last_room is not None:
                     new_tunnel = Tunnel(last_room.center, new_room.center)
                     self.map_tunnels.append(new_tunnel)
+                else:
+                    self.first_room = new_room
                 last_room = new_room
 
+        self.build_floor_map()
 
-        #self.run_room_check()
+        if self.player is not None:
+            self.add_player(self.player)
 
     def print(self):
         print(f'Floor {self.name}: ({self.width},{self.height})')
@@ -140,12 +158,18 @@ class Floor():
 
     def add_player(self, new_player : Player, x:int = None, y:int = None):
         if x is None:
-            x = int(self.width/2)
+            x, y = self.first_room.center
         if y is None:
-            y = int(self.height/2)
+            x, y = x, self.first_room.center
 
         self.player = new_player
         self.player.xy = (x,y)
+        self.recompute_fov()
+
+    def move_player(self, dx, dy):
+        if self.map[self.player.x + dx, self.player.y + dy] > 0:
+            self.player.move(dx,dy)
+            self.recompute_fov()
 
     def add_map_room(self, new_room:Room)->bool:
         """:param"""
@@ -190,6 +214,41 @@ class Floor():
                 print(f'room {room1.name} vs. room {room2.name}touching={x}')
 
 
+    def build_floor_map(self):
+        self.map = np.zeros((self.width, self.height))
+        self.explored = np.zeros((self.width, self.height), dtype=bool)
+
+        for room in self.map_rooms.values():
+            x,y,w,h = room.rect
+            self.map[x:x+w, y: y+h] = 1
+
+        for tunnel in self.map_tunnels:
+            for sx, sy in tunnel.get_segments():
+                self.map[sx,sy] = 1
+
+    def recompute_fov(self, x=None, y=None, radius=None, light_walls=False, algorithm=0):
+
+        if x is None and self.player is not None:
+            x = self.player.x
+
+        if y is None and self.player is not None:
+            y = self.player.y
+
+        if radius is None:
+            radius = self.fov_radius
+
+        t = self.map > 0
+
+        self.fov_map = libtcod.map.compute_fov(t,
+                                               (x,y),
+                                               radius,
+                                               light_walls,
+                                               algorithm)
+
+        self.explored |= self.fov_map
+
+        return self.fov_map
+
 
 class Model():
     def __init__(self, name:str):
@@ -216,4 +275,7 @@ class Model():
         return self.player
 
     def move_player(self, dx:int, dy:int):
-        self.player.move(dx, dy)
+        self.current_floor.move_player(dx, dy)
+
+    def new_floor(self):
+        self.current_floor.initialise()
