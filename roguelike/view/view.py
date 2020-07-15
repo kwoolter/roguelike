@@ -65,34 +65,36 @@ class MainFrame():
 
         libtcod.console_set_char_background(self.con, 0, 0, libtcod.red)
 
-        x = 30
-        y = 30
-
-        box2 = ([178, 178, 178, 178, 178],
-                [178, 32, 32, 32, 178],
-                [178, 32, 32, 32, 178],
-                [178, 32, 32, 32, 178],
-                [178, 178, 178, 178, 178])
-
-        st = ScreenString(text="New Test", fg=libtcod.dark_green, bg=libtcod.white)
-        self.con.default_fg = libtcod.dark_green
-        self.con.default_bg = libtcod.white
-        st.render(self.con, 10, 46)
-        libtcod.console_set_char_foreground(self.con, 10, 46, libtcod.black)
+        # x = 30
+        # y = 30
+        #
+        # box2 = ([178, 178, 178, 178, 178],
+        #         [178, 32, 32, 32, 178],
+        #         [178, 32, 32, 32, 178],
+        #         [178, 32, 32, 32, 178],
+        #         [178, 178, 178, 178, 178])
+        #
+        # so = ScreenObject2DArray(box2, fg=libtcod.dark_crimson, bg=libtcod.dark_grey)
+        # so.render(self.con, 10,30)
+        #
+        # st = ScreenString(text="New Test", fg=libtcod.dark_green, bg=libtcod.white)
+        # self.con.default_fg = libtcod.dark_green
+        # self.con.default_bg = libtcod.white
+        # st.render(self.con, 10, 46)
+        # libtcod.console_set_char_foreground(self.con, 10, 46, libtcod.black)
 
         player_x, player_y = self.game.player.xy
-
-        so = ScreenObjectArray(['@', chr(197), chr(203)], fg=libtcod.lighter_blue)
+        player_string = np.array(['@', chr(197), chr(203)])
+        player_string.shape=(1,3)
+        so = ScreenObject2DArray(player_string, fg=libtcod.lighter_blue)
         so.render(self.con, player_x, player_y)
-        #libtcod.console_put_char(self.con, player_x, player_y, '@')
-        #libtcod.console_put_char(self.con, player_x, player_y + 1, chr(197))
 
         self.floor_view.draw()
 
         libtcod.console_blit(self.floor_view.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=1, bfade=1)
         libtcod.console_blit(self.con, 0, 0, self.width, self.height, 0, 0, 0, ffade=1, bfade=0.5)
 
-        libtcod.console_credits_render(40,50,0)
+        #libtcod.console_credits_render(40,50,0)
 
         libtcod.console_flush()
 
@@ -142,7 +144,7 @@ class FloorView(View):
                [192, 196, 193, 196, 217])
         x=5
         y=5
-        so = ScreenObjectArray(box, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(box, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x += 10
@@ -152,7 +154,7 @@ class FloorView(View):
                 [204, 205, 206, 205, 185],
                 [186, 32, 186, 32, 186],
                 [200, 205, 202, 205, 188])
-        so = ScreenObjectArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x += 10
@@ -160,7 +162,7 @@ class FloorView(View):
         box3 = np.zeros((5, 5))
         box3.fill(int(178))
 
-        so = ScreenObjectArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x += 10
@@ -168,13 +170,13 @@ class FloorView(View):
         box3 = np.zeros((5, 5))
         box3.fill(int(177))
 
-        so = ScreenObjectArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x += 10
         box3 = np.zeros((5, 5))
         box3.fill(int(176))
-        so = ScreenObjectArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(box3, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x = 5
@@ -186,7 +188,7 @@ class FloorView(View):
                 [178, 32, 32, 32, 178],
                 [178, 178, 178, 178, 178])
 
-        so = ScreenObjectArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x += 10
@@ -197,7 +199,7 @@ class FloorView(View):
                 [186, 225, 186, 225, 186],
                 [200, 205, 202, 205, 188])
 
-        so = ScreenObjectArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(box2, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x += 10
@@ -206,7 +208,7 @@ class FloorView(View):
                   [17, 18, 16],
                   [32, 31, 32])
 
-        so = ScreenObjectArray(arrows, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(arrows, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         x += 10
@@ -217,7 +219,7 @@ class FloorView(View):
                   [32, 32, 32, 32, 32],
                   [231, 32, 228,32, 226])
 
-        so = ScreenObjectArray(blocks, fg=libtcod.dark_sea, bg=libtcod.grey)
+        so = ScreenObject2DArray(blocks, fg=libtcod.dark_sea, bg=libtcod.grey)
         so.render(self.con, x,y)
 
         libtcod.console_set_default_background(self.con, libtcod.white)
@@ -231,11 +233,11 @@ class FloorView(View):
         s.render(self.con, 10,10)
         s.render(self.con, 10,12, alignment=libtcod.CENTER)
 
-        bo = ScreenObjectArray(box2, fg=libtcod.orange, bg=libtcod.yellow)
+        bo = ScreenObject2DArray(box2, fg=libtcod.orange, bg=libtcod.yellow)
         bo.render(self.con, 40,10)
 
         text_box = ['###','#O#','###']
-        bo = ScreenObjectArray(text_box, fg=libtcod.red, bg=libtcod.white)
+        bo = ScreenObject2DArray(text_box, fg=libtcod.red, bg=libtcod.white)
         bo.render(self.con, 40,20)
 
         s = "This is the end. My only friend, the end. I'll never look into your eyes again!"
@@ -243,5 +245,32 @@ class FloorView(View):
                               fg=libtcod.darkest_blue, bg=libtcod.lightest_lime,
                               alignment=libtcod.CENTER)
         sr.render(self.con, 20,20)
+        
+        libtcod.console_clear(self.con)
+
+
+        for room in self.floor.map_rooms.values():
+            box = np.array([['#' for y in range(room.height+2)] for x in range(room.width+2)])
+            box[1:-1,1:-1] = ScreenObject.BLANK_CHAR
+            bo = ScreenObject2DArray(box, fg=room.fg, bg=room.bg)
+            bo.render(self.con, room.x-1, room.y-1)
+
+            s = ScreenString(room.name, fg = libtcod.red, bg=libtcod.white)
+            s.render(self.con, room.x-1,room.y-2, alignment=libtcod.LEFT)
+
+        for tunnel in self.floor.map_tunnels:
+            so = ScreenObjectList(char=ScreenObject.BLANK_CHAR,
+                                  positions=tunnel.get_segments(),
+                                  fg=tunnel.fg,
+                                  bg=tunnel.bg)
+            so.render(self.con)
+
+
+
+
+        # box = [['$' for y in range(8)] for x in range(3)]
+        # bo = ScreenObject2DArray(box)
+        # bo.render(self.con, 1,1)
+
 
 

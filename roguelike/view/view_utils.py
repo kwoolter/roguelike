@@ -3,6 +3,9 @@ import textwrap
 
 class ScreenObject:
 
+    BLANK_CHAR = ' '
+    NONE_CHAR = '¬'
+
     def __init__(self, char: int, fg: int = libtcod.white, bg: int = libtcod.BKGND_NONE):
         self.char = char
         self.fg = fg
@@ -14,7 +17,7 @@ class ScreenObject:
     def clear(self, con, x, y):
         libtcod.console_put_char(con, x, y, ' ', libtcod.BKGND_NONE)
 
-class ScreenObjectArray:
+class ScreenObject2DArray:
 
     def __init__(self, chars: list, fg: int = libtcod.white, bg: int = libtcod.black):
         self.chars = chars
@@ -22,16 +25,31 @@ class ScreenObjectArray:
         self.bg = bg
 
     def render(self, con, x:int, y:int):
-        for dy,row in enumerate(self.chars):
-            for dx,char in enumerate(row):
+        for dx,col in enumerate(self.chars):
+            for dy,char in enumerate(col):
                 if type(char) == 'int':
                     char = chr(char)
-                libtcod.console_put_char_ex(con, x + dx, y + dy, char, fore=self.fg, back=self.bg)
+                if char != ScreenObject.NONE_CHAR:
+                    libtcod.console_put_char_ex(con, x + dx, y + dy, char, fore=self.fg, back=self.bg)
 
     def clear(self, con, x:int, y:int):
         for dy,row in enumerate(self.chars):
             for dx,char in enumerate(row):
                 libtcod.console_put_char(con, x + dx, y + dy, ' ', libtcod.BKGND_NONE)
+
+
+class ScreenObjectList:
+
+    def __init__(self, char:str, positions : list, fg: int = libtcod.white, bg: int = libtcod.black):
+        self.char = char
+        self.positions = positions
+        self.fg = fg
+        self.bg = bg
+
+    def render(self, con):
+        for x,y in self.positions:
+            if self.char != ScreenObject.NONE_CHAR:
+                libtcod.console_put_char_ex(con, x, y, self.char, fore=self.fg, back=self.bg)
 
 
 class ScreenString:
