@@ -9,5 +9,5 @@ setup(
     author='kwoolter',
     author_email='',
     description='',
-    install_requires = ['pygame', 'numpy', 'tcod']
+    install_requires = ['pygame', 'numpy', 'tcod', 'pandas']
 )

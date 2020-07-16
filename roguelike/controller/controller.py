@@ -38,12 +38,15 @@ class Controller():
             exit = action.get('exit')
             fullscreen = action.get('fullscreen')
             stairs = action.get('take stairs')
+            pickup = action.get('pickup')
 
             if move:
                 dx, dy = move
                 self.model.move_player(dx,dy)
             elif stairs:
                 self.model.take_stairs()
+            elif pickup:
+                self.model.take_item()
 
             if exit:
                 return True
@@ -68,11 +71,16 @@ class Controller():
             return {'move': (1, 0)}
         elif key.vk == libtcod.KEY_ENTER:
             return {'take stairs': True}
+        elif key_char == 'g':
+            return {'pickup': True}
+        elif key_char == 'i':
+            return {'show_inventory': True}
+        elif key_char == 'd':
+            return {'drop_inventory': True}
 
         if key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
-
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the game
             return {'exit': True}
@@ -86,8 +94,6 @@ class Controller():
             self.view.add_message(text)
         elif key.vk == libtcod.KEY_F10:
             self.model.next_floor()
-            #self.view.add_message("New floor")
-
 
         # No key was pressed
         return {}

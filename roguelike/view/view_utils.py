@@ -2,6 +2,21 @@ import tcod as libtcod
 import textwrap
 import numpy as np
 
+def text_to_color(color_text :str)->libtcod.color.Color:
+
+    c = None
+
+    try:
+        c = eval(f'libtcod.{color_text.lower()}')
+
+        if isinstance(c, libtcod.color.Color) is False:
+            print("We didn't end up with a colour!")
+
+    except AttributeError:
+        print("not a valid attribite")
+
+    return c
+
 class ScreenObject:
 
     BLANK_CHAR = ' '

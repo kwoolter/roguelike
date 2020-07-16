@@ -6,6 +6,7 @@ import pygame.rect as rect
 import tcod as libtcod
 
 from .events import Event
+from .entity_factory import Entity, Player, EntityFactory
 
 
 class EventQueue():
@@ -26,31 +27,6 @@ class EventQueue():
             print(event)
 
 
-class Entity():
-    def __init__(self, name: str, char: str, x: int, y: int):
-        self.name = name
-        self.char = char
-        self.x = x
-        self.y = y
-
-    @property
-    def xy(self):
-        return self.x, self.y
-
-    @xy.setter
-    def xy(self, new_xy):
-        x, y = new_xy
-        self.x = x
-        self.y = y
-
-    def move(self, dx: int, dy: int):
-        self.x += dx
-        self.y += dy
-
-
-class Player(Entity):
-    def __init__(self, name: str, x: int = 1, y: int = 1):
-        super().__init__(name=name, char='@', x=x, y=y)
 
 
 class Tunnel:
@@ -227,18 +203,17 @@ class Floor():
 
     def add_entities_to_room(self, room : Room):
 
-        ename = "Gold"
-        echar = "$"
-        eprob = self.level * 5
+        l = self.level
 
-        if random.randint(1,100) < eprob:
-            rx,ry = room.get_random_pos()
-            if self.get_entity_at_pos((rx,ry)) is None:
-                new_entity = Entity(name=ename,
-                                    char=echar,
-                                    x=rx,
-                                    y=ry)
-                self.entities.append(new_entity)
+        entities = (("Gold", (1+ l//3)*5, 1), ("Orc", 30, 3), ("Troll", 5*(l//10), 1))
+        for ename, eprob, emax in entities:
+            for count in range(emax):
+                if random.randint(1,100) < eprob:
+                    rx,ry = room.get_random_pos()
+                    if self.get_entity_at_pos((rx,ry)) is None:
+                        new_entity = EntityFactory.get_entity_by_name(ename)
+                        new_entity.xy = rx,ry
+                        self.entities.append(new_entity)
 
     def add_entities_to_floor(self):
 
@@ -255,32 +230,39 @@ class Floor():
             cx,cy= self.first_room.center
             self.entities.append(Entity(name='up stairs', char='^', x=cx, y=cy))
 
-        # Add stuff to random rooms
-        available_rooms = list(self.map_rooms.values())
+        entities_to_add = [("NPC",3), ("Sword",2), ("Axe",2), ("Key",1), ("Fire Scroll",1), ("Healing Scroll",1)]
 
-        for i in range(10):
+        # Add different stuff to random rooms
+        for ename, ecount in entities_to_add:
 
-            ename = f"NPC{i}"
-            echar = "K"
+            # Get list of all rooms on this floor but exclude the first and last rooms
+            available_rooms = list(self.map_rooms.values())
+            available_rooms.remove(self.first_room)
+            available_rooms.remove(self.last_room)
 
-            # pick a random room
-            room=random.choice(available_rooms)
-            # Pick a random position in the room
-            rx, ry = room.get_random_pos()
+            for i in range(ecount):
 
-            # If there is nothing already there...
-            if self.get_entity_at_pos((rx, ry)) is None:
+                # pick a random room
+                room=random.choice(available_rooms)
 
-                # Add a new entity to the floor at this location
-                new_entity = Entity(name=ename,
-                                    char=echar,
-                                    x=rx,
-                                    y=ry)
+                # Pick a random position in the room
+                rx, ry = room.get_random_pos()
 
-                self.entities.append(new_entity)
+                # If there is nothing already there...
+                if self.get_entity_at_pos((rx, ry)) is None:
 
-                # Don't use this room again
-                available_rooms.remove(room)
+                    # Add a new entity to the floor at this location
+                    new_entity = EntityFactory.get_entity_by_name(ename)
+                    if new_entity is None:
+                        print(f"Couldn't create entity bny name of {ename}")
+                        continue
+
+                    new_entity.xy = rx,ry
+
+                    self.entities.append(new_entity)
+
+                    # Don't use this room again
+                    available_rooms.remove(room)
 
 
     def move_player(self, dx, dy):
@@ -324,11 +306,22 @@ class Floor():
 
         return success
 
-    def get_entity_at_pos(self, pos : tuple):
+    def get_entity_at_pos(self, pos : tuple)->Entity:
         for e in self.entities:
             if e.xy == pos:
                 return e
         return None
+
+    def swap_entity(self, old_entity : Entity, new_entity : Entity = None):
+        if old_entity in self.entities:
+            if new_entity is not None:
+                new_entity.xy = old_entity.xy
+                self.entities.append(new_entity)
+
+            self.entities.remove(old_entity)
+        else:
+            print(f"Couldn't find {old_entity.name} on this floor!")
+
 
     def get_current_room(self) -> Room:
         current_room = None
@@ -383,31 +376,40 @@ class Floor():
                 print(f'room {room1.name} vs. room {room2.name}touching={x}')
 
     def build_floor_map(self):
-        self.walkable = np.zeros((self.width, self.height))
+
+        # Start with nothing explored!
         self.explored = np.zeros((self.width, self.height), dtype=bool)
 
+        # Start with nothing walkable!
+        self.walkable = np.zeros((self.width, self.height))
+
+        # Make floor walkable where rooms are
         for room in self.map_rooms.values():
             x, y, w, h = room.rect
             self.walkable[x:x + w, y: y + h] = 1
 
+        # Make floor walkable where tunnels are
         for tunnel in self.map_tunnels:
             for sx, sy in tunnel.get_segments():
                 self.walkable[sx, sy] = 1
 
+        # Convert walkable to array of bools
+        self.walkable = self.walkable > 0
+
     def recompute_fov(self, x=None, y=None, radius=None, light_walls=True, algorithm=0):
 
+        # Use the player's xy if non specified
         if x is None and self.player is not None:
             x = self.player.x
-
         if y is None and self.player is not None:
             y = self.player.y
 
+        # Use floor's radius if nothing specified
         if radius is None:
             radius = self.fov_radius
 
-        t = self.walkable > 0
-
-        self.fov_map = libtcod.map.compute_fov(t,
+        # Use libtcod to calculate field of view
+        self.fov_map = libtcod.map.compute_fov(self.walkable,
                                                (x, y),
                                                radius,
                                                light_walls,
@@ -415,9 +417,6 @@ class Floor():
 
         # Add FOV cells to explored cells
         self.explored |= self.fov_map
-
-        # But remove any non-walkable cells e.g. FOV lit up walls walls
-        # self.explored &= t
 
         return self.fov_map
 
@@ -442,11 +441,16 @@ class Model():
 
         # Contents of the game
         self.player = None
+        self.inventory = {}
+        self.entities = None
         self.floors=[]
         self.current_floor = None
         self.events = EventQueue()
 
     def initialise(self):
+
+        EntityFactory.load("entities.csv")
+
         self.add_player(Player(name="Keith"))
         self.next_floor()
 
@@ -471,17 +475,83 @@ class Model():
     def move_player(self, dx: int, dy: int):
         self.current_floor.move_player(dx, dy)
 
+    def take_item(self):
+
+        success = False
+
+        # See if there is anything at your current position
+        e = self.current_floor.get_entity_at_pos(self.player.xy)
+
+        # If there are no entities at this location then fail
+        if e is None:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"There is nothing here!"))
+
+        # If there is an entity that you can pick-up then process it
+        elif e.get_property("IsCollectable") == True:
+
+            # If you don't have any of these set inventory count to 1
+            if e.name not in self.inventory.keys() or self.inventory[e.name] == 0:
+                self.inventory[e.name] = 1
+                success = True
+
+            # If the item is stackable then increase the number you are holding
+            elif e.get_property("IsStackable") == True:
+                self.inventory[e.name] += 1
+                success = True
+
+            # Otherwise you can't hold any more of these so fail
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"You can only hold one {e.name}!"))
+
+            # If we manage to pick up an item then remove it
+            if success is True:
+                self.current_floor.swap_entity(e)
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You picked up {e.name}!"))
+
+        # Otherwise you can't pick it up
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You can't pick up {e.name}!"))
+
+        print(self.inventory)
+
+        if e is not None:
+            print(e)
+            print(e.properties)
+            property_name = "IsCollectable"
+            property_value = e.get_property(property_name)
+            if property_value is True:
+                print("is true")
+            elif property_value == True:
+                print("eq True")
+            else:
+                print("False")
+
     def take_stairs(self):
 
+        # First see if there is anything at the current location.  If not then fail.
         e = self.current_floor.get_entity_at_pos(self.player.xy)
         if e is None:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"There is nothing here!"))
+
+        # If we found down stairs go to next floor
         elif e.name == "down stairs":
             self.next_floor()
+
+        # If we found up stairs go to teh previous floor
         elif e.name == "up stairs":
             self.previous_floor()
+
+        # Else the entity at this space is not stairs!
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
@@ -504,6 +574,9 @@ class Model():
                                         description=f"{self.name}:'{self.current_floor.name}' at Level {self.dungeon_level} Ready!"))
 
         else:
+
+            self.dungeon_level += 1
+
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"There are no levels above this one!"))

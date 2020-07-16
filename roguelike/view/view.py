@@ -1,5 +1,3 @@
-import numpy as np
-
 from roguelike import model
 from .view_utils import *
 
@@ -108,9 +106,9 @@ class MainFrame(View):
                              ffade=0.5, bfade=0.5)
 
         # Add a title
-        box = Boxes.get_box(20,3, border_type=Boxes.BORDER_TYPE_1)
-        bo = ScreenObject2DArray(box, fg=libtcod.green, bg=libtcod.grey)
-        bo.render(0, 10, 0)
+        # box = Boxes.get_box(20,3, border_type=Boxes.BORDER_TYPE_1)
+        # bo = ScreenObject2DArray(box, fg=libtcod.green, bg=libtcod.grey)
+        # bo.render(0, 10, 0)
 
         libtcod.console_flush()
 
@@ -180,13 +178,15 @@ class FloorView(View):
                 else:
                     libtcod.console_set_char_background(self.con, x, y, self.bg_explored_wall)
 
-        # Draw all of teh entities on the current floor
+        # Draw all of the entities in the current FOV
         for e in self.floor.entities:
-            if e.xy in explored_cells:
+            if e.xy in fov_cells:
                 x, y = e.xy
-
-                libtcod.console_set_default_foreground(self.con, libtcod.yellow)
+                bg = e.bg
+                libtcod.console_set_default_foreground(self.con, e.fg)
                 libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
+                if bg is not None:
+                    libtcod.console_set_char_background(self.con, x, y, bg)
 
         # Draw the player
         so = ScreenObject('@', fg=libtcod.dark_sea, bg=self.bg_lit_path)
@@ -194,8 +194,8 @@ class FloorView(View):
 
         # Draw name of current room
         room_name = self.floor.current_room.name if self.floor.current_room is not None else "???"
-        s = ScreenString(room_name, fg = libtcod.red, bg=libtcod.white)
-        s.render(self.con, 0,0, alignment=libtcod.LEFT)
+        s = ScreenString(f'{self.floor.name}:{room_name}', fg=libtcod.red, bg=libtcod.white)
+        s.render(self.con, 0, 0, alignment=libtcod.LEFT)
 
 
     def draw_old(self):
