@@ -76,6 +76,10 @@ class MainFrame(View):
 
         super().process_event(new_event)
 
+        if new_event.type == model.Event.GAME:
+            if new_event.name == model.Event.GAME_NEW_FLOOR:
+                self.floor_view.initialise(floor=self.game.current_floor)
+
         self.floor_view.process_event(new_event)
         self.message_panel.process_event(new_event)
 
@@ -175,6 +179,14 @@ class FloorView(View):
                 # Else unlit wall
                 else:
                     libtcod.console_set_char_background(self.con, x, y, self.bg_explored_wall)
+
+        # Draw all of teh entities on the current floor
+        for e in self.floor.entities:
+            if e.xy in explored_cells:
+                x, y = e.xy
+
+                libtcod.console_set_default_foreground(self.con, libtcod.yellow)
+                libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
 
         # Draw the player
         so = ScreenObject('@', fg=libtcod.dark_sea, bg=self.bg_lit_path)

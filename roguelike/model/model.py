@@ -27,8 +27,9 @@ class EventQueue():
 
 
 class Entity():
-    def __init__(self, name: str, x: int, y: int):
+    def __init__(self, name: str, char: str, x: int, y: int):
         self.name = name
+        self.char = char
         self.x = x
         self.y = y
 
@@ -49,7 +50,7 @@ class Entity():
 
 class Player(Entity):
     def __init__(self, name: str, x: int = 1, y: int = 1):
-        super().__init__(name, x, y)
+        super().__init__(name=name, char='@', x=x, y=y)
 
 
 class Tunnel:
@@ -117,25 +118,37 @@ class Room:
         x, y = point
         return self.rect.collidepoint(x, y) > 0
 
+    def get_random_pos(self):
+        """Return a random position within this room"""
+        return (self.x + random.randint(0,self.width-1), self.y + random.randint(0,self.height-1))
+
     def print(self):
         print(f'Room {self.name} located at {self.rect}')
 
 
 class Floor():
-    def __init__(self, name: str, width: int = 50, height: int = 50):
-
-        self.events = None
+    def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0):
 
         # Properties of this floor
         self.name = name
         self.width = width
         self.height = height
         self.rect = rect.Rect(0, 0, width, height)
+        self.level = level
+
+        '''        
+        'room_max_size': room_max_size,
+        'room_min_size': room_min_size,
+        'max_rooms': max_rooms,
+        'max_monsters_per_room': max_monsters_per_room,
+        'max_items_per_room': max_items_per_room,
+        '''
 
         # Contents of the floor
         self.player = None
         self.first_room = None
         self.current_room = None
+        self.last_room = None
         self.room_count = 15
         self.map_rooms = {}
         self.map_tunnels = []
@@ -144,11 +157,14 @@ class Floor():
         # Which parts of the floor are:-
         # - Walkable?
         # - Have already been explored?
-        # - Are in teh current FOV?
+        # - Are in the current FOV?
         self.walkable = None
         self.explored = None
         self.fov_map = None
         self.fov_radius = 5
+
+        self.events = None
+
 
     def initialise(self, events: EventQueue):
 
@@ -160,28 +176,35 @@ class Floor():
         self.explored = None
         self.fov_map = None
 
-        for i in range(10):
-            self.entities.append(Entity(name="NPC",
-                                        x=random.randint(1, self.width),
-                                        y=random.randint(1, self.height)))
-
         last_room = None
         self.first_room = None
 
         for i in range(self.room_count):
+
+            # Create a new room of random size
             new_room = Room(f'Room{i}', random.randint(3, 6), random.randint(3, 6))
+
+            # If we were able to add the room to the map...
             if self.add_map_room(new_room) is True:
+
+                # Add some random entities to the room
+                self.add_entities_to_room(new_room)
+
+                # if this is not the first room then create a tunnel to teh previous room
                 if last_room is not None:
                     new_tunnel = Tunnel(last_room.center, new_room.center)
                     self.map_tunnels.append(new_tunnel)
                 else:
                     self.first_room = new_room
+
                 last_room = new_room
+
+        self.last_room = new_room
+
+        self.add_entities_to_floor()
 
         self.build_floor_map()
 
-        if self.player is not None:
-            self.add_player(self.player)
 
     def print(self):
         print(f'Floor {self.name}: ({self.width},{self.height})')
@@ -191,20 +214,90 @@ class Floor():
         for tunnel in self.map_tunnels:
             tunnel.print()
 
-    def add_player(self, new_player: Player, x: int = None, y: int = None):
-        if x is None:
+    def add_player(self, new_player: Player, first_room = True):
+
+        if first_room is True:
             x, y = self.first_room.center
-        if y is None:
-            x, y = x, self.first_room.center
+        else:
+            x, y = self.last_room.center
 
         self.player = new_player
         self.player.xy = (x, y)
         self.move_player(0, 0)
 
+    def add_entities_to_room(self, room : Room):
+
+        ename = "Gold"
+        echar = "$"
+        eprob = self.level * 5
+
+        if random.randint(1,100) < eprob:
+            rx,ry = room.get_random_pos()
+            if self.get_entity_at_pos((rx,ry)) is None:
+                new_entity = Entity(name=ename,
+                                    char=echar,
+                                    x=rx,
+                                    y=ry)
+                self.entities.append(new_entity)
+
+    def add_entities_to_floor(self):
+
+        # Add the player
+        if self.player is not None:
+            self.add_player(self.player)
+
+        # Add stairs down to next level
+        cx,cy= self.last_room.center
+        self.entities.append(Entity(name='down stairs', char='v', x=cx, y=cy))
+
+        # If we are not at the top level add stairs back up to the previous level
+        if self.level > 1:
+            cx,cy= self.first_room.center
+            self.entities.append(Entity(name='up stairs', char='^', x=cx, y=cy))
+
+        # Add stuff to random rooms
+        available_rooms = list(self.map_rooms.values())
+
+        for i in range(10):
+
+            ename = f"NPC{i}"
+            echar = "K"
+
+            # pick a random room
+            room=random.choice(available_rooms)
+            # Pick a random position in the room
+            rx, ry = room.get_random_pos()
+
+            # If there is nothing already there...
+            if self.get_entity_at_pos((rx, ry)) is None:
+
+                # Add a new entity to the floor at this location
+                new_entity = Entity(name=ename,
+                                    char=echar,
+                                    x=rx,
+                                    y=ry)
+
+                self.entities.append(new_entity)
+
+                # Don't use this room again
+                available_rooms.remove(room)
+
+
     def move_player(self, dx, dy):
         # If the destination is a valid path...
         if self.move_entity(self.player, dx, dy) is True:
+
             self.recompute_fov()
+
+            # See if we found something?
+            e = self.get_entity_at_pos(self.player.xy)
+            if e is not None:
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_SUCCEEDED,
+                          description=f"You found {e.name}!"))
+
+            # See if we changed rooms/tunnels
             if self.current_room != self.get_current_room():
                 self.current_room = self.get_current_room()
                 room_name = "a tunnel" if self.current_room is None else self.current_room.name
@@ -212,6 +305,7 @@ class Floor():
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
                           description=f"You moved to {room_name}."))
+
         # Else raise an event
         else:
             self.events.add_event(
@@ -229,6 +323,12 @@ class Floor():
             success = False
 
         return success
+
+    def get_entity_at_pos(self, pos : tuple):
+        for e in self.entities:
+            if e.xy == pos:
+                return e
+        return None
 
     def get_current_room(self) -> Room:
         current_room = None
@@ -336,19 +436,19 @@ class Floor():
 
 class Model():
     def __init__(self, name: str):
+        # Properties of the game
         self.name = name
-        self.player = None
-        self.current_floor = None
+        self.dungeon_level = 0
 
+        # Contents of the game
+        self.player = None
+        self.floors=[]
+        self.current_floor = None
         self.events = EventQueue()
 
     def initialise(self):
         self.add_player(Player(name="Keith"))
-        self.current_floor = Floor("Test", 50, 50)
-        self.current_floor.initialise(self.events)
-        self.current_floor.add_player(self.player)
-
-        self.events.add_event(Event(type=Event.STATE, name=Event.STATE_LOADED, description=f"{self.name} Game Ready"))
+        self.next_floor()
 
     def print(self):
         self.current_floor.print()
@@ -360,7 +460,6 @@ class Model():
         next_event = None
         if self.events.size() > 0:
             next_event = self.events.pop_event()
-
         return next_event
 
     def add_player(self, new_player: Player):
@@ -372,5 +471,62 @@ class Model():
     def move_player(self, dx: int, dy: int):
         self.current_floor.move_player(dx, dy)
 
-    def new_floor(self):
-        self.current_floor.initialise()
+    def take_stairs(self):
+
+        e = self.current_floor.get_entity_at_pos(self.player.xy)
+        if e is None:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"There is nothing here!"))
+        elif e.name == "down stairs":
+            self.next_floor()
+        elif e.name == "up stairs":
+            self.previous_floor()
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"There are no stairs here!"))
+
+    def previous_floor(self):
+        self.dungeon_level -= 1
+
+        # If we have not reached the top level...
+        if self.dungeon_level > 0:
+
+            # Get the floor
+            self.current_floor = self.floors[self.dungeon_level - 1]
+
+            # Add the player at the end of the previous level
+            self.current_floor.add_player(self.player, first_room = False)
+
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.GAME_NEW_FLOOR,
+                                        description=f"{self.name}:'{self.current_floor.name}' at Level {self.dungeon_level} Ready!"))
+
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"There are no levels above this one!"))
+
+    def next_floor(self):
+
+            self.dungeon_level += 1
+
+            # If the new level doesn't exist yet then create it...
+            if self.dungeon_level > len(self.floors):
+
+                # Create a new floor and initialise
+                self.current_floor = Floor(f'The Floor {self.dungeon_level}', 50, 50, self.dungeon_level)
+                self.current_floor.initialise(self.events)
+                self.floors.append(self.current_floor)
+
+            # Otherwise retrieve it
+            else:
+                self.current_floor = self.floors[self.dungeon_level-1]
+
+            # Add the player at the start of teh new level
+            self.current_floor.add_player(self.player)
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.GAME_NEW_FLOOR,
+                                        description=f"{self.name}:'{self.current_floor.name}' at Level {self.dungeon_level} Ready!"))
+

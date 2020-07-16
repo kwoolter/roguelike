@@ -216,6 +216,7 @@ class Boxes:
     BORDER_DEFAULT = "default"
     BORDER_TYPE_1 = "type1"
     BORDER_TYPE_2 = "type2"
+    BORDER_TYPE_3 = "type3"
 
     BORDER_TL = 0
     BORDER_T = 1
@@ -230,9 +231,11 @@ class Boxes:
     BORDER_V = 10
 
     BORDER_CHAR_MAPS = {
-        BORDER_DEFAULT: (ord('#') * 11),
+
         BORDER_TYPE_1: (218, 194, 191, 195, 197, 180, 192, 193, 217, 196, 179),
-        BORDER_TYPE_2: (201, 203, 187, 204, 206, 185, 200, 202, 188, 205, 186)
+        BORDER_TYPE_2: (201, 203, 187, 204, 206, 185, 200, 202, 188, 205, 186),
+        BORDER_TYPE_3: (43, 43, 43, 43, 43, 43, 43, 43, 43, 124,45),
+        BORDER_DEFAULT: [ord('#') for i in range(11)]
     }
 
     def __init__(self):
@@ -245,6 +248,8 @@ class Boxes:
 
         if border_char_map is None:
             border_char_map = Boxes.BORDER_CHAR_MAPS.get(Boxes.BORDER_DEFAULT)
+
+        assert(border_char_map is not None)
 
         box = np.full((width, height), ord('#'))
         box[0,0] = border_char_map[Boxes.BORDER_TL]
@@ -259,4 +264,29 @@ class Boxes:
 
         return box
 
+    @staticmethod
+    def box_to_text(box: np.array)->str:
+        w,h = box.shape
+        box_text=""
+        for x in range(w):
+            for y in range(h):
+                c = box[x,y]
+                box_text+= chr(box[x,y]) if c != 0 else " "
+            box_text+="\n"
 
+        return box_text
+
+if __name__ == "__main__":
+
+    # Test out the Boxes.get_box() static method
+    box = Boxes.get_box(10,6, border_type=Boxes.BORDER_DEFAULT)
+    print(Boxes.box_to_text(box))
+
+    box = Boxes.get_box(10,6,border_type=Boxes.BORDER_TYPE_1)
+    print(Boxes.box_to_text(box))
+
+    box = Boxes.get_box(10,6,border_type=Boxes.BORDER_TYPE_2)
+    print(Boxes.box_to_text(box))
+
+    box = Boxes.get_box(10,6,border_type=Boxes.BORDER_TYPE_3)
+    print(Boxes.box_to_text(box))

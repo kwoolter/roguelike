@@ -17,6 +17,9 @@ class Event():
     STATE_GAME_OVER = "Game Over"
     STATE_WORLD_COMPLETE = "Game World Complete"
 
+    # Game events
+    GAME_NEW_FLOOR = "new floor"
+
     # Event Names
     TICK = "Tick"
     EFFECT_START = "Effect Start"

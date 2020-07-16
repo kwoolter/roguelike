@@ -37,10 +37,13 @@ class Controller():
             move = action.get('move')
             exit = action.get('exit')
             fullscreen = action.get('fullscreen')
+            stairs = action.get('take stairs')
 
             if move:
                 dx, dy = move
                 self.model.move_player(dx,dy)
+            elif stairs:
+                self.model.take_stairs()
 
             if exit:
                 return True
@@ -51,6 +54,9 @@ class Controller():
             self.view.draw()
 
     def handle_keys(self, key):
+
+        key_char = chr(key.c)
+
         # Movement keys
         if key.vk == libtcod.KEY_UP:
             return {'move': (0, -1)}
@@ -60,6 +66,8 @@ class Controller():
             return {'move': (-1, 0)}
         elif key.vk == libtcod.KEY_RIGHT:
             return {'move': (1, 0)}
+        elif key.vk == libtcod.KEY_ENTER:
+            return {'take stairs': True}
 
         if key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
@@ -77,8 +85,8 @@ class Controller():
             text = self.view.do_text_entry()
             self.view.add_message(text)
         elif key.vk == libtcod.KEY_F10:
-            self.model.new_floor()
-            self.view.add_message("New floor")
+            self.model.next_floor()
+            #self.view.add_message("New floor")
 
 
         # No key was pressed
