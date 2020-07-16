@@ -1,13 +1,15 @@
-Name,Char,FG,BG,IsTransparent,IsWalkable,IsInteractable,IsCollectable,IsStackable
-Player,@,black,,FALSE,FALSE,FALSE,FALSE,FALSE
-NPC,K,yellow,,FALSE,FALSE,TRUE,FALSE,FALSE
-Up Stairs,^,yellow,,FALSE,TRUE,TRUE,FALSE,FALSE
-Down Stairs,v,yellow,,FALSE,TRUE,TRUE,FALSE,FALSE
-Gold,$,black,yellow,FALSE,TRUE,TRUE,TRUE,TRUE
-Sword,\,white,,FALSE,TRUE,TRUE,TRUE,FALSE
-Axe,!,white,,FALSE,TRUE,TRUE,TRUE,FALSE
-Key,?,red,,FALSE,TRUE,TRUE,TRUE,FALSE
-Orc,o,green,,FALSE,FALSE,FALSE,FALSE,FALSE
-Troll,T,dark_green,,FALSE,FALSE,FALSE,FALSE,FALSE
-Fire Scroll,~,red,,FALSE,TRUE,TRUE,TRUE,TRUE
-Healing Scroll,H,blue,,FALSE,TRUE,TRUE,TRUE,TRUE
+Name,Char,FG,BG,IsTransparent,IsWalkable,IsInteractable,IsCollectable,IsStackable,IsEnemy
+Player,@,black,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+NPC,K,yellow,,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE
+Up Stairs,^,yellow,black,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE
+Down Stairs,v,yellow,black,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE
+Gold,$,black,yellow,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE
+Sword,\,white,,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE
+Axe,!,white,,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE
+Key,?,red,,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE
+Orc,o,green,,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Troll,T,dark_green,,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Fire Scroll,~,orange,red,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE
+Healing Scroll,#,red,white,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE
+Trap,*,yellow,red,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
+Chest,C,red,dark_red,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE

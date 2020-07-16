@@ -6,6 +6,7 @@ import pygame.rect as rect
 import tcod as libtcod
 
 from .events import Event
+#from .ai import AIBot
 from .entity_factory import Entity, Player, EntityFactory
 
 
@@ -87,6 +88,14 @@ class Room:
     def center(self):
         return self.rect.center
 
+    @property
+    def centerx(self):
+        return self.rect.centerx
+
+    @property
+    def centery(self):
+        return self.rect.centery
+
     def is_touching(self, other_room):
         return self.rect.colliderect(other_room.rect.inflate(2, 2)) > 0
 
@@ -129,6 +138,7 @@ class Floor():
         self.map_rooms = {}
         self.map_tunnels = []
         self.entities = []
+        self.bots = []
 
         # Which parts of the floor are:-
         # - Walkable?
@@ -158,7 +168,7 @@ class Floor():
         for i in range(self.room_count):
 
             # Create a new room of random size
-            new_room = Room(f'Room{i}', random.randint(3, 6), random.randint(3, 6))
+            new_room = Room(f'Room{i}', random.randint(4, 8), random.randint(4, 8))
 
             # If we were able to add the room to the map...
             if self.add_map_room(new_room) is True:
@@ -221,18 +231,28 @@ class Floor():
         if self.player is not None:
             self.add_player(self.player)
 
-        # Add stairs down to next level
-        cx,cy= self.last_room.center
-        self.entities.append(Entity(name='down stairs', char='v', x=cx, y=cy))
+        # Add stairs down to next level in the centre of the last room
+        ename = "Down Stairs"
+        new_entity = EntityFactory.get_entity_by_name(ename)
+        new_entity.xy = self.last_room.center
+        self.entities.append(new_entity)
 
-        # If we are not at the top level add stairs back up to the previous level
+        # If we are not at the top level add stairs back up to the previous level in the centre of the first room
         if self.level > 1:
-            cx,cy= self.first_room.center
-            self.entities.append(Entity(name='up stairs', char='^', x=cx, y=cy))
+            ename = "Up Stairs"
+            new_entity = EntityFactory.get_entity_by_name(ename)
+            new_entity.xy = self.first_room.center
+            self.entities.append(new_entity)
 
-        entities_to_add = [("NPC",3), ("Sword",2), ("Axe",2), ("Key",1), ("Fire Scroll",1), ("Healing Scroll",1)]
+        entities_to_add = [("NPC",3),
+                           ("Sword",2),
+                           ("Axe",2),
+                           ("Key",1),
+                           ("Fire Scroll",1),
+                           ("Healing Scroll",1),
+                           ("Chest", 2)]
 
-        # Add different stuff to random rooms
+        # Add different stuff to random rooms across the floor
         for ename, ecount in entities_to_add:
 
             # Get list of all rooms on this floor but exclude the first and last rooms
@@ -240,7 +260,7 @@ class Floor():
             available_rooms.remove(self.first_room)
             available_rooms.remove(self.last_room)
 
-            for i in range(ecount):
+            for i in range(random.randint(0,ecount)):
 
                 # pick a random room
                 room=random.choice(available_rooms)
@@ -254,7 +274,7 @@ class Floor():
                     # Add a new entity to the floor at this location
                     new_entity = EntityFactory.get_entity_by_name(ename)
                     if new_entity is None:
-                        print(f"Couldn't create entity bny name of {ename}")
+                        print(f"Couldn't create entity by name of {ename}")
                         continue
 
                     new_entity.xy = rx,ry
@@ -290,17 +310,34 @@ class Floor():
 
         # Else raise an event
         else:
-            self.events.add_event(
-                Event(type=Event.GAME,
-                      name=Event.ACTION_FAILED,
-                      description=f"That way is blocked!"))
+
+            # See if an entity blocked our way?
+            e = self.get_entity_at_pos((self.player.x + dx, self.player.y + dy))
+            if e is not None:
+                print(e)
+                print(e.properties)
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_FAILED,
+                          description=f"A solid {e.name} blocks your way!"))
+            else:
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_FAILED,
+                          description=f"That way is blocked!"))
 
     def move_entity(self, entity: Entity, dx: int, dy: int) -> bool:
 
         success = True
-        # If the destination is a valid path...
+        # If the destination is a valid path on the map...
         if self.walkable[entity.x + dx, entity.y + dy] > 0:
-            entity.move(dx, dy)
+            # And no solid entity is blocking the way...
+            e = self.get_entity_at_pos((entity.x + dx, entity.y+dy))
+            if e is None or e.get_property("IsWalkable") == True:
+                # Move the specified entity
+                entity.move(dx, dy)
+            else:
+                success = False
         else:
             success = False
 
@@ -432,6 +469,13 @@ class Floor():
         results = np.where(self.fov_map > 0)
         return list(zip(results[0], results[1]))
 
+    def tick(self):
+        current_fov = self.get_fov_cells()
+        for entity in self.entities:
+            if entity.xy in current_fov and entity.get_property("IsEnemy") == True:
+                print(f'Tick {entity.name}')
+
+
 
 class Model():
     def __init__(self, name: str):
@@ -458,7 +502,7 @@ class Model():
         self.current_floor.print()
 
     def tick(self):
-        pass
+        self.current_floor.tick()
 
     def get_next_event(self):
         next_event = None
@@ -544,11 +588,11 @@ class Model():
                                         description=f"There is nothing here!"))
 
         # If we found down stairs go to next floor
-        elif e.name == "down stairs":
+        elif e.name == "Down Stairs":
             self.next_floor()
 
         # If we found up stairs go to teh previous floor
-        elif e.name == "up stairs":
+        elif e.name == "Up Stairs":
             self.previous_floor()
 
         # Else the entity at this space is not stairs!

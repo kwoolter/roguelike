@@ -31,7 +31,12 @@ class Controller():
                 self.view.process_event(event)
                 event = self.model.get_next_event()
 
-            libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
+            # Draw the view
+            self.view.draw()
+
+            # Wait for event.........
+            #libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
+            key = libtcod.console_wait_for_keypress(True)
             action = self.handle_keys(key)
 
             move = action.get('move')
@@ -54,7 +59,8 @@ class Controller():
             if fullscreen:
                 libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
-            self.view.draw()
+            # Tick the model
+            self.model.tick()
 
     def handle_keys(self, key):
 
