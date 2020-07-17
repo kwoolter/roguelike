@@ -5,9 +5,8 @@ import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
 
-from .events import Event
-#from .ai import AIBot
 from .entity_factory import Entity, Player, EntityFactory
+from .events import Event
 
 
 class EventQueue():
@@ -147,7 +146,7 @@ class Floor():
         self.walkable = None
         self.explored = None
         self.fov_map = None
-        self.fov_radius = 5
+        self.fov_radius = 6
 
         self.events = None
 
@@ -173,16 +172,18 @@ class Floor():
             # If we were able to add the room to the map...
             if self.add_map_room(new_room) is True:
 
-                # Add some random entities to the room
-                self.add_entities_to_room(new_room)
-
-                # if this is not the first room then create a tunnel to teh previous room
+                # if this is not the first room then...
                 if last_room is not None:
+                    # Add some random entities to the room
+                    self.add_entities_to_room(new_room)
+
+                    # Create a tunnel to the previous room
                     new_tunnel = Tunnel(last_room.center, new_room.center)
                     self.map_tunnels.append(new_tunnel)
                 else:
                     self.first_room = new_room
 
+                # Make the new room the last room
                 last_room = new_room
 
         self.last_room = new_room
@@ -211,11 +212,15 @@ class Floor():
         self.player.xy = (x, y)
         self.move_player(0, 0)
 
+        for bot in self.bots:
+            bot.set_instructions(new_target=self.player)
+            print(bot)
+
     def add_entities_to_room(self, room : Room):
 
         l = self.level
 
-        entities = (("Gold", (1+ l//3)*5, 1), ("Orc", 30, 3), ("Troll", 5*(l//10), 1))
+        entities = (("Gold", (1+ l//3)*5, 1), ("Spider",20,1), ("Orc", 30, 3), ("Troll", 5*(l//10), 1))
         for ename, eprob, emax in entities:
             for count in range(emax):
                 if random.randint(1,100) < eprob:
@@ -224,6 +229,11 @@ class Floor():
                         new_entity = EntityFactory.get_entity_by_name(ename)
                         new_entity.xy = rx,ry
                         self.entities.append(new_entity)
+                        if new_entity.get_property("IsEnemy") == True:
+                            print(f"Adding new bot for {new_entity.name}")
+                            new_bot = AIBotTracker(new_entity, self)
+                            self.bots.append(new_bot)
+                            print(new_bot)
 
     def add_entities_to_floor(self):
 
@@ -235,6 +245,10 @@ class Floor():
         ename = "Down Stairs"
         new_entity = EntityFactory.get_entity_by_name(ename)
         new_entity.xy = self.last_room.center
+        e = self.get_entity_at_pos(self.last_room.center)
+        # Replace anything that is already there!
+        if e is not None:
+            self.remove_entity(e)
         self.entities.append(new_entity)
 
         # If we are not at the top level add stairs back up to the previous level in the centre of the first room
@@ -242,15 +256,20 @@ class Floor():
             ename = "Up Stairs"
             new_entity = EntityFactory.get_entity_by_name(ename)
             new_entity.xy = self.first_room.center
+            e = self.get_entity_at_pos(self.last_room.center)
+            # Replace anything that is already there!
+            if e is not None:
+                self.remove_entity(e)
             self.entities.append(new_entity)
 
         entities_to_add = [("NPC",3),
                            ("Sword",2),
                            ("Axe",2),
                            ("Key",1),
-                           ("Fire Scroll",1),
-                           ("Healing Scroll",1),
-                           ("Chest", 2)]
+                           ("Fire Scroll",2),
+                           ("Healing Scroll",2),
+                           ("Chest", 2),
+                           ("Locked Chest", 2),]
 
         # Add different stuff to random rooms across the floor
         for ename, ecount in entities_to_add:
@@ -316,10 +335,13 @@ class Floor():
             if e is not None:
                 print(e)
                 print(e.properties)
-                self.events.add_event(
-                    Event(type=Event.GAME,
-                          name=Event.ACTION_FAILED,
-                          description=f"A solid {e.name} blocks your way!"))
+                if e.get_property("IsEnemy"):
+                    self.attack_entity(self.player, e)
+                else:
+                    self.events.add_event(
+                        Event(type=Event.GAME,
+                              name=Event.ACTION_FAILED,
+                              description=f"A solid {e.name} blocks your way!"))
             else:
                 self.events.add_event(
                     Event(type=Event.GAME,
@@ -349,6 +371,13 @@ class Floor():
                 return e
         return None
 
+    def remove_entity(self, old_entity : Entity):
+        if old_entity in self.entities:
+            self.entities.remove(old_entity)
+        else:
+            print(f"Couldn't find {old_entity.name} on this floor!")
+
+
     def swap_entity(self, old_entity : Entity, new_entity : Entity = None):
         if old_entity in self.entities:
             if new_entity is not None:
@@ -359,6 +388,25 @@ class Floor():
         else:
             print(f"Couldn't find {old_entity.name} on this floor!")
 
+    def attack_entity(self, attacker : Entity, target : Entity):
+
+        self.events.add_event(
+            Event(type=Event.GAME,
+                  name=Event.ACTION_ATTACK,
+                  description=f"{attacker.name} attacks a {target.name}"))
+
+        if random.randint(1,10) > 5:
+            target.state = Entity.STATE_DEAD
+            self.remove_entity(target)
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_SUCCEEDED,
+                      description=f"{attacker.name} kills a {target.name}"))
+        else:
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_FAILED,
+                      description=f"{attacker.name} swings at the {target.name}...and misses!"))
 
     def get_current_room(self) -> Room:
         current_room = None
@@ -470,10 +518,20 @@ class Floor():
         return list(zip(results[0], results[1]))
 
     def tick(self):
-        current_fov = self.get_fov_cells()
-        for entity in self.entities:
-            if entity.xy in current_fov and entity.get_property("IsEnemy") == True:
-                print(f'Tick {entity.name}')
+        # current_fov = self.get_fov_cells()
+        # for entity in self.entities:
+        #     if entity.xy in current_fov and entity.get_property("IsEnemy") == True:
+        #         print(f'Tick {entity.name}')
+        dead_bots = []
+
+        for bot in self.bots:
+            bot.tick()
+            if bot.is_dead is True:
+                dead_bots.append(bot)
+
+        for bot in dead_bots:
+            print(f'Bot {bot} is dead')
+            self.bots.remove(bot)
 
 
 
@@ -647,3 +705,139 @@ class Model():
                                         name=Event.GAME_NEW_FLOOR,
                                         description=f"{self.name}:'{self.current_floor.name}' at Level {self.dungeon_level} Ready!"))
 
+
+import math
+
+class AIBot:
+
+    INSTRUCTION_FAIL_NOP = "NOP"
+    INSTRUCTION_FAIL_TICK = "TICK"
+    INSTRUCTION_FAIL_SKIP = "SKIP"
+    INSTRUCTION_FAIL_VALID_OPTIONS = (INSTRUCTION_FAIL_NOP, INSTRUCTION_FAIL_SKIP, INSTRUCTION_FAIL_TICK)
+
+    def __init__(self, name: str, bot_entity: Entity, floor: Floor, tick_slow_factor: int = 1):
+        self.name = name
+        self.bot_entity = bot_entity
+        self.floor = floor
+        self.tick_slow_factor = tick_slow_factor
+        self.loop = False
+        self.tick_count = 1
+        self._debug = False
+
+    @property
+    def is_dead(self):
+        return self.bot_entity.state == Entity.STATE_DEAD
+
+    def debug(self, debug_on: bool = None):
+        if debug_on is None:
+            self._debug = not self._debug
+        else:
+            self._debug = debug_on
+
+    def tick(self):
+        self.tick_count += 1
+        return self.tick_count % self.tick_slow_factor == 0
+
+    def reset(self):
+        self.tick_count = 0
+
+    def distance_to_target(self, target: Entity):
+
+        fx = self.bot_entity.x
+        fy = self.bot_entity.y
+
+        tx = target.x
+        ty = target.y
+
+        distance = math.sqrt((fx - tx) ** 2 + (fy - ty) ** 2)
+
+        return distance
+
+    def __str__(self):
+        text = "Subject:{0} at {1}".format(self.bot_entity.name, str(self.bot_entity.xy))
+        return text
+
+class AIBotTracker(AIBot):
+
+    def __init__(self, bot_entity: Entity, floor: Floor, tick_slow_factor: int = 1):
+
+        super().__init__(str(__class__), bot_entity, floor, tick_slow_factor)
+
+        self.target_entity = None
+        self.navigator = None
+        self.failed_ticks = 0
+        self.failed_ticks_limit = 10
+
+    def __str__(self):
+
+        text = f"{self.name}: Bot {self.bot_entity.name} at {self.bot_entity.xy}:"
+        if self.target_entity is not None:
+            text += f'target:{self.target_entity.name}'
+
+        return text
+
+    def set_instructions(self, new_target: Entity, sight_range: int = 5, loop: bool = True):
+        self.target_entity = new_target
+        self.sight_range = sight_range
+        self.loop = loop
+
+    def tick(self):
+
+        success = False
+
+        # If it's not our turn or
+        # We haven't got a target
+        if super().tick() is False or \
+                self.target_entity is None:
+            return success
+
+        # If we have had too many failed attempts at tracking the object then give-up
+        if self.failed_ticks > self.failed_ticks_limit:
+            self.failed_ticks = 0
+            return success
+
+        # See if we are close enough to the target and
+        # Check that there is a direct path to it
+        d = self.distance_to_target(self.target_entity)
+        target_in_sight = d <= self.sight_range
+
+        # If we can attack it....
+        if d < 2:
+
+            print(f'{self.bot_entity.name}: "I can attack you {self.target_entity.name}"')
+            self.floor.attack_entity(self.bot_entity, self.target_entity)
+
+        # if we can see it...
+        elif target_in_sight:
+
+            bx, by = self.bot_entity.xy
+            tx, ty = self.target_entity.xy
+
+            # Try and track the target's X position
+            if tx != bx:
+                if tx < bx:
+                    self.floor.move_entity(self.bot_entity, -1,0)
+                elif tx > bx:
+                    self.floor.move_entity(self.bot_entity, 1, 0)
+
+            # Try and track the target's Y position
+            if ty != by:
+                if ty < by:
+                    self.floor.move_entity(self.bot_entity, 0, -1)
+                elif ty > by:
+                    self.floor.move_entity(self.bot_entity, 0, 1)
+
+            # If we moved and are still in sight of the target then all good
+            success = (bx,by) != self.bot_entity.xy or target_in_sight
+
+            print(f'{self.bot_entity.name}: "I can see you {self.target_entity.name}"')
+
+
+        if self._debug is True and self.failed_ticks >0:
+            print("Failed {0} vs. limit {1}".format(self.failed_ticks, self.failed_ticks_limit   ))
+
+        return success
+
+    def reset(self):
+        super().reset()
+        self.failed_ticks = 0

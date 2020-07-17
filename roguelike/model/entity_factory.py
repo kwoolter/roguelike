@@ -3,21 +3,32 @@ import tcod as libtcod
 def text_to_color(color_text :str)->libtcod.color.Color:
     ''':param:'''
 
-    c = None
-
     try:
         c = eval(f'libtcod.{color_text.lower()}')
         if isinstance(c, libtcod.color.Color) is False:
             print("We didn't end up with a colour!")
+            c = None
     except AttributeError:
-        print("not a valid attribute")
+        print(f"{color_text} is not a valid attribute")
+        c = None
 
     return c
 
 class Entity():
-    def __init__(self, name: str, char: str, x: int = 0, y: int = 0, fg=libtcod.white, bg=None):
+
+    STATE_INERT = "inert"
+    STATE_ALIVE = "alive"
+    STATE_DEAD = "dead"
+
+    def __init__(self, name: str, char: str,
+                 x: int = 0, y: int = 0,
+                 fg=libtcod.white, bg=None,
+                 state = STATE_INERT):
+
         self.name = name
         self.char = char
+        self._state = state
+
         self.properties = {}
         self.x = x
         self.y = y
@@ -26,6 +37,15 @@ class Entity():
 
     def __str__(self):
         return f"Name:{self.name}, char:'{self.char}', xy: {self.x}/{self.y}, properties:{self.properties.keys()}"
+
+    @property
+    def state(self):
+        state = self._state
+        return state
+
+    @state.setter
+    def state(self, new_state):
+        self._state = new_state
 
     @property
     def xy(self):
@@ -39,13 +59,19 @@ class Entity():
 
     def add_properties(self, new_properties: dict):
         self.properties.update(new_properties)
+        if self.get_property("IsEnemy") is True:
+            self._state = Entity.STATE_ALIVE
 
     def get_property(self, property_name : str):
-        return self.properties.get(property_name)
+        return self.properties.get(property_name) == True
 
     def move(self, dx: int, dy: int):
         self.x += dx
         self.y += dy
+
+class Fighter():
+    def __init__(self):
+        self.stats = {}
 
 
 class Player(Entity):
@@ -75,18 +101,17 @@ class EntityFactory:
         EntityFactory.entities.set_index("Name", drop=True, inplace=True)
         #self.entities.set_index(self.entities.columns[0], drop=True, inplace=True)
 
-        print(EntityFactory.entities.info())
-
     @staticmethod
     def get_entity_by_name(name: str) -> Entity:
         e = None
         if name in EntityFactory.entities.index:
             row = EntityFactory.entities.loc[name]
-            print(row)
+
             fg = text_to_color(row["FG"])
             bg = text_to_color(row["BG"])
             e = Entity(name=name, char=row["Char"], fg=fg, bg=bg)
             e.add_properties(row.iloc[3:].to_dict())
+
         else:
             print(f"Can't find entity {name} in factory!")
 

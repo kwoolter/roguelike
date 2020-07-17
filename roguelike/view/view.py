@@ -19,7 +19,7 @@ class View():
 class MainFrame(View):
 
     CONSOLE_MESSAGE_PANEL_HEIGHT = 10
-    CONSOLE_MESSAGE_PANEL_WIDTH = 25
+    CONSOLE_MESSAGE_PANEL_WIDTH = 35
 
     def __init__(self, width: int = 50, height: int = 50):
         super().__init__()

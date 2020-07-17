@@ -40,6 +40,7 @@ class Controller():
             action = self.handle_keys(key)
 
             move = action.get('move')
+            wait = action.get('wait')
             exit = action.get('exit')
             fullscreen = action.get('fullscreen')
             stairs = action.get('take stairs')
@@ -79,6 +80,8 @@ class Controller():
             return {'take stairs': True}
         elif key_char == 'g':
             return {'pickup': True}
+        elif key_char == 'z':
+            return {'wait': True}
         elif key_char == 'i':
             return {'show_inventory': True}
         elif key_char == 'd':

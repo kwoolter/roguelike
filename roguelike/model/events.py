@@ -19,9 +19,15 @@ class Event():
 
     # Game events
     GAME_NEW_FLOOR = "new floor"
+    TICK = "Tick"
+
+
+    # Player action events
+    ACTION_FAILED = "action failed"
+    ACTION_SUCCEEDED = "action succeeded"
+    ACTION_ATTACK = "attack"
 
     # Event Names
-    TICK = "Tick"
     EFFECT_START = "Effect Start"
     EFFECT_END = "Effect End"
     HELP = "Help"
@@ -30,8 +36,7 @@ class Event():
     INTERACT = "interact"
     READ = "read"
     BLOCKED = "blocked"
-    ACTION_FAILED = "action failed"
-    ACTION_SUCCEEDED = "action succeeded"
+
     DEAD = "dead"
     SECRET = "secret"
     TREASURE = "treasure"

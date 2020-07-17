@@ -1,5 +1,4 @@
-from .entity_factory import Entity
-from .model import *
+
 import math
 
 class AIBot:
@@ -30,7 +29,6 @@ class AIBot:
 
     def reset(self):
         self.tick_count = 0
-        self.world.move_object_to_xyz(self.target_object, self.initial_xyz)
 
     def distance_to_target(self, target: Entity):
 
@@ -107,9 +105,6 @@ class AIBotTracker(AIBot):
 
             # Try and track the target's X position
 
-            # If we moved and are still in sight of the target then all good
-            success = (move_x or move_y or target_in_sight)
-
         if self._debug is True and self.failed_ticks >0:
             print("Failed {0} vs. limit {1}".format(self.failed_ticks, self.failed_ticks_limit   ))
 
@@ -118,3 +113,6 @@ class AIBotTracker(AIBot):
     def reset(self):
         super().reset()
         self.failed_ticks = 0
+
+from .entity_factory import Entity
+from .model import Floor
