@@ -69,10 +69,6 @@ class Entity():
         self.x += dx
         self.y += dy
 
-class Fighter():
-    def __init__(self):
-        self.stats = {}
-
 
 class Player(Entity):
     def __init__(self, name: str, x: int = 0, y: int = 0):

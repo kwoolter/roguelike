@@ -6,6 +6,7 @@ import pygame.rect as rect
 import tcod as libtcod
 
 from .entity_factory import Entity, Player, EntityFactory
+from .combat import CombatClass, CombatClassFactory
 from .events import Event
 
 
@@ -397,7 +398,8 @@ class Floor():
 
         if random.randint(1,10) > 5:
             target.state = Entity.STATE_DEAD
-            self.remove_entity(target)
+            corpse = EntityFactory.get_entity_by_name("Corpse")
+            self.swap_entity(target, corpse)
             self.events.add_event(
                 Event(type=Event.GAME,
                       name=Event.ACTION_SUCCEEDED,
@@ -552,6 +554,7 @@ class Model():
     def initialise(self):
 
         EntityFactory.load("entities.csv")
+        CombatClassFactory.load("combat_classes.csv")
 
         self.add_player(Player(name="Keith"))
         self.next_floor()

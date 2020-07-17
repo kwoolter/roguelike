@@ -1,0 +1,5 @@
+﻿Name,Description,Slot,PHY,DEF
+Sword,a sword,Hand1,3,0
+Axe,an axe,Hand1,4,0
+Shield,a shield,Hand2,0,2
+Helmet,a helmet,Head,0,1
