@@ -11,7 +11,7 @@ Axe,a hand axe,!,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Key,a small key,?,red,,4,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE
 Orc,a small green Orc,o,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Troll,a large Troll,T,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
-Corpse,a rotting corpse,%,red,,10,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
+Corpse,a rotting corpse,%,red,,9,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
 Fire Scroll,a magic fireball scroll,~,orange,red,4,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Healing Scroll,a magic healing scroll,+,red,white,4,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Trap,a hidden trap,*,yellow,red,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
@@ -22,3 +22,5 @@ Shield,a small leather shield,O,dark_red,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FAL
 Helmet,a metal helmet,^,black,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Hands,bare hands,@,pink,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Spear,a wooden spear,I,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Leather Armour,a leather tunic,#,orange,dark_red,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Leather Boots,some old leather boots,b,dark_red,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE

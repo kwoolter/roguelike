@@ -6,3 +6,5 @@ Helmet,a helmet,Head,0,1,0
 Hands,bare hands,Main Hand,0,0,1d1
 Dagger,a small dagger,Main Hand,1,0,1d2
 Spear,a wooden spear,Main Hand,1,0,1d3
+Leather Armour,a leather tunic,Body,0,1,0
+Leather Boots,some old leather boots,Feet,0,1,0

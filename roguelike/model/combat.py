@@ -141,6 +141,7 @@ class CombatEquipmentFactory:
 
         else:
             print(f"Can't find combat equipment {name} in factory!")
+            print(f'Index: {CombatEquipmentFactory.combat_equipment.index}')
 
         return e
 
@@ -154,4 +155,5 @@ class CombatEquipmentFactory:
             dmg = 0
 
         return dmg
+
 

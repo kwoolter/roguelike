@@ -1,5 +1,6 @@
 import tcod as libtcod
-from .combat import *
+import random
+from .combat import CombatClass, CombatEquipmentFactory
 
 def text_to_color(color_text :str)->libtcod.color.Color:
     ''':param:'''
@@ -47,7 +48,7 @@ class Entity():
         self.combat_equipment = None
 
     def __str__(self):
-        return f"Name:{self.name}, char:'{self.char}', xy: {self.x}/{self.y}, properties:{self.properties.keys()}"
+        return f"Name:{self.name}, char:'{self.char}', xyz: {self.x}/{self.y}/{self.z}, properties:{self.properties.keys()}"
 
     @property
     def state(self):
@@ -68,13 +69,17 @@ class Entity():
         self.x = x
         self.y = y
 
+    @property
+    def z(self):
+        return self.get_property("Zorder")
+
     def add_properties(self, new_properties: dict):
         self.properties.update(new_properties)
         if self.get_property("IsEnemy") is True:
             self._state = Entity.STATE_ALIVE
 
     def get_property(self, property_name : str):
-        return self.properties.get(property_name) == True
+        return self.properties.get(property_name)
 
     def move(self, dx: int, dy: int):
         self.x += dx
@@ -82,18 +87,21 @@ class Entity():
 
 
 class Player(Entity):
+    MAX_INVENTORY_ITEMS = 10
+
     def __init__(self, name: str, x: int = 0, y: int = 0):
         super().__init__(name=name, description="The player", char='@', x=x, y=y)
-        self.inventory = Inventory()
+        self.inventory = Inventory(max_items=Player.MAX_INVENTORY_ITEMS)
 
     def equip_item(self, new_item : Entity)->bool:
         success = False
         if new_item.get_property("IsEquipable") == True:
             old_item = self.fighter.equip_item(new_item)
             self.inventory.remove_item(new_item)
-            if old_item is not None:
-                self.inventory.add_item(old_item)
             success=True
+            if old_item is not None:
+                success = self.inventory.add_item(old_item)
+
         else:
             print(f"{new_item.name} is not equipable")
 
@@ -159,31 +167,6 @@ class Fighter():
         for k, v in self.equipment.items():
             print(f'\t{k}={str(v)}')
 
-
-if __name__ == "__main__":
-    CombatClassFactory.load("combat_classes.csv")
-    CombatEquipmentFactory.load("combat_equipment.csv")
-
-    cl = CombatClassFactory.get_combat_class_by_name("Warrior")
-
-    f = Fighter(combat_class=cl)
-
-    eq = CombatEquipmentFactory.get_equipment_by_name("Sword")
-    f.equip_item(eq)
-    eq = CombatEquipmentFactory.get_equipment_by_name("Shield")
-    f.equip_item(eq)
-    eq = CombatEquipmentFactory.get_equipment_by_name("Helmet")
-    f.equip_item(eq)
-
-    f.print()
-    f.take_damage(20)
-    f.print()
-    f.heal(30)
-    f.print()
-    CombatEquipment.dnd_dice_text_to_roll("1d3+1")
-    CombatEquipment.dnd_dice_text_to_roll("1d6")
-    CombatEquipment.dnd_dice_text_to_roll("2d3+1")
-
 from pathlib import Path
 import pandas as pd
 
@@ -245,9 +228,18 @@ if __name__ == "__main__":
 
 
 class Inventory:
-    def __init__(self):
+    def __init__(self, max_items : int = 10):
+        self.max_items = max_items
         self.stackable_items = {}
         self.other_items = []
+
+    @property
+    def items(self)->int:
+        return len(self.other_items) + len(self.stackable_items)
+
+    @property
+    def full(self):
+        return self.items >= self.max_items
 
     def get_stackable_items(self)->dict:
         items={}
@@ -259,22 +251,24 @@ class Inventory:
     def get_other_items(self)->list:
         return list(self.other_items)
 
-
     def add_item(self, new_item: Entity)->bool:
 
         success = False
 
-        # If the item is stackable then increase the number you are holding
-        if new_item.get_property("IsStackable") == True:
-            # If you don't have any of these set inventory count to 0
-            if new_item.name not in self.stackable_items.keys() or self.stackable_items[new_item.name] == 0:
-                self.stackable_items[new_item.name] = 0
+        # Have we got room in the inventory?
+        if self.full is False:
 
-            self.stackable_items[new_item.name] += 1
-            success = True
-        else:
-            self.other_items.append(new_item)
-            success = True
+            # If the item is stackable then increase the number you are holding
+            if new_item.get_property("IsStackable") == True:
+                # If you don't have any of these set inventory count to 0
+                if new_item.name not in self.stackable_items.keys() or self.stackable_items[new_item.name] == 0:
+                    self.stackable_items[new_item.name] = 0
+
+                self.stackable_items[new_item.name] += 1
+                success = True
+            else:
+                self.other_items.append(new_item)
+                success = True
 
         return success
 
@@ -300,4 +294,17 @@ class Inventory:
 
         return success
 
-    
+
+if __name__ == "__main__":
+    EntityFactory.load("entites")
+
+    entities = []
+
+    names = {"Player", "Corpse", "Stairs Up", "Orc", "Dagger"}
+
+    for name in names:
+        for c in range(random.randint(1.3)):
+            new_enity = EntityFactory.get_entity_by_name(name)
+            entities.append(new_enity)
+
+    print(entities)

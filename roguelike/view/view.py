@@ -289,9 +289,10 @@ class FloorView(View):
                     libtcod.console_set_char_background(self.con, x, y, self.bg_explored_wall)
 
         # Draw all of the entities in the current FOV
-        entities = sorted(self.floor.entities, key = lambda x: x.get_property("Zorder"))
-        for e in entities:
-            if e.xy in fov_cells:
+        fov_entities = [e for e in self.floor.entities if e.xy in fov_cells]
+        if len(fov_entities) > 0:
+            entities = sorted(fov_entities, key = lambda x: x.get_property("Zorder"), reverse=True)
+            for e in entities:
                 x, y = e.xy
                 bg = e.bg
                 try:
@@ -302,6 +303,7 @@ class FloorView(View):
                 except e:
                     print("Problem drawing {e.name} {e.fg} {e.bg}")
                     print(e)
+
         # Draw the player
         so = ScreenObject('@', fg=libtcod.dark_sea, bg=self.bg_lit_path)
         so.render(self.con, x=self.floor.player.x, y=self.floor.player.y)
@@ -575,11 +577,12 @@ class InventoryView(View):
 
         cc = self.character.fighter.combat_class
         equipment = self.character.fighter.equipment
+        inv = self.character.inventory
         inventory = self.character.inventory.get_other_items()
         inventory_stackable =  self.character.inventory.get_stackable_items()
 
-        if len(inventory) + len(inventory_stackable) > 0:
-            self.selected_item = min(max(0,self.selected_item), len(inventory) + len(inventory_stackable) -1)
+        if inv.items > 0:
+            self.selected_item = min(max(0,self.selected_item), inv.items -1)
         else:
             self.selected_item = -1
             self.selected_item_entity = None
@@ -668,7 +671,7 @@ class InventoryView(View):
         y+=2
 
         # Print what items are being carried
-        text = "Carrying:"
+        text = f"Carrying {inv.items} item(s) (max {inv.max_items})"
 
         so = ScreenStringRect(text,
                               width=self.width - 2,
@@ -681,7 +684,7 @@ class InventoryView(View):
 
         y+=2
 
-        if len(inventory) + len(inventory_stackable) == 0:
+        if inv.items == 0:
             text = "Nothing"
             so = ScreenStringRect(text,
                                   width=self.width - 2,

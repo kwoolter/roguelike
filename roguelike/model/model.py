@@ -256,6 +256,8 @@ class Floor():
                            ("Axe",5),
                            ("Shield", 5),
                            ("Helmet", 5),
+                           ("Leather Boots", 15),
+                           ("Leather Armour", 15),
                            ("Key",1),
                            ("Fire Scroll",2),
                            ("Healing Scroll",2),
@@ -269,30 +271,30 @@ class Floor():
             available_rooms = list(self.map_rooms.values())
             available_rooms.remove(self.first_room)
             available_rooms.remove(self.last_room)
+            if len(available_rooms) > 0:
+                for i in range(random.randint(0,ecount)):
 
-            for i in range(random.randint(0,ecount)):
+                    # pick a random room
+                    room=random.choice(available_rooms)
 
-                # pick a random room
-                room=random.choice(available_rooms)
+                    # Pick a random position in the room
+                    rx, ry = room.get_random_pos()
 
-                # Pick a random position in the room
-                rx, ry = room.get_random_pos()
+                    # If there is nothing already there...
+                    if self.get_entity_at_pos((rx, ry)) is None:
 
-                # If there is nothing already there...
-                if self.get_entity_at_pos((rx, ry)) is None:
+                        # Add a new entity to the floor at this location
+                        new_entity = EntityFactory.get_entity_by_name(ename)
+                        if new_entity is None:
+                            print(f"Couldn't create entity by name of {ename}")
+                            continue
 
-                    # Add a new entity to the floor at this location
-                    new_entity = EntityFactory.get_entity_by_name(ename)
-                    if new_entity is None:
-                        print(f"Couldn't create entity by name of {ename}")
-                        continue
+                        new_entity.xy = rx,ry
 
-                    new_entity.xy = rx,ry
+                        self.entities.append(new_entity)
 
-                    self.entities.append(new_entity)
-
-                    # Don't use this room again
-                    available_rooms.remove(room)
+                        # Don't use this room again
+                        available_rooms.remove(room)
 
         # If we are not at the top level add stairs back up to the previous level in the centre of the first room
         if self.level > 1:
@@ -303,8 +305,9 @@ class Floor():
             # Replace anything that is already there!
             if e is not None:
                 self.remove_entity(e)
-            self.entities.append(new_entity)
+            #self.entities.append(new_entity)
 
+        # In the last room add some stairs to the next level down
         ename = "Down Stairs"
         new_entity = EntityFactory.get_entity_by_name(ename)
         new_entity.xy = self.last_room.center
@@ -313,7 +316,6 @@ class Floor():
         if e is not None:
             self.remove_entity(e)
         self.entities.append(new_entity)
-        print(f'******Added {new_entity.name} in room {self.last_room.name} at {new_entity.xy}')
 
     def move_player(self, dx, dy):
         # If the destination is a valid path...
@@ -655,6 +657,11 @@ class Model():
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
                                             description=f"You picked up {e.description}!"))
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"You are unable to pick up {e.description}!"))
+
 
         # Otherwise you can't pick it up
         else:
