@@ -577,6 +577,10 @@ class InventoryView(View):
 
         cc = self.character.fighter.combat_class
         equipment = self.character.fighter.equipment
+
+        equipment_stat_names = ("AC", "Weight")
+        equipment_totals = self.character.fighter.get_equipment_stat_totals(equipment_stat_names)
+        print(equipment_totals)
         inv = self.character.inventory
         inventory = self.character.inventory.get_other_items()
         inventory_stackable =  self.character.inventory.get_stackable_items()
@@ -623,7 +627,7 @@ class InventoryView(View):
         y+=2
 
         # Print what is currently equipped
-        text = f"Equipped:"
+        text = f'Equipment: AC={equipment_totals["AC"]}, Weight={equipment_totals["Weight"]}'
 
         # Print the panel text
         so = ScreenStringRect(text,
@@ -794,6 +798,13 @@ class CharacterView(View):
         entity_stats = self.character.properties
         cc = self.character.fighter.combat_class
 
+        # Character Equipment stats
+        equipment_stat_names = ("AC", "Weight")
+        equipment_totals = self.character.fighter.get_equipment_stat_totals(equipment_stat_names)
+        print(equipment_totals)
+        ac = self.character.get_stat_total("AC")
+        print(f'Total AC={ac}')
+
         # Clear the screen with the background colour
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
@@ -811,7 +822,6 @@ class CharacterView(View):
         y=2
         text = f"Character Sheet for {self.character.name} the {cc.name}"
 
-        # Print the panel text
         so = ScreenString(text,
                               fg=self.fg,
                               bg=self.bg,
@@ -839,6 +849,23 @@ class CharacterView(View):
 
 
         y+=1
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y+=2
+
+        # Print what is currently equipped
+        text = f'Equipment: AC={equipment_totals["AC"]}, Weight={equipment_totals["Weight"]}'
+
+        so = ScreenString(text,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=2
 
         # Draw a divider
         divider.render(self.con, 0, y)

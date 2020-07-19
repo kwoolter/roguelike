@@ -1,10 +1,11 @@
-﻿Name,Description,Slot,PHY,DEF,DMG
-Sword,a sword,Main Hand,3,0,1d3
-Axe,an axe,Main Hand,4,0,1d4
-Shield,a shield,Off Hand,0,2,0
-Helmet,a helmet,Head,0,1,0
-Hands,bare hands,Main Hand,0,0,1d1
-Dagger,a small dagger,Main Hand,1,0,1d2
-Spear,a wooden spear,Main Hand,1,0,1d3
-Leather Armour,a leather tunic,Body,0,1,0
-Leather Boots,some old leather boots,Feet,0,1,0
+﻿Name,Description,Slot,HANDS,AC,DMG,Weight,Value
+Sword,a sword,Main Hand,1H,0,1d3,1,1
+Axe,an axe,Main Hand,1H,0,1d4,2,1
+Shield,a shield,Off Hand,1H,2,0,3,1
+Helmet,a helmet,Head,,1,0,1,1
+Hands,bare hands,Main Hand,1H,0,1d1,0,1
+Dagger,a small dagger,Main Hand,1H,0,1d2,1,1
+Spear,a wooden spear,Main Hand,2H,0,1d3,2,1
+Leather Armour,a leather tunic,Body,,1,0,2,1
+Leather Boots,some old leather boots,Feet,,1,0,2,1
+War Hammer,a mighty War Hammer,Main Hand,2H,0,2d4,4,4

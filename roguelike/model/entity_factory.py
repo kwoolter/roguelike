@@ -86,6 +86,8 @@ class Entity():
         self.y += dy
 
 
+
+
 class Player(Entity):
     MAX_INVENTORY_ITEMS = 10
 
@@ -109,6 +111,19 @@ class Player(Entity):
 
     def drop_item(self, old_item : Entity)->bool:
         return self.inventory.remove_item(old_item)
+
+    def get_stat_total(self, stat_name :str)->int:
+        totals = self.fighter.get_equipment_stat_totals([stat_name])
+        print(totals)
+        total = totals.get(stat_name)
+        print(f'Equipment {stat_name} total = {total}')
+        if total is None:
+            total = 0
+        v = self.fighter.combat_class.get_property(stat_name)
+        if v is not None:
+            total += v
+
+        return total
 
 
 class Fighter():
@@ -150,6 +165,21 @@ class Fighter():
         existing_item = self.equipment.get(new_eq.slot)
         self.equipment[new_eq.slot] = new_item
         return existing_item
+
+    def get_equipment_stat_totals(self, stat_names : list = ["AC", "Weight", "Value"]):
+        totals = {}
+
+        for stat in stat_names:
+            totals[stat] = 0
+            for e in self.equipment.values():
+                eq = CombatEquipmentFactory.get_equipment_by_name(e.name)
+                v = eq.get_property(stat)
+                if v is not None:
+                    totals[stat] += v
+
+        return totals
+
+
 
     def roll_damage(self) -> int:
         dmg = CombatEquipmentFactory.get_damage_roll_by_name(self.current_weapon.name)
