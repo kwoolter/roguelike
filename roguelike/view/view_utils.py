@@ -64,8 +64,8 @@ class ScreenString:
     def render(self, con, x:int, y:int, alignment:int = None):
         if alignment is None:
             alignment = self.alignment
-        con.default_fg = self.fg
-        con.default_bg = self.bg
+        libtcod.console_set_default_foreground(con, self.fg)
+        libtcod.console_set_default_background(con, self.bg)
         libtcod.console_print_ex(con, x, y, flag=libtcod.BKGND_OVERLAY, alignment=alignment, fmt = self.text)
 
 
@@ -73,10 +73,12 @@ class ScreenStringRect:
 
     def __init__(self, text: str, width: int, height:int,
                  fg: int = libtcod.white, bg: int = libtcod.black,
-                 alignment: int = libtcod.LEFT):
+                 alignment: int = libtcod.LEFT,
+                 fill_char=0):
         self.text = text
         self.width = width
         self.height = height
+        self.fill_char = fill_char
         self.fg = fg
         self.bg = bg
         self.alignment = alignment
@@ -84,8 +86,18 @@ class ScreenStringRect:
     def render(self, con, x:int, y:int, alignment:int = None):
         if alignment is None:
             alignment = self.alignment
-        con.default_fg = self.fg
-        con.default_bg = self.bg
+
+        if self.fill_char != 0:
+            box = np.full((self.width, self.height), self.fill_char)
+            for dx, col in enumerate(box):
+                for dy, char in enumerate(col):
+                    if type(char) == 'int':
+                        char = chr(char)
+                    if char != ScreenObject.NONE_CHAR:
+                        libtcod.console_put_char_ex(con, x + dx, y + dy, char, fore=self.fg, back=self.bg)
+
+        libtcod.console_set_default_foreground(con, self.fg)
+        libtcod.console_set_default_background(con, self.bg)
         libtcod.console_print_rect_ex(con, x, y, self.width, self.height,
                                       flag=libtcod.BKGND_SET,
                                       alignment=alignment,
@@ -218,6 +230,9 @@ class Boxes:
     BORDER_TYPE_2 = "type2"
     BORDER_TYPE_3 = "type3"
 
+    DIVIDER_HORIZONTAL = "horizontal"
+    DIVIDER_VERTICAL = "vertical"
+
     BORDER_TL = 0
     BORDER_T = 1
     BORDER_TR = 2
@@ -242,7 +257,7 @@ class Boxes:
         pass
 
     @staticmethod
-    def get_box(width, height, border_type: str = BORDER_DEFAULT):
+    def get_box(width, height, border_type: str = BORDER_DEFAULT, fill_char=0):
 
         border_char_map = Boxes.BORDER_CHAR_MAPS.get(border_type)
 
@@ -250,6 +265,9 @@ class Boxes:
             border_char_map = Boxes.BORDER_CHAR_MAPS.get(Boxes.BORDER_DEFAULT)
 
         assert(border_char_map is not None)
+
+        if type(fill_char) == 'int' and fill_char != 0:
+            fill_char = chr(fill_char)
 
         box = np.full((width, height), ord('#'))
         box[0,0] = border_char_map[Boxes.BORDER_TL]
@@ -260,7 +278,7 @@ class Boxes:
         box[1:-1, height-1] = border_char_map[Boxes.BORDER_H]
         box[0,1:-1] = border_char_map[Boxes.BORDER_V]
         box[width-1, 1:-1] = border_char_map[Boxes.BORDER_V]
-        box[1:-1, 1:-1] = 0
+        box[1:-1, 1:-1] = fill_char
 
         return box
 
@@ -276,6 +294,28 @@ class Boxes:
 
         return box_text
 
+
+    @staticmethod
+    def get_box_divider(length:int, border_type: str = BORDER_DEFAULT, orient=DIVIDER_HORIZONTAL):
+
+        border_char_map = Boxes.BORDER_CHAR_MAPS.get(border_type)
+
+        if border_char_map is None:
+            border_char_map = Boxes.BORDER_CHAR_MAPS.get(Boxes.BORDER_DEFAULT)
+
+        assert(border_char_map is not None)
+
+        if orient == Boxes.DIVIDER_HORIZONTAL:
+            box = np.full((length,1), border_char_map[Boxes.BORDER_H] )
+            box[0,0] = border_char_map[Boxes.BORDER_L]
+            box[-1,-1] = border_char_map[Boxes.BORDER_R]
+        else:
+            box = np.full((1, length), border_char_map[Boxes.BORDER_V])
+            box[0, 0] = border_char_map[Boxes.BORDER_T]
+            box[-1, -1] = border_char_map[Boxes.BORDER_B]
+        return box
+
+
 if __name__ == "__main__":
 
     # Test out the Boxes.get_box() static method
@@ -290,3 +330,12 @@ if __name__ == "__main__":
 
     box = Boxes.get_box(10,6,border_type=Boxes.BORDER_TYPE_3)
     print(Boxes.box_to_text(box))
+
+    box = Boxes.get_box_divider(10,border_type=Boxes.BORDER_TYPE_3)
+    print((box))
+    print(Boxes.box_to_text(box))
+
+    box = Boxes.get_box_divider(10,border_type=Boxes.BORDER_TYPE_3, orient=Boxes.DIVIDER_VERTICAL)
+    print((box))
+    print(Boxes.box_to_text(box))
+

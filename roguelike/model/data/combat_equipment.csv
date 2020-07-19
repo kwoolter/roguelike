@@ -1,5 +1,8 @@
-﻿Name,Description,Slot,PHY,DEF
-Sword,a sword,Hand1,3,0
-Axe,an axe,Hand1,4,0
-Shield,a shield,Hand2,0,2
-Helmet,a helmet,Head,0,1
+﻿Name,Description,Slot,PHY,DEF,DMG
+Sword,a sword,Right Hand,3,0,1d3
+Axe,an axe,Right Hand,4,0,1d4
+Shield,a shield,Left Hand,0,2,0
+Helmet,a helmet,Head,0,1,0
+Hands,bare hands,Right Hand,0,0,1d1
+Dagger,a small dagger,Right Hand,1,0,1d2
+Spear,a wooden spear,Right Hand,1,0,1d3

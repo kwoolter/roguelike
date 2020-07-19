@@ -3,8 +3,17 @@ from .view_utils import *
 
 
 class View():
-    def __init__(self):
+
+    events = None
+
+    def __init__(self, width:int=0, height:int=0):
+        self.width=width
+        self.height=height
         self.tick_count = 0
+
+    @property
+    def center(self):
+        return (int(self.width/2), int(self.height/2))
 
     def tick(self):
         self.tick_count += 0
@@ -15,19 +24,32 @@ class View():
     def draw(self):
         pass
 
+    @staticmethod
+    def set_event_queue(new_q : model.EventQueue):
+        View.events = new_q
+
 
 class MainFrame(View):
 
+    MODE_READY= "ready"
+    MODE_PLAYING = "playing"
+    MODE_INVENTORY_SCREEN = "inventory"
+    MODE_CHARACTER_SCREEN = "character"
+    MODE_PAUSED = "paused"
+
     CONSOLE_MESSAGE_PANEL_HEIGHT = 10
-    CONSOLE_MESSAGE_PANEL_WIDTH = 35
+    CONSOLE_MESSAGE_PANEL_WIDTH = 50
 
     def __init__(self, width: int = 50, height: int = 50):
-        super().__init__()
-        self.width = width
-        self.height = height
+
+        super().__init__(width=width, height=height)
+        # Properties
+        self.mode = MainFrame.MODE_PLAYING
+
+
+        # Components
         self.game = None
         self.con = None
-
         self.floor_view = FloorView(self.width, self.height, bg=libtcod.black)
         self.message_panel = MessagePanel(MainFrame.CONSOLE_MESSAGE_PANEL_WIDTH,
                                           MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
@@ -36,9 +58,25 @@ class MainFrame(View):
                                           border_bg=libtcod.black,
                                           border_fg=libtcod.green)
 
+        self.inventory_view = InventoryView(width=int(self.width/2),
+                                            height=int(self.height*2/3),
+                                          fg=libtcod.white,
+                                          bg=libtcod.black,
+                                          border_bg=libtcod.black,
+                                          border_fg=libtcod.green)
+
+        self.character_view = CharacterView(width=int(self.width/2),
+                                            height=int(self.height*2/3),
+                                          fg=libtcod.white,
+                                          bg=libtcod.black,
+                                          border_bg=libtcod.black,
+                                          border_fg=libtcod.green)
+
         self.text_entry = TextEntryBox()
 
     def initialise(self, model: model.Model):
+
+        self.set_mode(MainFrame.MODE_PLAYING)
 
         self.game = model
         font_file_dir = ".\\roguelike\\view\\fonts\\"
@@ -69,6 +107,11 @@ class MainFrame(View):
         self.floor_view.initialise(self.game.current_floor)
         self.message_panel.initialise()
         self.message_panel.add_message(f"Welcome to {self.game.name}")
+        self.inventory_view.initialise(self.game.player)
+        self.character_view.initialise(self.game.player)
+
+    def set_mode(self, new_mode:str):
+        self.mode = new_mode
 
     def process_event(self, new_event: model.Event):
 
@@ -81,34 +124,101 @@ class MainFrame(View):
         self.floor_view.process_event(new_event)
         self.message_panel.process_event(new_event)
 
+        if self.mode == MainFrame.MODE_INVENTORY_SCREEN:
+            self.inventory_view.process_event(new_event)
+        elif self.mode == MainFrame.MODE_CHARACTER_SCREEN:
+            self.character_view.process_event(new_event)
+
     def draw(self):
 
         self.con.default_bg = libtcod.black
         libtcod.console_clear(self.con)
 
-        self.floor_view.draw()
-        self.message_panel.draw()
+        if self.mode == MainFrame.MODE_PLAYING:
 
-        # Blit the current floor
-        libtcod.console_blit(self.floor_view.con,
-                             0, 0,
-                             self.floor_view.width, self.floor_view.height,
-                             0,
-                             0, 0, ffade=1, bfade=1)
+            self.floor_view.draw()
+            self.message_panel.draw()
 
-        # Blit the message panel
-        libtcod.console_blit(self.message_panel.con,
-                             0, 0,
-                             self.message_panel.width,
-                             self.message_panel.height,
-                             0,
-                             0, self.height-MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
-                             ffade=0.5, bfade=0.5)
+            # Blit the current floor
+            libtcod.console_blit(self.floor_view.con,
+                                 0, 0,
+                                 self.floor_view.width, self.floor_view.height,
+                                 0,
+                                 0, 0, ffade=1, bfade=1)
 
-        # Add a title
-        # box = Boxes.get_box(20,3, border_type=Boxes.BORDER_TYPE_1)
-        # bo = ScreenObject2DArray(box, fg=libtcod.green, bg=libtcod.grey)
-        # bo.render(0, 10, 0)
+            # Blit the message panel
+            libtcod.console_blit(self.message_panel.con,
+                                 0, 0,
+                                 self.message_panel.width,
+                                 self.message_panel.height,
+                                 0,
+                                 0, self.height-MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
+                                 ffade=0.5, bfade=0.5)
+
+        elif self.mode == MainFrame.MODE_INVENTORY_SCREEN:
+            self.inventory_view.draw()
+            bx = int((self.width - self.inventory_view.width)/2)
+            by = int((self.height - self.inventory_view.height) / 2)
+            # Blit the inventory panel
+            libtcod.console_blit(self.inventory_view.con,
+                                 0,0,
+                                 self.inventory_view.width,
+                                 self.inventory_view.height,
+                                 0,
+                                 bx, by,
+                                 ffade=1, bfade=1)
+
+        elif self.mode == MainFrame.MODE_CHARACTER_SCREEN:
+            # Redraw the character view
+            self.character_view.draw()
+            bx = int((self.width - self.character_view.width)/2)
+            by = int((self.height - self.character_view.height) / 2)
+            # Blit the character panel
+            libtcod.console_blit(self.character_view.con,
+                                 0,0,
+                                 self.character_view.width,
+                                 self.character_view.height,
+                                 0,
+                                 bx, by,
+                                 ffade=1, bfade=1)
+
+        else:
+
+            # Draw box with current game mode
+            bw = int(self.width/2)
+            bh = 5
+            bx = int((self.width - bw)/2)
+            by = int((self.height - bh)/2)
+
+            # Draw the border
+            border = Boxes.get_box(width=bw, height=bh, border_type=Boxes.BORDER_TYPE_1, fill_char=ord(' '))
+            border = Boxes.get_box(width=bw, height=bh, border_type=Boxes.BORDER_TYPE_1)
+            bo = ScreenObject2DArray(border, fg=libtcod.white, bg=libtcod.red)
+            bo.render(0, bx, by)
+
+            panel_text = self.mode.upper()
+            # Print the panel text
+            so = ScreenString(panel_text,
+                                  fg=libtcod.yellow,
+                                  bg=libtcod.darkest_gray)
+            so.render(0, bw, by+2, alignment=libtcod.CENTER)
+
+            #Add a title
+
+            bw = int(self.width/2)
+            bh = 5
+            bx = int((self.width - bw)/2)
+            by = 1
+            box = Boxes.get_box(bw,bh, border_type=Boxes.BORDER_TYPE_1)
+            bo = ScreenObject2DArray(box, fg=libtcod.green, bg=libtcod.grey)
+            bo.render(0, bx, 1)
+
+            panel_text="Rogue Tower"
+            # Print the panel text
+            so = ScreenString(panel_text,
+                                  fg=libtcod.darker_green,
+                                  bg=libtcod.darkest_gray)
+            so.render(0, bw, by+2, alignment=libtcod.CENTER)
 
         libtcod.console_flush()
 
@@ -125,8 +235,7 @@ class MainFrame(View):
 
 class FloorView(View):
     def __init__(self, width: int, height: int, fg = libtcod.white, bg=libtcod.black):
-        self.width = width
-        self.height = height
+        super().__init__(width=width, height=height)
 
         self.con = None
 
@@ -183,11 +292,14 @@ class FloorView(View):
             if e.xy in fov_cells:
                 x, y = e.xy
                 bg = e.bg
-                libtcod.console_set_default_foreground(self.con, e.fg)
-                libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
-                if bg is not None:
-                    libtcod.console_set_char_background(self.con, x, y, bg)
-
+                try:
+                    libtcod.console_set_default_foreground(self.con, e.fg)
+                    libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
+                    if bg is not None:
+                        libtcod.console_set_char_background(self.con, x, y, bg)
+                except e:
+                    print("Problem drawing {e.name} {e.fg} {e.bg}")
+                    print(e)
         # Draw the player
         so = ScreenObject('@', fg=libtcod.dark_sea, bg=self.bg_lit_path)
         so.render(self.con, x=self.floor.player.x, y=self.floor.player.y)
@@ -357,8 +469,7 @@ class MessagePanel(View):
                  fg = libtcod.white, bg=libtcod.black,
                  border_fg = libtcod.white, border_bg=libtcod.black):
 
-        self.width = width
-        self.height = height
+        super().__init__(width=width, height=height)
         self.fg = fg
         self.bg = bg
         self.border_fg = border_fg
@@ -405,4 +516,345 @@ class MessagePanel(View):
                               bg=self.bg)
 
         so.render(self.con, 1, 1)
-        
+
+
+class InventoryView(View):
+    BORDER_TYPE1 = "type1"
+    BORDER_TYPE2 = "type2"
+
+    def __init__(self, width: int, height: int,
+                 fg=libtcod.white, bg=libtcod.black,
+                 border_fg=libtcod.white, border_bg=libtcod.black):
+
+        super().__init__(width=width, height=height)
+
+        # Properties
+        self.fg = fg
+        self.bg = bg
+        self.border_fg = border_fg
+        self.border_bg = border_bg
+        self.border_type = InventoryView.BORDER_TYPE1
+
+        # Components
+        self.con = None
+        self.character = None
+        self.selected_item = 0
+        self.selected_item_entity = None
+        self.message_event = None
+        self.border = None
+
+    def initialise(self, character : model.Entity):
+
+        self.character = character
+
+        self.con = libtcod.console_new(self.width, self.height)
+        self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+    def process_event(self, new_event: model.Event):
+        print(f'{__class__}: Event {new_event}')
+        if new_event.name in (model.Event.ACTION_SUCCEEDED, model.Event.ACTION_FAILED):
+            self.message_event = new_event
+        else:
+            self.message_event = None
+
+    def change_selection(self, d : int):
+
+        self.message_event = None
+
+        inventory = self.character.inventory.get_other_items()
+        inventory_stackable = self.character.inventory.get_stackable_items()
+        self.selected_item += d
+        self.selected_item = min(max(0,self.selected_item), len(inventory) + len(inventory_stackable) -1)
+
+    def get_selected_item(self):
+        return self.selected_item_entity
+
+    def draw(self):
+
+        cc = self.character.fighter.combat_class
+        equipment = self.character.fighter.equipment
+        inventory = self.character.inventory.get_other_items()
+        inventory_stackable =  self.character.inventory.get_stackable_items()
+
+        cx, cy = self.center
+
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+
+        # Draw the border
+        bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
+        bo.render(self.con, 0, 0)
+
+        # Create a box divider
+        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
+        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
+
+        y=2
+
+        text = f"Inventory for {self.character.name} the {cc.name}"
+
+        # Print the panel text
+        so = ScreenStringRect(text,
+                              width=self.width - 2,
+                              height=self.height - 2,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=2
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y+=2
+
+        # Print what is currently equipped
+        text = f"Equipped:"
+
+        # Print the panel text
+        so = ScreenStringRect(text,
+                              width=self.width - 2,
+                              height=self.height - 2,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=2
+
+        if len(equipment) == 0:
+
+            text = "Nothing"
+            so = ScreenStringRect(text,
+                                  width=self.width - 2,
+                                  height=self.height - 2,
+                                  fg=self.fg,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+
+        else:
+
+            for slot, item in equipment.items():
+
+                text=f'{slot}: {item.description}'
+                # Print the panel text
+                so = ScreenString(text,
+                                  fg=self.fg,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, cx, y)
+                y += 1
+
+        y+=1
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y+=2
+
+        # Print what items are being carried
+        text = "Carrying:"
+
+        so = ScreenStringRect(text,
+                              width=self.width - 2,
+                              height=self.height - 2,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=2
+
+        if len(inventory) + len(inventory_stackable) == 0:
+            text = "Nothing"
+            so = ScreenStringRect(text,
+                                  width=self.width - 2,
+                                  height=self.height - 2,
+                                  fg=libtcod.light_yellow,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+
+        for i, item in enumerate(inventory):
+
+            if i == self.selected_item:
+                bg=libtcod.red
+                fg=libtcod.black
+                self.selected_item_entity = item
+            else:
+                bg=libtcod.black
+                fg=libtcod.yellow
+
+            text=f'{item.description}'
+            so = ScreenString(text,
+                              fg=fg,
+                              bg=bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+            y += 1
+
+        for i, (item, count) in enumerate(inventory_stackable.items()):
+
+            if i == (self.selected_item - len(inventory)):
+                bg=libtcod.red
+                fg=libtcod.black
+                self.selected_item_entity = item
+            else:
+                bg=libtcod.black
+                fg=libtcod.yellow
+
+            text=f'{item.description}: {count}'
+            # Print the panel text
+            so = ScreenString(text,
+                              fg=fg,
+                              bg=bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+            y += 1
+
+
+        # Print any event messages that we have received
+        y= self.height - 4
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        if self.message_event is not None:
+            message_text = self.message_event.description
+            if self.message_event.name == model.Event.ACTION_FAILED:
+                fg = libtcod.lighter_yellow
+            else:
+                fg = libtcod.white
+
+            so = ScreenStringRect(message_text,
+                                  width=self.width - 2,
+                                  height=2,
+                                  fg=fg,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+            so.render(self.con, int(self.width/2), self.height-3)
+
+
+class CharacterView(View):
+    BORDER_TYPE1 = "type1"
+    BORDER_TYPE2 = "type2"
+
+    def __init__(self, width: int, height: int,
+                 fg=libtcod.white, bg=libtcod.black,
+                 border_fg=libtcod.white, border_bg=libtcod.black):
+
+        super().__init__(width=width, height=height)
+
+        self.fg = fg
+        self.bg = bg
+        self.border_fg = border_fg
+        self.border_bg = border_bg
+
+        self.con = None
+        self.character = None
+
+        self.border_type = CharacterView.BORDER_TYPE2
+        self.border = None
+
+    def initialise(self, character : model.Entity):
+
+        self.character = character
+
+        self.con = libtcod.console_new(self.width, self.height)
+        self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+    def process_event(self, new_event: model.Event):
+        pass
+
+    def draw(self):
+
+        entity_stats = self.character.properties
+        cc = self.character.fighter.combat_class
+
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+
+        cx, cy = self.center
+
+        # Draw the border
+        bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
+        bo.render(self.con, 0, 0)
+
+        # Create a box divider
+        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
+        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
+
+        y=2
+        text = f"Character Sheet for {self.character.name} the {cc.name}"
+
+        # Print the panel text
+        so = ScreenString(text,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=2
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y+=2
+
+        for stat, value in cc.properties.items():
+            text=f'{stat}: {value}'
+            # Print the panel text
+            so = ScreenString(text,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+            y += 1
+
+
+        y+=1
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y+=2
+
+        text = f"Stats:"
+
+        # Print the panel text
+        so = ScreenStringRect(text,
+                              width=self.width - 2,
+                              height=self.height - 2,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=2
+        for stat, value in entity_stats:
+            text=f'{stat}: {value}'
+            # Print the panel text
+            so = ScreenString(text,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+            y += 1
+

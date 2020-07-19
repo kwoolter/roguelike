@@ -4,19 +4,56 @@ import tcod as libtcod
 import numpy as np
 
 class Controller():
+
+    GAME_MODE_START = "start"
+    GAME_MODE_INVENTORY = "inventory"
+    GAME_MODE_CHARACTER = "character"
+    GAME_MODE_PLAYING = "playing"
+    GAME_MODE_PAUSED = "paused"
+    GAME_MODE_GAME_OVER = "game over"
+
     def __init__(self, name:str):
+        #Properties
         self.name = name
+        self.mode = None
+
+        # Components
         self.view = None
         self.model = None
+        self.events = None
 
     def initialise(self):
         self.model = model.Model(self.name)
         self.model.initialise()
+        self.events = self.model.events
 
         self.view = view.MainFrame(80,60)
         self.view.initialise(self.model)
+        self.view.set_event_queue(self.model.events)
+        self.set_mode(Controller.GAME_MODE_START)
 
         self.model.print()
+
+    def set_mode(self, new_mode):
+        if new_mode != self.mode:
+            self.last_mode = self.mode
+            self.mode = new_mode
+
+            if new_mode == Controller.GAME_MODE_START:
+                self.view.set_mode(view.MainFrame.MODE_READY)
+                self.model.set_mode(model.Model.GAME_STATE_PAUSED)
+            elif new_mode == Controller.GAME_MODE_INVENTORY:
+                self.view.set_mode(view.MainFrame.MODE_INVENTORY_SCREEN)
+                self.model.set_mode(model.Model.GAME_STATE_PAUSED)
+            elif new_mode == Controller.GAME_MODE_CHARACTER:
+                self.view.set_mode(view.MainFrame.MODE_CHARACTER_SCREEN)
+                self.model.set_mode(model.Model.GAME_STATE_PAUSED)
+            elif new_mode == Controller.GAME_MODE_PLAYING:
+                self.view.set_mode(view.MainFrame.MODE_PLAYING)
+                self.model.set_mode(model.Model.GAME_STATE_PLAYING)
+            elif new_mode == Controller.GAME_MODE_PAUSED:
+                self.view.set_mode(view.MainFrame.MODE_PAUSED)
+                self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
     def run(self):
 
@@ -39,23 +76,72 @@ class Controller():
             key = libtcod.console_wait_for_keypress(True)
             action = self.handle_keys(key)
 
-            move = action.get('move')
-            wait = action.get('wait')
+            print(f'Game Mode={self.mode}; last mode={self.last_mode}')
+
+            # Common actions
             exit = action.get('exit')
             fullscreen = action.get('fullscreen')
-            stairs = action.get('take stairs')
-            pickup = action.get('pickup')
+            move = action.get('move')
 
-            if move:
-                dx, dy = move
-                self.model.move_player(dx,dy)
-            elif stairs:
-                self.model.take_stairs()
-            elif pickup:
-                self.model.take_item()
+            if self.mode == Controller.GAME_MODE_PLAYING:
+                # Game playing actions
+                wait = action.get('wait')
+                fullscreen = action.get('fullscreen')
+                stairs = action.get('take stairs')
+                pickup = action.get('pickup')
+                inventory = action.get('show_inventory')
+                character = action.get('show_character')
+
+                if move:
+                    dx, dy = move
+                    self.model.move_player(dx,dy)
+                elif stairs:
+                    self.model.take_stairs()
+                elif pickup:
+                    self.model.take_item()
+                elif inventory:
+                    self.set_mode(Controller.GAME_MODE_INVENTORY)
+                elif character:
+                    self.set_mode(Controller.GAME_MODE_CHARACTER)
+                elif exit:
+                    self.set_mode(Controller.GAME_MODE_PAUSED)
+
+            elif self.mode == Controller.GAME_MODE_PAUSED:
+                if exit:
+                    self.set_mode(Controller.GAME_MODE_START)
+
+            elif self.mode == Controller.GAME_MODE_START:
+                new_game = action.get('new_game')
+
+                if new_game:
+                    self.set_mode(Controller.GAME_MODE_PLAYING)
+                elif exit:
+                    return True
+
+            elif self.mode == Controller.GAME_MODE_INVENTORY:
+                equip = action.get('equip')
+                drop = action.get('drop')
+                use = action.get('use')
+
+                if move:
+                    dx, dy = move
+                    self.view.inventory_view.change_selection(dy)
+                elif equip:
+                    e = self.view.inventory_view.get_selected_item()
+                    if e is not None:
+                        self.model.equip_item(e)
+                elif drop:
+                    e = self.view.inventory_view.get_selected_item()
+                    if e is not None:
+                        self.model.drop_item(e)
+                elif use:
+                    e = self.view.inventory_view.get_selected_item()
+                    if e is not None:
+                        self.model.use_item(e)
+
 
             if exit:
-                return True
+                self.set_mode(self.last_mode)
 
             if fullscreen:
                 libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
@@ -64,6 +150,31 @@ class Controller():
             self.model.tick()
 
     def handle_keys(self, key):
+
+        if self.mode == Controller.GAME_MODE_START:
+            return self.handle_start_menu_keys(key)
+        elif self.mode == Controller.GAME_MODE_PLAYING:
+            return self.handle_player_turn_keys(key)
+        elif self.mode == Controller.GAME_MODE_INVENTORY:
+            return self.handle_inventory_keys(key)
+        elif self.mode == Controller.GAME_MODE_CHARACTER:
+            return self.handle_character_view_keys(key)
+
+        # No key was pressed
+        return {}
+
+    def handle_start_menu_keys(self, key):
+        key_char = chr(key.c)
+        if key_char == 'a' or key.vk == libtcod.KEY_SPACE:
+            return {'new_game': True}
+        elif key_char == 'b':
+            return {'load_game': True}
+        elif key_char == 'c' or key.vk == libtcod.KEY_ESCAPE:
+            return {'exit': True}
+
+        return {}
+
+    def handle_player_turn_keys(self, key):
 
         key_char = chr(key.c)
 
@@ -84,6 +195,8 @@ class Controller():
             return {'wait': True}
         elif key_char == 'i':
             return {'show_inventory': True}
+        elif key_char == 'c':
+            return {'show_character': True}
         elif key_char == 'd':
             return {'drop_inventory': True}
 
@@ -105,6 +218,44 @@ class Controller():
             self.model.next_floor()
 
         # No key was pressed
+        return {}
+
+    def handle_inventory_keys(self, key):
+        key_char = chr(key.c)
+
+        if key.vk == libtcod.KEY_ENTER and key.lalt:
+            # Alt+Enter: toggle full screen
+            return {'fullscreen': True}
+        # Movement keys
+        elif key.vk == libtcod.KEY_UP:
+            return {'move': (0, -1)}
+        elif key.vk == libtcod.KEY_DOWN:
+            return {'move': (0, 1)}
+        elif key_char == 'e':
+            return {'equip': True}
+        elif key_char == 'd':
+            return {'drop': True}
+        elif key_char == 'u':
+            return {'use': True}
+        elif key.vk == libtcod.KEY_ESCAPE:
+            # Exit the menu
+            return {'exit': True}
+
+        return {}
+
+    def handle_character_view_keys(self, key):
+        index = key.c - ord('a')
+
+        if index >= 0:
+            return {'inventory_index': index}
+
+        if key.vk == libtcod.KEY_ENTER and key.lalt:
+            # Alt+Enter: toggle full screen
+            return {'fullscreen': True}
+        elif key.vk == libtcod.KEY_ESCAPE:
+            # Exit the menu
+            return {'exit': True}
+
         return {}
 
 class TextEntry:

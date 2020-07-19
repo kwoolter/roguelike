@@ -1,8 +1,8 @@
-Name,HP,STR,DEX,CON,INT
-Warrior,30,15,10,12,9
-Mage,12,7,12,5,15
-Thief,20,10,20,8,12
-Ranger,15,10,18,10,10
-Minion,8,8,8,8,5
-Guard,11,11,11,11,7
-Chief,15,15,15,15,10
+Name,HP,MAX_HP,STR,DEX,CON,INT,AC
+Warrior,30,30,15,10,12,9,12
+Mage,12,12,7,12,5,15,6
+Thief,20,20,10,20,8,12,8
+Ranger,15,15,10,18,10,10,8
+Minion,6,6,8,8,8,5,3
+Guard,11,11,11,11,11,7,3
+Chief,15,15,15,15,15,10,3

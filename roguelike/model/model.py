@@ -5,10 +5,9 @@ import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
 
-from .entity_factory import Entity, Player, EntityFactory
-from .combat import CombatClass, CombatClassFactory
+from .entity_factory import Entity, Player, EntityFactory, Fighter
+from .combat import *
 from .events import Event
-
 
 class EventQueue():
     def __init__(self):
@@ -26,8 +25,6 @@ class EventQueue():
     def print(self):
         for event in self.events:
             print(event)
-
-
 
 
 class Tunnel:
@@ -221,7 +218,7 @@ class Floor():
 
         l = self.level
 
-        entities = (("Gold", (1+ l//3)*5, 1), ("Spider",20,1), ("Orc", 30, 3), ("Troll", 5*(l//10), 1))
+        entities = (("Gold", (1+ l//3)*5, 1), ("Spider",20,1), ("Orc", 20, 3), ("Troll", 25, 1))
         for ename, eprob, emax in entities:
             for count in range(emax):
                 if random.randint(1,100) < eprob:
@@ -231,10 +228,22 @@ class Floor():
                         new_entity.xy = rx,ry
                         self.entities.append(new_entity)
                         if new_entity.get_property("IsEnemy") == True:
-                            print(f"Adding new bot for {new_entity.name}")
+                            self.generate_new_enemy(new_entity)
                             new_bot = AIBotTracker(new_entity, self)
                             self.bots.append(new_bot)
-                            print(new_bot)
+
+    def generate_new_enemy(self, new_entity : Entity):
+
+        class_name = random.choice(("Minion", "Guard", "Chief"))
+        equipment = random.choice(("Hands", "Dagger", "Spear"))
+
+        cc = CombatClassFactory.get_combat_class_by_name(class_name)
+        eq = EntityFactory.get_entity_by_name(equipment)
+
+        new_fighter = Fighter(combat_class=cc)
+        new_fighter.equip_item(eq)
+        new_entity.fighter = new_fighter
+        new_fighter.print()
 
     def add_entities_to_floor(self):
 
@@ -242,30 +251,11 @@ class Floor():
         if self.player is not None:
             self.add_player(self.player)
 
-        # Add stairs down to next level in the centre of the last room
-        ename = "Down Stairs"
-        new_entity = EntityFactory.get_entity_by_name(ename)
-        new_entity.xy = self.last_room.center
-        e = self.get_entity_at_pos(self.last_room.center)
-        # Replace anything that is already there!
-        if e is not None:
-            self.remove_entity(e)
-        self.entities.append(new_entity)
-
-        # If we are not at the top level add stairs back up to the previous level in the centre of the first room
-        if self.level > 1:
-            ename = "Up Stairs"
-            new_entity = EntityFactory.get_entity_by_name(ename)
-            new_entity.xy = self.first_room.center
-            e = self.get_entity_at_pos(self.last_room.center)
-            # Replace anything that is already there!
-            if e is not None:
-                self.remove_entity(e)
-            self.entities.append(new_entity)
-
         entities_to_add = [("NPC",3),
-                           ("Sword",2),
-                           ("Axe",2),
+                           ("Sword",5),
+                           ("Axe",5),
+                           ("Shield", 5),
+                           ("Helmet", 5),
                            ("Key",1),
                            ("Fire Scroll",2),
                            ("Healing Scroll",2),
@@ -304,6 +294,26 @@ class Floor():
                     # Don't use this room again
                     available_rooms.remove(room)
 
+        # If we are not at the top level add stairs back up to the previous level in the centre of the first room
+        if self.level > 1:
+            ename = "Up Stairs"
+            new_entity = EntityFactory.get_entity_by_name(ename)
+            new_entity.xy = self.first_room.center
+            e = self.get_entity_at_pos(self.last_room.center)
+            # Replace anything that is already there!
+            if e is not None:
+                self.remove_entity(e)
+            self.entities.append(new_entity)
+
+        ename = "Down Stairs"
+        new_entity = EntityFactory.get_entity_by_name(ename)
+        new_entity.xy = self.last_room.center
+        e = self.get_entity_at_pos(self.last_room.center)
+        # Replace anything that is already there!
+        if e is not None:
+            self.remove_entity(e)
+        self.entities.append(new_entity)
+        print(f'******Added {new_entity.name} in room {self.last_room.name} at {new_entity.xy}')
 
     def move_player(self, dx, dy):
         # If the destination is a valid path...
@@ -317,7 +327,7 @@ class Floor():
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"You found {e.name}!"))
+                          description=f"You found {e.description}!"))
 
             # See if we changed rooms/tunnels
             if self.current_room != self.get_current_room():
@@ -342,7 +352,7 @@ class Floor():
                     self.events.add_event(
                         Event(type=Event.GAME,
                               name=Event.ACTION_FAILED,
-                              description=f"A solid {e.name} blocks your way!"))
+                              description=f"{e.description} blocks your way!"))
             else:
                 self.events.add_event(
                     Event(type=Event.GAME,
@@ -394,21 +404,33 @@ class Floor():
         self.events.add_event(
             Event(type=Event.GAME,
                   name=Event.ACTION_ATTACK,
-                  description=f"{attacker.name} attacks a {target.name}"))
+                  description=f"{attacker.description} attacks {target.description}"))
 
         if random.randint(1,10) > 5:
-            target.state = Entity.STATE_DEAD
-            corpse = EntityFactory.get_entity_by_name("Corpse")
-            self.swap_entity(target, corpse)
+
+            dmg = attacker.fighter.roll_damage()
+            target.fighter.take_damage(dmg)
+
             self.events.add_event(
                 Event(type=Event.GAME,
                       name=Event.ACTION_SUCCEEDED,
-                      description=f"{attacker.name} kills a {target.name}"))
+                      description=f"{attacker.description}'s {attacker.fighter.current_weapon.description} deals {dmg} damage"))
+
+            if target.fighter.is_dead:
+                target.state = Entity.STATE_DEAD
+                attacker.fighter.add_kills()
+                attacker.fighter.add_XP(target.fighter.get_XP_reward())
+                corpse = EntityFactory.get_entity_by_name("Corpse")
+                self.swap_entity(target, corpse)
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_SUCCEEDED,
+                          description=f"{attacker.description} kills {target.description}"))
         else:
             self.events.add_event(
                 Event(type=Event.GAME,
                       name=Event.ACTION_FAILED,
-                      description=f"{attacker.name} swings at the {target.name}...and misses!"))
+                      description=f"{attacker.description} swings at {target.description}...and misses!"))
 
     def get_current_room(self) -> Room:
         current_room = None
@@ -483,6 +505,10 @@ class Floor():
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
 
+        x, y, w, h = self.last_room.rect
+        self.explored[x:x + w, y: y + h] = 1
+
+
     def recompute_fov(self, x=None, y=None, radius=None, light_walls=True, algorithm=0):
 
         # Use the player's xy if non specified
@@ -538,10 +564,17 @@ class Floor():
 
 
 class Model():
+
+    GAME_STATE_PAUSED = "paused"
+    GAME_STATE_PLAYING = "playing"
+    GAME_STATE_LOADED = "loaded"
+    GAME_STATE_GAME_OVER = "game over"
+
     def __init__(self, name: str):
         # Properties of the game
         self.name = name
         self.dungeon_level = 0
+        self.state = None
 
         # Contents of the game
         self.player = None
@@ -555,17 +588,34 @@ class Model():
 
         EntityFactory.load("entities.csv")
         CombatClassFactory.load("combat_classes.csv")
+        CombatEquipmentFactory.load("combat_equipment.csv")
 
-        self.add_player(Player(name="Keith"))
+        cc = CombatClassFactory.get_combat_class_by_name("Warrior")
+        eq = EntityFactory.get_entity_by_name("Dagger")
+        new_player = Player(name="Keith")
+        new_player.fighter = Fighter(combat_class=cc)
+        new_player.fighter.equip_item(eq)
+
+        self.add_player(new_player)
         self.next_floor()
+        self.set_state(Model.GAME_STATE_LOADED)
 
     def print(self):
         self.current_floor.print()
 
     def tick(self):
-        self.current_floor.tick()
+        if self.state == Model.GAME_STATE_PLAYING:
+            self.current_floor.tick()
 
-    def get_next_event(self):
+    def set_state(self, new_state):
+        if new_state != self.state:
+            self._old_state = self.state
+            self.state = new_state
+
+    def set_mode(self, new_mode):
+        self.set_state(new_mode)
+
+    def get_next_event(self)->Event:
         next_event = None
         if self.events.size() > 0:
             next_event = self.events.pop_event()
@@ -580,7 +630,7 @@ class Model():
     def move_player(self, dx: int, dy: int):
         self.current_floor.move_player(dx, dy)
 
-    def take_item(self):
+    def take_item(self)->bool:
 
         success = False
 
@@ -596,48 +646,22 @@ class Model():
         # If there is an entity that you can pick-up then process it
         elif e.get_property("IsCollectable") == True:
 
-            # If you don't have any of these set inventory count to 1
-            if e.name not in self.inventory.keys() or self.inventory[e.name] == 0:
-                self.inventory[e.name] = 1
-                success = True
+            success = self.player.inventory.add_item(e)
 
-            # If the item is stackable then increase the number you are holding
-            elif e.get_property("IsStackable") == True:
-                self.inventory[e.name] += 1
-                success = True
-
-            # Otherwise you can't hold any more of these so fail
-            else:
-                self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_FAILED,
-                                            description=f"You can only hold one {e.name}!"))
-
-            # If we manage to pick up an item then remove it
+            # If we manage to pick up an item then remove it from the floor
             if success is True:
                 self.current_floor.swap_entity(e)
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
-                                            description=f"You picked up {e.name}!"))
+                                            description=f"You picked up {e.description}!"))
 
         # Otherwise you can't pick it up
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
-                                        description=f"You can't pick up {e.name}!"))
+                                        description=f"You can't pick up {e.description}!"))
 
-        print(self.inventory)
-
-        if e is not None:
-            print(e)
-            print(e.properties)
-            property_name = "IsCollectable"
-            property_value = e.get_property(property_name)
-            if property_value is True:
-                print("is true")
-            elif property_value == True:
-                print("eq True")
-            else:
-                print("False")
+        return success
 
     def take_stairs(self):
 
@@ -707,6 +731,58 @@ class Model():
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.GAME_NEW_FLOOR,
                                         description=f"{self.name}:'{self.current_floor.name}' at Level {self.dungeon_level} Ready!"))
+
+    def equip_item(self, new_item : Entity)->bool:
+
+        success = False
+
+        if new_item.get_property("IsEquipable") == True:
+            success = self.player.equip_item(new_item)
+            if success is True:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You equip {new_item.description}"))
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You can't equip {new_item.description}"))
+        return success
+
+    def drop_item(self, old_item : Entity)->bool:
+
+        success = False
+
+        e = self.current_floor.get_entity_at_pos(self.player.xy)
+        if e is None:
+            success = self.player.drop_item(old_item)
+            if success is True:
+                old_item.xy = self.player.xy
+                self.current_floor.entities.append(old_item)
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You drop {old_item.description} here"))
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You can't drop {old_item.description} here"))
+
+        return success
+
+    def use_item(self, new_item : Entity)->bool:
+
+        success = False
+
+        if new_item.get_property("IsInteractable") == True:
+            success = self.player.drop_item(new_item)
+            if success is True:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You use {new_item.description}"))
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You can't use {new_item.description}"))
+        return success
 
 
 import math

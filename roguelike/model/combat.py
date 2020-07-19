@@ -1,11 +1,14 @@
 import pandas as pd
 from pathlib import Path
+import re
+import random
 
 
 class CombatClass:
+
     def __init__(self, name : str):
         self.name = name
-        self.properties = {}
+        self.properties = {"KILLS":0, "XP":0}
 
     def __str__(self):
         text = f'Class {self.name}: properties:{self.properties}'
@@ -15,7 +18,18 @@ class CombatClass:
         self.properties.update(new_properties)
 
     def get_property(self, property_name : str):
-        return self.properties.get(property_name) == True
+        return self.properties.get(property_name)
+
+    def update_property(self, property_name : str, new_value : float, increment=False):
+        if property_name in self.properties.keys():
+            if increment is False:
+                self.properties[property_name] = new_value
+            else:
+                self.properties[property_name] += new_value
+        else:
+            print(f"Can't find property {property_name} in {self.name} list of properties")
+
+
 
 class CombatClassFactory:
     combat_classes = None
@@ -40,7 +54,7 @@ class CombatClassFactory:
         if name in CombatClassFactory.combat_classes.index:
             row = CombatClassFactory.combat_classes.loc[name]
             e = CombatClass(name)
-            e.add_properties(row.iloc[1:].to_dict())
+            e.add_properties(row.iloc[:].to_dict())
 
         else:
             print(f"Can't find combat class {name} in factory!")
@@ -62,7 +76,42 @@ class CombatEquipment:
         self.properties.update(new_properties)
 
     def get_property(self, property_name : str):
-        return self.properties.get(property_name) == True
+        return self.properties.get(property_name)
+
+    def get_damage_roll(self)->int:
+        dmg_dice = self.get_property("DMG")
+        return CombatEquipment.dnd_dice_text_to_roll(dmg_dice)
+
+
+
+    @staticmethod
+    def dnd_dice_text_to_roll(dice_text:str):
+
+        number_of_dice = re.compile(r'^\d+(?=d)')
+        dice_sides = re.compile(r'(?<=\dd)\d+')
+        extra_bonus = re.compile(r'(?<=\d\+)\d+$')
+
+        r = number_of_dice.search(dice_text)
+        assert r is not None, "Can't find number of dice"
+        num_dice = int(r[0])
+        r = dice_sides.search(dice_text)
+        assert r is not None, "Can't find number of dice sides"
+        num_dice_sides = int(r[0])
+        r = extra_bonus.search(dice_text)
+        if r is not None:
+            bonus = int(r[0])
+        else:
+            bonus = 0
+
+        result = 0
+
+        for i in range(num_dice):
+            result += random.randint(1,num_dice_sides)
+        result += bonus
+
+        print(f"Rolling {num_dice} x {num_dice_sides} sided dice + {bonus} = {result}")
+
+        return result
 
 
 class CombatEquipmentFactory:
@@ -95,37 +144,14 @@ class CombatEquipmentFactory:
 
         return e
 
-class Fighter():
+    @staticmethod
+    def get_damage_roll_by_name(equipment_name: str):
+        eq = CombatEquipmentFactory.get_equipment_by_name(equipment_name)
+        if eq is not None:
+            dmg = eq.get_damage_roll()
+        else:
+            print(f"{__class__}: Can't ding equipment {equipment_name}")
+            dmg = 0
 
-    def __init__(self, combat_class: CombatClass):
-        self.combat_class = combat_class
-        self.equipment = {}
+        return dmg
 
-    def equip_item(self, new_item : CombatEquipment):
-        self.equipment[new_item.slot] = new_item
-
-    def print(self):
-        print(f'Fighter ({self.combat_class.name})')
-        for k, v in self.combat_class.properties.items():
-            print(f'\t{k}={v}')
-        print("Equipment:")
-        for k, v in self.equipment.items():
-            print(f'\t{k}={str(v)}')
-
-
-if __name__ == "__main__":
-    CombatClassFactory.load("combat_classes.csv")
-    CombatEquipmentFactory.load("combat_equipment.csv")
-
-    cl = CombatClassFactory.get_combat_class_by_name("Warrior")
-
-    f = Fighter(combat_class=cl)
-
-    eq = CombatEquipmentFactory.get_equipment_by_name("Sword")
-    f.equip_item(eq)
-    eq = CombatEquipmentFactory.get_equipment_by_name("Shield")
-    f.equip_item(eq)
-    eq = CombatEquipmentFactory.get_equipment_by_name("Helmet")
-    f.equip_item(eq)
-
-    f.print()
