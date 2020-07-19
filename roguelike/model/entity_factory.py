@@ -106,7 +106,7 @@ class Player(Entity):
 class Fighter():
     DEFAULT_WEAPON = None
     DEFAULT_WEAPON_NAME = "Hands"
-    WEAPON_SLOT = "Right Hand"
+    WEAPON_SLOT = "Main Hand"
 
     def __init__(self, combat_class: CombatClass):
         self.combat_class = combat_class

@@ -32,10 +32,10 @@ class Controller():
         self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
 
-        self.model.print()
-
     def set_mode(self, new_mode):
+
         if new_mode != self.mode:
+
             self.last_mode = self.mode
             self.mode = new_mode
 
@@ -83,6 +83,7 @@ class Controller():
             fullscreen = action.get('fullscreen')
             move = action.get('move')
 
+            # If we are in PLAYING mode
             if self.mode == Controller.GAME_MODE_PLAYING:
                 # Game playing actions
                 wait = action.get('wait')
@@ -106,10 +107,13 @@ class Controller():
                 elif exit:
                     self.set_mode(Controller.GAME_MODE_PAUSED)
 
+            # If we are in PAUSED mode
             elif self.mode == Controller.GAME_MODE_PAUSED:
                 if exit:
                     self.set_mode(Controller.GAME_MODE_START)
+                    continue
 
+            # If we are in START mode
             elif self.mode == Controller.GAME_MODE_START:
                 new_game = action.get('new_game')
 
@@ -118,27 +122,29 @@ class Controller():
                 elif exit:
                     return True
 
+            # If we are in INVENTORY mode
             elif self.mode == Controller.GAME_MODE_INVENTORY:
                 equip = action.get('equip')
                 drop = action.get('drop')
                 use = action.get('use')
 
+                e = self.view.inventory_view.get_selected_item()
+
                 if move:
                     dx, dy = move
                     self.view.inventory_view.change_selection(dy)
-                elif equip:
-                    e = self.view.inventory_view.get_selected_item()
-                    if e is not None:
-                        self.model.equip_item(e)
-                elif drop:
-                    e = self.view.inventory_view.get_selected_item()
-                    if e is not None:
-                        self.model.drop_item(e)
-                elif use:
-                    e = self.view.inventory_view.get_selected_item()
-                    if e is not None:
-                        self.model.use_item(e)
+                else:
 
+                    if e is None:
+                        self.events.add_event(model.Event(type=model.Event.GAME,
+                                                    name=model.Event.ACTION_FAILED,
+                                                    description=f"No item selected!"))
+                    elif equip:
+                        self.model.equip_item(e)
+                    elif drop:
+                        self.model.drop_item(e)
+                    elif use:
+                        self.model.use_item(e)
 
             if exit:
                 self.set_mode(self.last_mode)

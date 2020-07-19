@@ -419,13 +419,14 @@ class Floor():
             if target.fighter.is_dead:
                 target.state = Entity.STATE_DEAD
                 attacker.fighter.add_kills()
-                attacker.fighter.add_XP(target.fighter.get_XP_reward())
+                XP = target.fighter.get_XP_reward()
+                attacker.fighter.add_XP(XP)
                 corpse = EntityFactory.get_entity_by_name("Corpse")
                 self.swap_entity(target, corpse)
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"{attacker.description} kills {target.description}"))
+                          description=f"{attacker.description} kills {target.description} and gains {XP} XP"))
         else:
             self.events.add_event(
                 Event(type=Event.GAME,
@@ -505,8 +506,8 @@ class Floor():
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
 
-        x, y, w, h = self.last_room.rect
-        self.explored[x:x + w, y: y + h] = 1
+        # x, y, w, h = self.last_room.rect
+        # self.explored[x:x + w, y: y + h] = 1
 
 
     def recompute_fov(self, x=None, y=None, radius=None, light_walls=True, algorithm=0):

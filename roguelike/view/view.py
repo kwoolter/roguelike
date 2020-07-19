@@ -46,14 +46,13 @@ class MainFrame(View):
         # Properties
         self.mode = MainFrame.MODE_PLAYING
 
-
         # Components
         self.game = None
         self.con = None
         self.floor_view = FloorView(self.width, self.height, bg=libtcod.black)
         self.message_panel = MessagePanel(MainFrame.CONSOLE_MESSAGE_PANEL_WIDTH,
                                           MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
-                                          fg=libtcod.lightest_lime,
+                                          fg=libtcod.white,
                                           bg=libtcod.black,
                                           border_bg=libtcod.black,
                                           border_fg=libtcod.green)
@@ -134,6 +133,7 @@ class MainFrame(View):
         self.con.default_bg = libtcod.black
         libtcod.console_clear(self.con)
 
+        # If we are playing then draw the current floor, etc.
         if self.mode == MainFrame.MODE_PLAYING:
 
             self.floor_view.draw()
@@ -153,8 +153,9 @@ class MainFrame(View):
                                  self.message_panel.height,
                                  0,
                                  0, self.height-MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
-                                 ffade=0.5, bfade=0.5)
+                                 ffade=0.7, bfade=0.7)
 
+        # If we are in INVENTORY mode the draw the inventory screen
         elif self.mode == MainFrame.MODE_INVENTORY_SCREEN:
             self.inventory_view.draw()
             bx = int((self.width - self.inventory_view.width)/2)
@@ -168,6 +169,7 @@ class MainFrame(View):
                                  bx, by,
                                  ffade=1, bfade=1)
 
+        # If we are in CHARACTER mode then draw the character screen
         elif self.mode == MainFrame.MODE_CHARACTER_SCREEN:
             # Redraw the character view
             self.character_view.draw()
@@ -182,8 +184,8 @@ class MainFrame(View):
                                  bx, by,
                                  ffade=1, bfade=1)
 
+        # Otherwise just display current mode in a box!!!
         else:
-
             # Draw box with current game mode
             bw = int(self.width/2)
             bh = 5
@@ -203,7 +205,7 @@ class MainFrame(View):
                                   bg=libtcod.darkest_gray)
             so.render(0, bw, by+2, alignment=libtcod.CENTER)
 
-            #Add a title
+            #Add game title
 
             bw = int(self.width/2)
             bh = 5
@@ -214,7 +216,6 @@ class MainFrame(View):
             bo.render(0, bx, 1)
 
             panel_text="Rogue Tower"
-            # Print the panel text
             so = ScreenString(panel_text,
                                   fg=libtcod.darker_green,
                                   bg=libtcod.darkest_gray)
@@ -288,7 +289,8 @@ class FloorView(View):
                     libtcod.console_set_char_background(self.con, x, y, self.bg_explored_wall)
 
         # Draw all of the entities in the current FOV
-        for e in self.floor.entities:
+        entities = sorted(self.floor.entities, key = lambda x: x.get_property("Zorder"))
+        for e in entities:
             if e.xy in fov_cells:
                 x, y = e.xy
                 bg = e.bg
@@ -489,7 +491,6 @@ class MessagePanel(View):
         self.messages.append(new_message)
         if len(self.messages) > self.height:
             del self.messages[0]
-            #print(self.messages)
 
     def process_event(self, new_event: model.Event):
         self.add_message(new_event.description)
@@ -510,7 +511,7 @@ class MessagePanel(View):
 
         # Print the panel text
         so = ScreenStringRect(panel_text,
-                              width = self.width-2, 
+                              width = self.width-2,
                               height = self.height-2,
                               fg=self.fg,
                               bg=self.bg)
@@ -538,7 +539,7 @@ class InventoryView(View):
         # Components
         self.con = None
         self.character = None
-        self.selected_item = 0
+        self.selected_item = -1
         self.selected_item_entity = None
         self.message_event = None
         self.border = None
@@ -567,6 +568,7 @@ class InventoryView(View):
         self.selected_item = min(max(0,self.selected_item), len(inventory) + len(inventory_stackable) -1)
 
     def get_selected_item(self):
+
         return self.selected_item_entity
 
     def draw(self):
@@ -575,6 +577,12 @@ class InventoryView(View):
         equipment = self.character.fighter.equipment
         inventory = self.character.inventory.get_other_items()
         inventory_stackable =  self.character.inventory.get_stackable_items()
+
+        if len(inventory) + len(inventory_stackable) > 0:
+            self.selected_item = min(max(0,self.selected_item), len(inventory) + len(inventory_stackable) -1)
+        else:
+            self.selected_item = -1
+            self.selected_item_entity = None
 
         cx, cy = self.center
 

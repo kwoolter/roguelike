@@ -1,24 +1,24 @@
-Name,Description,Char,FG,BG,IsTransparent,IsWalkable,IsInteractable,IsCollectable,IsStackable,IsEquipable,IsEnemy
-Player,the player,@,black,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
-NPC,a strange man,K,yellow,,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE
-Up Stairs,some stairs leading up,^,yellow,black,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
-Down Stairs,some stairs leading down,v,yellow,black,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
-Locked Down Stairs,a locked entrance,v,red,black,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
-Gold,some gold,$,black,yellow,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Dagger,a small dagger,(,white,,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Sword,a short sword,\,white,,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Axe,a hand axe,!,white,,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Key,a small key,?,red,,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE
-Orc,a small green Orc,o,green,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
-Troll,a large Troll,T,dark_green,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
-Corpse,a rotting corpse,%,red,,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
-Fire Scroll,a magic fireball scroll,~,orange,red,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Healing Scroll,a magic healing scroll,+,red,white,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Trap,a hidden trap,*,yellow,red,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
-Chest,a wooden chest,C,red,dark_red,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
-Spider,a large spider,.,black,,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
-Locked Chest,a locked wooden chest,X,red,dark_red,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
-Shield,a small leather shield,O,dark_red,,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Helmet,a metal helmet,^,black,,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Hands,bare hands,@,pink,,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Spear,a wooden spear,I,white,,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Name,Description,Char,FG,BG,Zorder,IsTransparent,IsWalkable,IsInteractable,IsCollectable,IsStackable,IsEquipable,IsEnemy
+Player,the player,@,black,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+NPC,a strange man,K,yellow,,1,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE
+Up Stairs,some stairs leading up,^,yellow,black,3,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
+Down Stairs,some stairs leading down,v,yellow,black,3,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
+Locked Down Stairs,a locked entrance,v,red,black,3,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
+Gold,some gold,$,black,yellow,4,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Dagger,a small dagger,(,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Sword,a short sword,\,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Axe,a hand axe,!,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Key,a small key,?,red,,4,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE
+Orc,a small green Orc,o,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Troll,a large Troll,T,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Corpse,a rotting corpse,%,red,,10,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
+Fire Scroll,a magic fireball scroll,~,orange,red,4,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Healing Scroll,a magic healing scroll,+,red,white,4,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Trap,a hidden trap,*,yellow,red,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
+Chest,a wooden chest,C,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
+Spider,a large spider,.,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Locked Chest,a locked wooden chest,X,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
+Shield,a small leather shield,O,dark_red,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Helmet,a metal helmet,^,black,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Hands,bare hands,@,pink,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Spear,a wooden spear,I,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
