@@ -245,8 +245,8 @@ class FloorView(View):
         self.bg = bg
         self.bg_lit_path = libtcod.darker_yellow
         self.bg_lit_wall = libtcod.darkest_yellow
-        self.bg_explored_path = libtcod.darker_grey
-        self.bg_explored_wall = libtcod.darkest_grey
+        self.bg_explored_path = libtcod.Color(25,25,25)
+        self.bg_explored_wall = libtcod.Color(15,15,15)
 
         # Model Floor that we are going to render
         self.floor = None
@@ -259,6 +259,19 @@ class FloorView(View):
         self.con = libtcod.console_new(self.width, self.height)
 
     def draw(self):
+
+        def dim_rgb(rgb, dc):
+            """
+
+            :param rgb:
+            :param dc:
+            :return:
+            """
+            r,g,b = rgb
+            r = max(0, r - dc)
+            g = max(0, g - dc)
+            b = max(0, b - dc)
+            return libtcod.Color(r, g, b)
 
         # Clear the screen with the background colour
         self.con.default_bg = self.bg
@@ -274,12 +287,24 @@ class FloorView(View):
 
             # For the cells in the current FOV
             if (x, y) in fov_cells:
+
+                a = int(self.floor.get_fov_light_attenuation(x, y, 50))
+
                 # Lit path
                 if (x,y) in walkable_cells:
-                    libtcod.console_set_char_background(self.con, x, y, self.bg_lit_path)
+
+                    tile_rgb = list(self.floor.floor_tile_colours[x,y])
+                    if tile_rgb == [0,0,0]:
+                        tile_rgb = list(self.bg_lit_path)
+                    tile_colour = dim_rgb(tile_rgb, a)
+
+                    libtcod.console_set_char_background(self.con, x, y, tile_colour)
+
                 # Else lit wall
                 else:
-                    libtcod.console_set_char_background(self.con, x, y, self.bg_lit_wall)
+                    tile_rgb = list(self.bg_lit_wall)
+                    tile_colour = dim_rgb(tile_rgb, a)
+                    libtcod.console_set_char_background(self.con, x, y, tile_colour)
             else:
                 # Unlit path
                 if (x,y) in walkable_cells:
@@ -305,12 +330,13 @@ class FloorView(View):
                     print(e)
 
         # Draw the player
-        so = ScreenObject('@', fg=libtcod.dark_sea, bg=self.bg_lit_path)
-        so.render(self.con, x=self.floor.player.x, y=self.floor.player.y)
+        p = self.floor.player
+        libtcod.console_set_default_foreground(self.con, p.fg)
+        libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_NONE)
 
         # Draw name of current room
         room_name = self.floor.current_room.name if self.floor.current_room is not None else "???"
-        s = ScreenString(f'{self.floor.name}:{room_name}', fg=libtcod.red, bg=libtcod.white)
+        s = ScreenString(f'{self.floor.name}:{room_name}: room={self.floor.room_count}, room_max_size={self.floor.room_max_size}', fg=libtcod.red, bg=libtcod.white)
         s.render(self.con, 0, 0, alignment=libtcod.LEFT)
 
 

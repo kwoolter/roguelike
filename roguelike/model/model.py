@@ -5,7 +5,10 @@ import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
 
+from . game_parameters import GameParameters
 from . entity_factory import Entity, Player, EntityFactory, Fighter
+from . entity_factory import text_to_color
+
 from . combat import *
 from . events import Event
 
@@ -65,7 +68,16 @@ class Tunnel:
 
 
 class Room:
-    def __init__(self, name: str, w, h, fg=libtcod.white, bg=libtcod.black):
+    def __init__(self, name: str, w:int, h:int, fg=libtcod.white, bg=libtcod.black):
+        """
+
+        :param name:
+        :param w:
+        :param h:
+        :param fg:
+        :param bg:
+        """
+
         self.name = name
         self.width = w
         self.height = h
@@ -100,38 +112,51 @@ class Room:
         x, y = point
         return self.rect.collidepoint(x, y) > 0
 
-    def get_random_pos(self):
-        """Return a random position within this room"""
-        return (self.x + random.randint(0,self.width-1), self.y + random.randint(0,self.height-1))
+    def get_random_pos(self, margin = 0)->tuple:
+        """
+
+        :param margin:
+        :return:
+        """
+
+        # Force the margin to be less than half of the smallest room dimension
+        margin=int(min(margin,min(self.width, self.height)/2))
+
+        return (self.x + random.randint(margin,self.width-margin-1), self.y + random.randint(margin,self.height-margin-1))
 
     def print(self):
         print(f'Room {self.name} located at {self.rect}')
 
 
 class Floor():
-    def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0):
+
+    ROOM_COLOURS =  ["lightest_grey", "grey", "darker_grey", "darkest_grey"]
+
+    ROOM_COLOURS = ["darker_yellow","darkest_amber", "desaturated_orange",  "desaturated_flame"]
+
+    def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
 
         # Properties of this floor
         self.name = name
         self.width = width
         self.height = height
-        self.rect = rect.Rect(0, 0, width, height)
         self.level = level
+        self.rect = rect.Rect(0, 0, width, height)
 
-        '''        
-        'room_max_size': room_max_size,
-        'room_min_size': room_min_size,
-        'max_rooms': max_rooms,
-        'max_monsters_per_room': max_monsters_per_room,
-        'max_items_per_room': max_items_per_room,
-        '''
+        # Floor generation parameters
+        self.room_parameters = params["Room"]
+        self.floor_parameters = params["Floor"]
+        self.room_count = self.floor_parameters["Rooms Count"]
+        self.room_min_size = 4
+        self.room_size_haircut = 0.75
+        self.room_max_size = int(max(math.sqrt(self.width * self.height / self.room_count) * self.room_size_haircut, self.room_min_size))
 
         # Contents of the floor
         self.player = None
         self.first_room = None
         self.current_room = None
         self.last_room = None
-        self.room_count = 15
+
         self.map_rooms = {}
         self.map_tunnels = []
         self.entities = []
@@ -141,10 +166,13 @@ class Floor():
         # - Walkable?
         # - Have already been explored?
         # - Are in the current FOV?
+        # - Have a specific tile colour set?
         self.walkable = None
         self.explored = None
         self.fov_map = None
-        self.fov_radius = 6
+        self.fov_radius = 7
+        self.fov_radius2 = self.fov_radius**2
+        self.floor_tile_colours = None
 
         self.events = None
 
@@ -158,14 +186,52 @@ class Floor():
         self.walkable = None
         self.explored = None
         self.fov_map = None
+        self.floor_tile_colours = None
+
+        # entities = (("Gold", (1 + l // 3) * 5, 1),
+        #             ("Spider", 20, 1),
+        #             ("Orc", 20, 3),
+        #             ("Troll", 25, 1),
+        #             ("Pillar", 30, int(s / 10)))
+
+        room_entities = []
+        enames = ["Orc", "Spider", "Troll"]
+        for ename in enames:
+            emax = self.room_parameters[f'{ename} Count']
+            eprob = self.room_parameters[f'{ename} Probability']
+            room_entities.append((ename,eprob,emax))
+
+        floor_entities = []
+        enames = ["Gold", "Sword", "Axe"]
+        for ename in enames:
+            emax = self.floor_parameters[f'{ename} Count']
+            eprob = self.floor_parameters[f'{ename} Probability']
+            floor_entities.append((ename,eprob,emax))
 
         last_room = None
         self.first_room = None
 
+        valid_room_colours = []
+        for c in Floor.ROOM_COLOURS:
+            lc = text_to_color(c)
+            if lc is not None:
+                valid_room_colours.append(lc)
+
+        valid_room_colours = []
+        for i in range(100,150,10):
+            valid_room_colours.append(libtcod.Color(i,i,0))
+
+        print(valid_room_colours)
+
         for i in range(self.room_count):
 
+            random_colour = random.choice(valid_room_colours)
+
             # Create a new room of random size
-            new_room = Room(f'Room{i}', random.randint(4, 8), random.randint(4, 8))
+            new_room = Room(name=f'Room{i}',
+                            w=random.randint(self.room_min_size, self.room_max_size),
+                            h=random.randint(self.room_min_size, self.room_max_size),
+                            bg=random_colour)
 
             # If we were able to add the room to the map...
             if self.add_map_room(new_room) is True:
@@ -173,10 +239,12 @@ class Floor():
                 # if this is not the first room then...
                 if last_room is not None:
                     # Add some random entities to the room
-                    self.add_entities_to_room(new_room)
+                    self.add_entities_to_room(new_room, entities=room_entities)
 
                     # Create a tunnel to the previous room
-                    new_tunnel = Tunnel(last_room.center, new_room.center)
+                    new_tunnel = Tunnel(start_pos=last_room.center,
+                                        end_pos=new_room.center,
+                                        bg=random_colour)
                     self.map_tunnels.append(new_tunnel)
                 else:
                     self.first_room = new_room
@@ -186,7 +254,7 @@ class Floor():
 
         self.last_room = new_room
 
-        self.add_entities_to_floor()
+        self.add_entities_to_floor(entities = floor_entities)
 
         self.build_floor_map()
 
@@ -210,23 +278,60 @@ class Floor():
         self.player.xy = (x, y)
         self.move_player(0, 0)
 
+        # Point all bots at the player!!!!
         for bot in self.bots:
             bot.set_instructions(new_target=self.player)
             print(bot)
 
-    def add_entities_to_room(self, room : Room):
+    def add_entities_to_room(self, room : Room, entities = None):
 
-        l = self.level
 
-        entities = (("Gold", (1+ l//3)*5, 1), ("Spider",20,1), ("Orc", 20, 3), ("Troll", 25, 1))
+        if entities is None:
+
+            # Pull in some information that can be used to influence count and probability or randomly generated entities
+            l = self.level
+            s = room.width * room.height
+
+            # Define what entities we are attempting to add, the probability one being added and the maximum we can add per room
+            entities = (("Gold", (1+ l//3)*5, 1),
+                        ("Spider",20,1),
+                        ("Orc", 20, 3),
+                        ("Troll", 25, 1),
+                        ("Pillar", 30, int(s/10)))
+
+        # loop through the entities that we are randomly deploying
         for ename, eprob, emax in entities:
+
+            # Get a sample of the entity that we are trying deploy
+            e=EntityFactory.get_entity_by_name(ename)
+
+            # If it is solid and it doesn't move...
+            # ...then avoid putting it around the edge of the room where it might block a tunnel!
+            if e.get_property("IsWalkable") == False and \
+                e.get_property("IsEnemy") == False:
+                margin = 1
+                #print(f"margin = 1 for {e.name}:{e.description}")
+            else:
+                margin = 0
+
+            # Try an create a random number of entities up to the max allowable...
             for count in range(emax):
+
+                # I random number less than our probability of creating this entity...
                 if random.randint(1,100) < eprob:
-                    rx,ry = room.get_random_pos()
+
+                    # Find a random spot in the room
+                    rx,ry = room.get_random_pos(margin=margin)
+
+                    # If it is unoccupied...
                     if self.get_entity_at_pos((rx,ry)) is None:
+
+                        # Place a new entity at this location
                         new_entity = EntityFactory.get_entity_by_name(ename)
                         new_entity.xy = rx,ry
                         self.entities.append(new_entity)
+
+                        # if the entity is an enemy then create an AI bot to control it
                         if new_entity.get_property("IsEnemy") == True:
                             self.generate_new_enemy(new_entity)
                             new_bot = AIBotTracker(new_entity, self)
@@ -245,19 +350,21 @@ class Floor():
         new_entity.fighter = new_fighter
         new_fighter.print()
 
-    def add_entities_to_floor(self):
+    def add_entities_to_floor(self, entities: dict):
 
         # Add the player
         if self.player is not None:
             self.add_player(self.player)
+
+
 
         entities_to_add = [("NPC",3),
                            ("Sword",5),
                            ("Axe",5),
                            ("Shield", 5),
                            ("Helmet", 5),
-                           ("Leather Boots", 15),
-                           ("Leather Armour", 15),
+                           ("Leather Boots", 5),
+                           ("Leather Armour", 5),
                            ("Key",1),
                            ("Fire Scroll",2),
                            ("Healing Scroll",2),
@@ -265,20 +372,33 @@ class Floor():
                            ("Locked Chest", 2),]
 
         # Add different stuff to random rooms across the floor
-        for ename, ecount in entities_to_add:
+        for ename, eprob, emax in entities:
+
+            # Get an entity of the named type
+            e = EntityFactory.get_entity_by_name(ename)
+
+            # If it is solid and it doesn't move...
+            # ...then avoid putting it around the edge of the room where it might block a tunnel!
+            if e.get_property("IsWalkable") == False and \
+                    e.get_property("IsEnemy") == False:
+                margin = 1
+                print(f"margin = 1 for {e.name}:{e.description}")
+            else:
+                margin = 0
 
             # Get list of all rooms on this floor but exclude the first and last rooms
             available_rooms = list(self.map_rooms.values())
             available_rooms.remove(self.first_room)
             available_rooms.remove(self.last_room)
+
             if len(available_rooms) > 0:
-                for i in range(random.randint(0,ecount-1)):
+                for i in range(random.randint(0,emax)):
 
                     # pick a random room
                     room=random.choice(available_rooms)
 
                     # Pick a random position in the room
-                    rx, ry = room.get_random_pos()
+                    rx, ry = room.get_random_pos(margin=margin)
 
                     # If there is nothing already there...
                     if self.get_entity_at_pos((rx, ry)) is None:
@@ -294,7 +414,8 @@ class Floor():
                         self.entities.append(new_entity)
 
                         # Don't use this room again
-                        available_rooms.remove(room)
+                        # Can't delete while iterating!!!!!
+                        #available_rooms.remove(room)
 
         # If we are not at the top level add stairs back up to the previous level in the centre of the first room
         if self.level > 1:
@@ -435,11 +556,15 @@ class Floor():
                       name=Event.ACTION_FAILED,
                       description=f"{attacker.description} swings at {target.description}...and misses!"))
 
-    def get_current_room(self) -> Room:
+    def get_current_room(self, xy:tuple = None) -> Room:
+
+        if xy is None:
+            xy = self.player.xy
+
         current_room = None
 
         for room in self.map_rooms.values():
-            if room.contains_point(self.player.xy) is True:
+            if room.contains_point(xy) is True:
                 current_room = room
                 break
 
@@ -495,15 +620,23 @@ class Floor():
         # Start with nothing walkable!
         self.walkable = np.zeros((self.width, self.height))
 
-        # Make floor walkable where rooms are
-        for room in self.map_rooms.values():
-            x, y, w, h = room.rect
-            self.walkable[x:x + w, y: y + h] = 1
+        # Start with no fg and bg colours specified
+        self.floor_tile_colours = np.full((self.width, self.height, 3), 0)
+
 
         # Make floor walkable where tunnels are
         for tunnel in self.map_tunnels:
             for sx, sy in tunnel.get_segments():
                 self.walkable[sx, sy] = 1
+                self.floor_tile_colours[sx,sy] = list(tunnel.bg)
+                #self.floor_tile_colours[sx,sy] = list(libtcod.red)
+                #self.floor_tile_colours[sx, sy] = [255,0,0]
+
+        # Make floor walkable where rooms are and store any colours
+        for room in self.map_rooms.values():
+            x, y, w, h = room.rect
+            self.walkable[x:x + w, y: y + h] = 1
+            self.floor_tile_colours[x:x + w, y: y + h] = list(room.bg)
 
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
@@ -524,8 +657,13 @@ class Floor():
         if radius is None:
             radius = self.fov_radius
 
+        walkable = self.walkable.copy()
+        for e in self.entities:
+            if e.get_property("IsTransparent") == False:
+                walkable[e.x,e.y] = False
+
         # Use libtcod to calculate field of view
-        self.fov_map = libtcod.map.compute_fov(self.walkable,
+        self.fov_map = libtcod.map.compute_fov(walkable,
                                                (x, y),
                                                radius,
                                                light_walls,
@@ -547,6 +685,11 @@ class Floor():
     def get_fov_cells(self):
         results = np.where(self.fov_map > 0)
         return list(zip(results[0], results[1]))
+
+    def get_fov_light_attenuation(self, ox: int, oy:int, factor:float = 1.0):
+        px, py = self.player.xy
+        return ((px-ox)**2 + (py-oy)**2) * factor/ self.fov_radius2
+
 
     def tick(self):
         # current_fov = self.get_fov_cells()
@@ -598,14 +741,87 @@ class Model():
         Description: Initialise an instance of the Model.
         :arg None
         """
-
+        GameParameters.load("game_parameters.csv")
         EntityFactory.load("entities.csv")
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
 
+        #self.load_game_parameters()
+
         self.add_player(self.generate_player(name="Keith"))
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)
+
+    def load_game_parameters(self)->dict:
+        """
+
+        :return:
+        """
+
+        # Dictionary to store Room and Floor level parameters
+        game_parameters = {"Room":{},
+                           "Floor":{}}
+
+        current_input = { "Level" : self.dungeon_level }
+
+        # Calculate floor level parameters
+        ltype = "Floor"
+
+        # Get the list of entities that are enemies
+        equipable = EntityFactory.get_entities_by_property("IsEquipable")
+        parameters = ("Rooms", "Gold", "Sword", "Axe")
+        types = ("Count", "Probability")
+
+        for param in parameters:
+            for type in types:
+                yname = f'{param} {type}'
+                # Get the name of the x input parameter that we need for y=f(x)
+                xname = GameParameters.get_parameter_input(yname)
+
+                # Calculate y value based on x value
+                yvalue = int(GameParameters.get_parameter(yname, current_input[xname]))
+
+                # Store yname and value
+                game_parameters[ltype][yname] = yvalue
+
+        #max_room_size = int(GameParameters.get_parameter("Max Room Size", num_rooms))
+
+        #Room level parameters
+        ltype = "Room"
+        # Now calculate enemy related parameters
+        # Get the list of entities that are enemies
+        enemies = EntityFactory.get_entities_by_property("IsEnemy")
+
+        # We want to calculate for each enemy the max count of each enemy per room and probability of adding one
+        parameter_types = ("Count", "Probability")
+
+        # For each type of enemy...
+        for enemy in enemies:
+
+            # For each type parameter...
+            for type in parameter_types:
+
+                # Make the name of the y parameter
+                param_name = f'{enemy.name} {type}'
+
+                # Get the name of the x input parameter that we need for y=f(x)
+                gp = GameParameters.get_parameter_input(param_name)
+
+                # Get the current value of x based on its name
+                gp_value = current_input[gp]
+
+                # Calculate y based on the current value of x
+                gp_y = int(GameParameters.get_parameter(param_name, gp_value))
+                print(f'{param_name}: input is "{gp}" = {gp_value}, output={gp_y}')
+
+                # Store the y and its value  in a dictionary of parameters
+                game_parameters[ltype][param_name] = gp_y
+
+        print(game_parameters)
+
+        #assert False
+
+        return game_parameters
 
     def print(self):
         self.current_floor.print()
@@ -767,11 +983,20 @@ class Model():
 
             self.dungeon_level += 1
 
+            num_rooms = int(GameParameters.get_parameter("Rooms Count", self.dungeon_level))
+            max_room_size = int(GameParameters.get_parameter("Max Room Size", num_rooms))
+
+            game_parameters = self.load_game_parameters()
+
             # If the new level doesn't exist yet then create it...
             if self.dungeon_level > len(self.floors):
 
                 # Create a new floor and initialise
-                self.current_floor = Floor(f'The Floor {self.dungeon_level}', 50, 50, self.dungeon_level)
+                self.current_floor = Floor(f'The Floor {self.dungeon_level}',
+                                           50, 50,
+                                           level=self.dungeon_level,
+                                           params=game_parameters)
+
                 self.current_floor.initialise(self.events)
                 self.floors.append(self.current_floor)
 

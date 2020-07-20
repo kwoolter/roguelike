@@ -4,18 +4,18 @@ This game is a rogue-like game that uses the `libtcod` library and is loosely ba
 
 ### What is a rogue-like game?
 
-https://en.wikipedia.org/wiki/Roguelike
+* https://en.wikipedia.org/wiki/Roguelike
 
 ### What is the `libtcod` library?
 
-https://github.com/libtcod/libtcod
-https://libtcod.github.io/docs/
+* https://github.com/libtcod/libtcod
+* https://libtcod.github.io/docs/
 
 ### What is the Python rogue-like tutorial? 
 
-http://rogueliketutorials.com/about/
-http://rogueliketutorials.com
-http://rogueliketutorials.com/tutorials/tcod/v2/
+* http://rogueliketutorials.com/about/
+* http://rogueliketutorials.com
+* http://rogueliketutorials.com/tutorials/tcod/v2/
 
 ### What is this game again?????
 TBC

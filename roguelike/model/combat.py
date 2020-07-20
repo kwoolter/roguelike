@@ -30,7 +30,6 @@ class CombatClass:
             print(f"Can't find property {property_name} in {self.name} list of properties")
 
 
-
 class CombatClassFactory:
     combat_classes = None
 

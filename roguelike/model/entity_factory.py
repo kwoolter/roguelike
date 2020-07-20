@@ -281,24 +281,33 @@ class EntityFactory:
 
         return e
 
+    @staticmethod
+    def get_entities_by_property(property_name: str, property_value: bool = True) -> list:
 
-if __name__ == "__main__":
-    ef = EntityFactory()
-    ef.load("entities.csv")
-    e = ef.get_entity_by_name("rubbish")
-    e = ef.get_entity_by_name("Gold")
-    print(e)
-    property_name = "IsCollectable"
-    property_value = e.get_property(property_name)
-    if property_value is True:
-        print("is true")
-    elif property_value == True:
-        print("eq True")
-    else:
-        print("False")
-    print(f'{property_name} = {e.get_property(property_name)}')
-    print(e.properties)
+        matches = []
+        df = EntityFactory.entities
 
+        if property_name in df.columns:
+
+            q = f'{property_name} == {property_value}'
+            matched = df.query(q)
+
+            for index, row in matched.iterrows():
+                name = index
+                fg = text_to_color(row["FG"])
+                bg = text_to_color(row["BG"])
+                e = Entity(name=name,
+                           description=row["Description"],
+                           char=row["Char"],
+                           fg=fg, bg=bg)
+
+                e.add_properties(row.iloc[4:].to_dict())
+
+                matches.append(e)
+        else:
+            print(f"Can't find property {property_name} in factory!")
+
+        return matches
 
 class Inventory:
     def __init__(self, max_items: int = 10):
@@ -368,8 +377,8 @@ class Inventory:
         return success
 
 
-if __name__ == "__main__":
-    EntityFactory.load("entites")
+def main():
+    EntityFactory.load("entities.csv")
 
     entities = []
 
@@ -381,3 +390,25 @@ if __name__ == "__main__":
             entities.append(new_enity)
 
     print(entities)
+
+
+    e = ef.get_entity_by_name("rubbish")
+    e = ef.get_entity_by_name("Gold")
+    print(e)
+    property_name = "IsCollectable"
+    property_value = e.get_property(property_name)
+    if property_value is True:
+        print("is true")
+    elif property_value == True:
+        print("eq True")
+    else:
+        print("False")
+    print(f'{property_name} = {e.get_property(property_name)}')
+    print(e.properties)
+
+    matches = EntityFactory.get_entities_by_property("IsEnemy")
+    print(matches)
+
+
+if __name__ == "__main__":#
+    main()
