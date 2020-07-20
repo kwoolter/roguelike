@@ -2,7 +2,8 @@ import tcod as libtcod
 import random
 from .combat import CombatClass, CombatEquipmentFactory
 
-def text_to_color(color_text :str)->libtcod.color.Color:
+
+def text_to_color(color_text: str) -> libtcod.color.Color:
     ''':param:'''
 
     try:
@@ -16,34 +17,52 @@ def text_to_color(color_text :str)->libtcod.color.Color:
 
     return c
 
-class Entity():
 
+class Entity():
+    """
+    The Entity class is for holding information about ALL items in the game.
+
+    Attributes:
+        STATE_xxxx (str):
+
+    """
     STATE_INERT = "inert"
     STATE_ALIVE = "alive"
     STATE_DEAD = "dead"
 
-    def __init__(self, name: str,
-                 description:str,
+    def __init__(self,
+                 name: str,
+                 description: str,
                  char: str,
                  x: int = 0, y: int = 0,
                  fg=libtcod.white, bg=None,
-                 state = STATE_INERT):
+                 state=STATE_INERT):
+        """
+        Create an instance of an Entity.
+
+        :param name:
+        :param description:
+        :param char: the character to be used when drawing this entity on a console
+        :param x: current x position of the Entity.  Default is 0
+        :param y: current y position of the Entity.  Default is 0
+        :param fg: foreground colour to be used when drawing entities' char.  Default white.
+        :param bg: background colour to be used when drawing entities' char.  Default None.
+        :param state:
+        """
 
         # Properties
         self.name = name
         self.description = description
         self.char = char
         self._state = state
+        self.x = x
+        self.y = y
+        self.fg = fg
+        self.bg = bg
 
         self.properties = {}
 
-        self.x = x
-        self.y = y
-        self.fg=fg
-        self.bg=bg
-
         # Components
-        self.inventory = None
         self.fighter = None
         self.combat_equipment = None
 
@@ -78,7 +97,7 @@ class Entity():
         if self.get_property("IsEnemy") is True:
             self._state = Entity.STATE_ALIVE
 
-    def get_property(self, property_name : str):
+    def get_property(self, property_name: str):
         return self.properties.get(property_name)
 
     def move(self, dx: int, dy: int):
@@ -86,21 +105,42 @@ class Entity():
         self.y += dy
 
 
-
-
 class Player(Entity):
+    """
+    Player is a class that specialises the Entity class principally by adding an inventory.
+    Items can be added or removed to the player's inventory
+
+    Attributes:
+        MAX_INVENTORY_ITEMS (int): What is the max allowable size of the player's inventory
+
+    """
     MAX_INVENTORY_ITEMS = 10
 
     def __init__(self, name: str, x: int = 0, y: int = 0):
+        """
+        Create a new instance of a Player.
+
+        :param name: the name of the new player
+        :param x: their current x position. Defaults to 0
+        :param y: their current y position Defaults to 0
+        """
+
+        # Initialise parent class
         super().__init__(name=name, description="The player", char='@', x=x, y=y)
+
+        # Components
+        # Give the player an inventory to store items in
         self.inventory = Inventory(max_items=Player.MAX_INVENTORY_ITEMS)
 
-    def equip_item(self, new_item : Entity)->bool:
+    def equip_item(self, new_item: Entity) -> bool:
+
+        assert self.fighter is not None, "Trying to equip an item when you don't have a fighter set-up"
+
         success = False
         if new_item.get_property("IsEquipable") == True:
             old_item = self.fighter.equip_item(new_item)
             self.inventory.remove_item(new_item)
-            success=True
+            success = True
             if old_item is not None:
                 success = self.inventory.add_item(old_item)
 
@@ -109,10 +149,13 @@ class Player(Entity):
 
         return success
 
-    def drop_item(self, old_item : Entity)->bool:
+    def take_item(self, new_item: Entity) -> bool:
+        return self.inventory.add_item(new_item)
+
+    def drop_item(self, old_item: Entity) -> bool:
         return self.inventory.remove_item(old_item)
 
-    def get_stat_total(self, stat_name :str)->int:
+    def get_stat_total(self, stat_name: str) -> int:
         totals = self.fighter.get_equipment_stat_totals([stat_name])
         print(totals)
         total = totals.get(stat_name)
@@ -166,7 +209,7 @@ class Fighter():
         self.equipment[new_eq.slot] = new_item
         return existing_item
 
-    def get_equipment_stat_totals(self, stat_names : list = ["AC", "Weight", "Value"]):
+    def get_equipment_stat_totals(self, stat_names: list = ["AC", "Weight", "Value"]):
         totals = {}
 
         for stat in stat_names:
@@ -179,13 +222,11 @@ class Fighter():
 
         return totals
 
-
-
     def roll_damage(self) -> int:
         dmg = CombatEquipmentFactory.get_damage_roll_by_name(self.current_weapon.name)
         return dmg
 
-    def get_XP_reward(self)->int:
+    def get_XP_reward(self) -> int:
         reward = random.randint(1, 3)
         return reward
 
@@ -197,11 +238,12 @@ class Fighter():
         for k, v in self.equipment.items():
             print(f'\t{k}={str(v)}')
 
+
 from pathlib import Path
 import pandas as pd
 
-class EntityFactory:
 
+class EntityFactory:
     entities = None
 
     def __init__(self):
@@ -217,7 +259,7 @@ class EntityFactory:
         # Read in the csv file
         EntityFactory.entities = pd.read_csv(file_to_open)
         EntityFactory.entities.set_index("Name", drop=True, inplace=True)
-        #self.entities.set_index(self.entities.columns[0], drop=True, inplace=True)
+        # self.entities.set_index(self.entities.columns[0], drop=True, inplace=True)
 
     @staticmethod
     def get_entity_by_name(name: str) -> Entity:
@@ -238,7 +280,8 @@ class EntityFactory:
             print(f"Can't find entity {name} in factory!")
 
         return e
-            
+
+
 if __name__ == "__main__":
     ef = EntityFactory()
     ef.load("entities.csv")
@@ -258,30 +301,30 @@ if __name__ == "__main__":
 
 
 class Inventory:
-    def __init__(self, max_items : int = 10):
+    def __init__(self, max_items: int = 10):
         self.max_items = max_items
         self.stackable_items = {}
         self.other_items = []
 
     @property
-    def items(self)->int:
+    def items(self) -> int:
         return len(self.other_items) + len(self.stackable_items)
 
     @property
     def full(self):
         return self.items >= self.max_items
 
-    def get_stackable_items(self)->dict:
-        items={}
+    def get_stackable_items(self) -> dict:
+        items = {}
         for item_name, count in self.stackable_items.items():
             e = EntityFactory.get_entity_by_name(item_name)
             items[e] = count
         return items
 
-    def get_other_items(self)->list:
+    def get_other_items(self) -> list:
         return list(self.other_items)
 
-    def add_item(self, new_item: Entity)->bool:
+    def add_item(self, new_item: Entity) -> bool:
 
         success = False
 

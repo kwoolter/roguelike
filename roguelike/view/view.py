@@ -699,17 +699,21 @@ class InventoryView(View):
 
             so.render(self.con, cx, y)
 
+        # Draw all of the normal items...
         for i, item in enumerate(inventory):
 
+            text=f'{item.description}'
+
+            # If this is the currently selected item...
             if i == self.selected_item:
                 bg=libtcod.red
                 fg=libtcod.black
                 self.selected_item_entity = item
+                text = f'--> {text} <--'
             else:
                 bg=libtcod.black
                 fg=libtcod.yellow
 
-            text=f'{item.description}'
             so = ScreenString(text,
                               fg=fg,
                               bg=bg,
@@ -718,17 +722,20 @@ class InventoryView(View):
             so.render(self.con, cx, y)
             y += 1
 
+        # Draw all of the stackable items...
         for i, (item, count) in enumerate(inventory_stackable.items()):
+
+            text=f'{item.description}: {count}'
 
             if i == (self.selected_item - len(inventory)):
                 bg=libtcod.red
                 fg=libtcod.black
                 self.selected_item_entity = item
+                text = f'--> {text} <--'
             else:
                 bg=libtcod.black
                 fg=libtcod.yellow
 
-            text=f'{item.description}: {count}'
             # Print the panel text
             so = ScreenString(text,
                               fg=fg,

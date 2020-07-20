@@ -5,9 +5,9 @@ import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
 
-from .entity_factory import Entity, Player, EntityFactory, Fighter
-from .combat import *
-from .events import Event
+from . entity_factory import Entity, Player, EntityFactory, Fighter
+from . combat import *
+from . events import Event
 
 class EventQueue():
     def __init__(self):
@@ -272,7 +272,7 @@ class Floor():
             available_rooms.remove(self.first_room)
             available_rooms.remove(self.last_room)
             if len(available_rooms) > 0:
-                for i in range(random.randint(0,ecount)):
+                for i in range(random.randint(0,ecount-1)):
 
                     # pick a random room
                     room=random.choice(available_rooms)
@@ -567,6 +567,10 @@ class Floor():
 
 
 class Model():
+    """
+    Description:
+    The class contains the model for the WHOLE game.
+    """
 
     GAME_STATE_PAUSED = "paused"
     GAME_STATE_PLAYING = "playing"
@@ -574,7 +578,9 @@ class Model():
     GAME_STATE_GAME_OVER = "game over"
 
     def __init__(self, name: str):
-        # Properties of the game
+        """:arg name the name that you want to give to this game
+        """
+
         self.name = name
         self.dungeon_level = 0
         self.state = None
@@ -588,18 +594,16 @@ class Model():
         self.events = EventQueue()
 
     def initialise(self):
+        """
+        Description: Initialise an instance of the Model.
+        :arg None
+        """
 
         EntityFactory.load("entities.csv")
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
 
-        cc = CombatClassFactory.get_combat_class_by_name("Warrior")
-        eq = EntityFactory.get_entity_by_name("Dagger")
-        new_player = Player(name="Keith")
-        new_player.fighter = Fighter(combat_class=cc)
-        new_player.fighter.equip_item(eq)
-
-        self.add_player(new_player)
+        self.add_player(self.generate_player(name="Keith"))
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)
 
@@ -611,6 +615,11 @@ class Model():
             self.current_floor.tick()
 
     def set_state(self, new_state):
+        """
+        Change the stats of the model to a new state but store what the old state was
+        :rtype: object
+        :arg new_state the new state that you want so set the model to
+        """
         if new_state != self.state:
             self._old_state = self.state
             self.state = new_state
@@ -619,10 +628,46 @@ class Model():
         self.set_state(new_mode)
 
     def get_next_event(self)->Event:
+        """
+        Get the next event in the Model's event queue.
+
+        :return:The next event in the event queue
+
+        """
         next_event = None
         if self.events.size() > 0:
             next_event = self.events.pop_event()
         return next_event
+
+    def generate_player(self, name:str)->Player:
+        """
+        Create an instance of a Player with the specified name, give them a combat class
+        and give them some basic equipment.
+
+        :param name: The name that you want to give to the new player
+        :return: The newly created Player object
+        """
+
+        # Create a new player
+        new_player = Player(name=name)
+
+        # Assign them a combat class
+        cc = CombatClassFactory.get_combat_class_by_name("Warrior")
+        new_player.fighter = Fighter(combat_class=cc)
+
+        # Give the player some basic equipment
+        basic_equipment = ("Dagger", "Robe", "Sandals")
+        for item in basic_equipment:
+            eq = EntityFactory.get_entity_by_name(item)
+            new_player.fighter.equip_item(eq)
+
+        # Give the player some basic items
+        basic_items = ("Food", "Food")
+        for item in basic_items:
+            eq = EntityFactory.get_entity_by_name(item)
+            new_player.take_item(eq)
+
+        return new_player
 
     def add_player(self, new_player: Player):
         self.player = new_player
@@ -649,7 +694,7 @@ class Model():
         # If there is an entity that you can pick-up then process it
         elif e.get_property("IsCollectable") == True:
 
-            success = self.player.inventory.add_item(e)
+            success = self.player.take_item(e)
 
             # If we manage to pick up an item then remove it from the floor
             if success is True:

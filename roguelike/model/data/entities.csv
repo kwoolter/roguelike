@@ -23,5 +23,8 @@ Helmet,a metal helmet,^,black,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Hands,bare hands,@,pink,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Spear,a wooden spear,I,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Leather Armour,a leather tunic,#,orange,dark_red,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Leather Boots,some old leather boots,b,dark_red,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Leather Boots,a pair of old leather boots,b,dark_red,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Bronze Ring,a plain bronze ring,o,gold,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Robe,a ragged cloth robe,#,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Sandals,a pair of leather sandals,b,white,,4,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Food,a simple meal,O,red,white,4,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
