@@ -16,7 +16,7 @@ Fire Scroll,a magic fireball scroll,~,orange,red,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALS
 Healing Scroll,a magic healing scroll,+,red,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Trap,a hidden trap,*,yellow,red,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
 Chest,a wooden chest,C,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
-Spider,a large spider,*,red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Spider,a large spider,*,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Locked Chest,a locked wooden chest,X,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
 Shield,a small leather shield,O,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Helmet,a metal helmet,^,black,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
@@ -24,8 +24,12 @@ Hands,bare hands,@,pink,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Spear,a wooden spear,I,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Leather Armour,a leather tunic,#,orange,dark_red,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Leather Boots,a pair of old leather boots,b,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Bronze Ring,a plain bronze ring,o,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Robe,a ragged cloth robe,#,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Sandals,a pair of leather sandals,b,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Bronze Ring,a plain bronze ring,o,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Gold Ring,a gold ring,o,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Robe,a ragged cloth robe,#,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Sandals,a pair of leather sandals,b,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Food,a simple meal,O,red,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Pillar,a stone pillar,+,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+War Hammer,a mighty War Hammer,t,black,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Goblin,an evil Goblin,g,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Room,a room,O,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE

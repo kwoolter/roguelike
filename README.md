@@ -43,14 +43,15 @@ TBC
 # Useful Links
 
 ## Documentation
-https://libtcod.github.io/docs/index2.html?c=false&cpp=false&cs=false&py=true&lua=false
+* https://libtcod.github.io/docs/index2.html?c=false&cpp=false&cs=false&py=true&lua=false
 
 ## Tutorial on writing a game using libtcod
-http://rogueliketutorials.com/tutorials/tcod/
+* http://rogueliketutorials.com/tutorials/tcod/
 
 ## Fonts that you can load into libtcod
-https://docs.rs/crate/tcod/0.10.0/source/fonts/README.txt
-https://www.gridsagegames.com/rexpaint/resources.html#Fonts
+* https://docs.rs/crate/tcod/0.10.0/source/fonts/README.txt
+* https://www.gridsagegames.com/rexpaint/resources.html#Fonts
 
 ## Libtcod pre-defined colours
-https://i.imgur.com/taWlWoW.png
+* https://libtcod.github.io/docs/html2/color.html?c=false&cpp=false&cs=false&py=true&lua=false
+* https://i.imgur.com/taWlWoW.png

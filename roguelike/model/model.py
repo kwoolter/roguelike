@@ -130,9 +130,14 @@ class Room:
 
 class Floor():
 
-    ROOM_COLOURS =  ["lightest_grey", "grey", "darker_grey", "darkest_grey"]
-
-    ROOM_COLOURS = ["darker_yellow","darkest_amber", "desaturated_orange",  "desaturated_flame"]
+    ROOM_COLOURS = ["darker_yellow",
+                    "desaturated_amber",
+                    "desaturated_orange",
+                    "desaturated_flame",
+                    "desaturated_lime",
+                    "desaturated_chartreuse",
+                    "grey",
+                    "sepia_light"]
 
     def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
 
@@ -146,7 +151,7 @@ class Floor():
         # Floor generation parameters
         self.room_parameters = params["Room"]
         self.floor_parameters = params["Floor"]
-        self.room_count = self.floor_parameters["Rooms Count"]
+        self.room_count = self.floor_parameters["Room"]["Count"]
         self.room_min_size = 4
         self.room_size_haircut = 0.75
         self.room_max_size = int(max(math.sqrt(self.width * self.height / self.room_count) * self.room_size_haircut, self.room_min_size))
@@ -194,40 +199,49 @@ class Floor():
         #             ("Troll", 25, 1),
         #             ("Pillar", 30, int(s / 10)))
 
-        room_entities = []
-        enames = ["Orc", "Spider", "Troll"]
+        # Template that contains the list of entities that we want to add to each Room
+        room_entities_template = []
+        enames = self.room_parameters.keys()
         for ename in enames:
-            emax = self.room_parameters[f'{ename} Count']
-            eprob = self.room_parameters[f'{ename} Probability']
-            room_entities.append((ename,eprob,emax))
+            emax = self.room_parameters[ename]['Count']
+            eprob = self.room_parameters[ename]['Probability']
+            room_entities_template.append((ename,eprob,emax))
 
+        print("*"*20)
+        print(room_entities_template)
+
+        # Template that contains the list of entities that we want to add to the Floor
         floor_entities = []
-        enames = ["Gold", "Sword", "Axe"]
+        enames = self.floor_parameters.keys()
         for ename in enames:
-            emax = self.floor_parameters[f'{ename} Count']
-            eprob = self.floor_parameters[f'{ename} Probability']
+            emax = self.floor_parameters[ename]['Count']
+            eprob = self.floor_parameters[ename]['Probability']
             floor_entities.append((ename,eprob,emax))
+        print("*"*20)
+        print(floor_entities)
+
 
         last_room = None
         self.first_room = None
 
+        # List of floor tile colours that can be randomly assigned to a Room
         valid_room_colours = []
         for c in Floor.ROOM_COLOURS:
             lc = text_to_color(c)
             if lc is not None:
                 valid_room_colours.append(lc)
 
-        valid_room_colours = []
-        for i in range(100,150,10):
-            valid_room_colours.append(libtcod.Color(i,i,0))
+        # List of floor tile colours that can be randomly assigned to a Tunnel
+        valid_tunnel_colours = []
+        for i in range(130,180,10):
+            valid_tunnel_colours.append(libtcod.Color(i,i,0))
 
         print(valid_room_colours)
 
         for i in range(self.room_count):
 
+            # Create a new room of random size and tile colour
             random_colour = random.choice(valid_room_colours)
-
-            # Create a new room of random size
             new_room = Room(name=f'Room{i}',
                             w=random.randint(self.room_min_size, self.room_max_size),
                             h=random.randint(self.room_min_size, self.room_max_size),
@@ -238,14 +252,22 @@ class Floor():
 
                 # if this is not the first room then...
                 if last_room is not None:
-                    # Add some random entities to the room
+
+                    # Calculate the area of this room
+                    s = new_room.width * new_room.height
+
+                    # Add some random entities to the room using a template or count and probability
+                    room_entities = room_entities_template.copy()
+                    room_entities.append(("Pillar", 10, int(s / 10)))
                     self.add_entities_to_room(new_room, entities=room_entities)
 
-                    # Create a tunnel to the previous room
+                    # Create a tunnel connecting back to the previous room
+                    random_tunnel_colour = random.choice(valid_tunnel_colours)
                     new_tunnel = Tunnel(start_pos=last_room.center,
                                         end_pos=new_room.center,
-                                        bg=random_colour)
+                                        bg=random_tunnel_colour)
                     self.map_tunnels.append(new_tunnel)
+
                 else:
                     self.first_room = new_room
 
@@ -348,7 +370,7 @@ class Floor():
         new_fighter = Fighter(combat_class=cc)
         new_fighter.equip_item(eq)
         new_entity.fighter = new_fighter
-        new_fighter.print()
+        #new_fighter.print()
 
     def add_entities_to_floor(self, entities: dict):
 
@@ -438,10 +460,18 @@ class Floor():
             self.remove_entity(e)
         self.entities.append(new_entity)
 
-    def move_player(self, dx, dy):
-        # If the destination is a valid path...
-        if self.move_entity(self.player, dx, dy) is True:
+    def move_player(self, dx, dy)->bool:
+        """
+        Attempt to move the Player on the Floor
+        :param dx: change in x position
+        :param dy: change in y position
+        :return: True if the Player actually moved otherwise False
+        """
+        # If the player moved...
+        moved = self.move_entity(self.player, dx, dy)
+        if moved is True:
 
+            # Recalculate their current FOV
             self.recompute_fov()
 
             # See if we found something?
@@ -461,45 +491,67 @@ class Floor():
                           name=Event.ACTION_SUCCEEDED,
                           description=f"You moved to {room_name}."))
 
-        # Else raise an event
+        # Else see why we couldn't move..
         else:
 
             # See if an entity blocked our way?
             e = self.get_entity_at_pos((self.player.x + dx, self.player.y + dy))
             if e is not None:
-                print(e)
-                print(e.properties)
+
+                # If it is an enemy then attack it
                 if e.get_property("IsEnemy"):
                     self.attack_entity(self.player, e)
+
+                # Else raise event about what entity is blocking you
                 else:
                     self.events.add_event(
                         Event(type=Event.GAME,
                               name=Event.ACTION_FAILED,
                               description=f"{e.description} blocks your way!"))
+
+            # Otherwise the way is block for another reason
             else:
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_FAILED,
                           description=f"That way is blocked!"))
 
-    def move_entity(self, entity: Entity, dx: int, dy: int) -> bool:
+        return moved
 
+    def move_entity(self, entity: Entity, dx: int, dy: int) -> bool:
+        """
+        Attempt to move a specified Entity across the Floor
+        :param entity: the Entity object that you want to move
+        :param dx: the change in x position
+        :param dy: the change in y position
+        :return: True if we succeeded in moving teh Entity otherwise Falee
+        """
         success = True
         # If the destination is a valid path on the map...
         if self.walkable[entity.x + dx, entity.y + dy] > 0:
+
             # And no solid entity is blocking the way...
             e = self.get_entity_at_pos((entity.x + dx, entity.y+dy))
             if e is None or e.get_property("IsWalkable") == True:
                 # Move the specified entity
                 entity.move(dx, dy)
+
+            # Something is blocking the way so fail
             else:
                 success = False
+
+        # Otherwise we can't walk to the new destination so fail
         else:
             success = False
 
         return success
 
     def get_entity_at_pos(self, pos : tuple)->Entity:
+        """
+        See if there is an Entity object occupying a specified xy position on the Floor
+        :param pos: the xy position that you want to check
+        :return: the Entity at the specified position if one was found otherwise None
+        """
         for e in self.entities:
             if e.xy == pos:
                 return e
@@ -557,12 +609,19 @@ class Floor():
                       description=f"{attacker.description} swings at {target.description}...and misses!"))
 
     def get_current_room(self, xy:tuple = None) -> Room:
+        """
+        See if a specified point on the Floor map is within a room
+        :param xy: the point that you want to check. Default is the player's current position
+        :return: the Room object that you are in or None if you are not in a Room
+        """
 
+        # If you didn't specify an xy position then use the player's current position
         if xy is None:
             xy = self.player.xy
 
         current_room = None
 
+        # Loop through the rooms to see if teh specified point is an a room
         for room in self.map_rooms.values():
             if room.contains_point(xy) is True:
                 current_room = room
@@ -571,18 +630,24 @@ class Floor():
         return current_room
 
     def add_map_room(self, new_room: Room) -> bool:
-        """:param"""
+        """
+        Attemple to add a new room to the Floor map
+        :param new_room: the new Room that you want to add
+        :return: True if successfully added
+        """
 
+        # How many times do we attempt to add the room before giving up?
         attempts = 10
-        overlap = True
 
-        # Shrink floor rect to allow for border
+        # Shrink available floor rect so that rooms don't get placed right on the edge of the map
         floor_rect = self.rect.inflate(-2, -2)
 
         # Try a specified number of times to find a random space for the new room
+        overlap = True
+
         while overlap is True and attempts > 0:
 
-            # Generate random centre
+            # Generate random centre for the new room
             cx = random.randint(floor_rect.left, floor_rect.right)
             cy = random.randint(floor_rect.top, floor_rect.bottom)
             new_room.rect.center = (cx, cy)
@@ -590,8 +655,9 @@ class Floor():
             # If the random room location fits within the floor boundaries...
             if floor_rect.contains(new_room.rect):
                 overlap = False
-                # Check to see if we arenot touching an existing room...
+                # Check to see if we are not touching an existing room...
                 for room in self.map_rooms.values():
+                    # If we touched an existing room then try again!
                     if new_room.is_touching(room):
                         overlap = True
                         break
@@ -623,16 +689,13 @@ class Floor():
         # Start with no fg and bg colours specified
         self.floor_tile_colours = np.full((self.width, self.height, 3), 0)
 
-
-        # Make floor walkable where tunnels are
+        # Make floor walkable where tunnels are and store the floor tile colour
         for tunnel in self.map_tunnels:
             for sx, sy in tunnel.get_segments():
                 self.walkable[sx, sy] = 1
                 self.floor_tile_colours[sx,sy] = list(tunnel.bg)
-                #self.floor_tile_colours[sx,sy] = list(libtcod.red)
-                #self.floor_tile_colours[sx, sy] = [255,0,0]
 
-        # Make floor walkable where rooms are and store any colours
+        # Make floor walkable where rooms are and store any floor tile colours
         for room in self.map_rooms.values():
             x, y, w, h = room.rect
             self.walkable[x:x + w, y: y + h] = 1
@@ -641,6 +704,7 @@ class Floor():
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
 
+        # Show where the final room of the floor is (CHEAT)
         # x, y, w, h = self.last_room.rect
         # self.explored[x:x + w, y: y + h] = 1
 
@@ -692,10 +756,7 @@ class Floor():
 
 
     def tick(self):
-        # current_fov = self.get_fov_cells()
-        # for entity in self.entities:
-        #     if entity.xy in current_fov and entity.get_property("IsEnemy") == True:
-        #         print(f'Tick {entity.name}')
+
         dead_bots = []
 
         for bot in self.bots:
@@ -758,66 +819,34 @@ class Model():
         :return:
         """
 
-        # Dictionary to store Room and Floor level parameters
+        # Dictionary to store teh calculated Room and Floor level parameters
         game_parameters = {"Room":{},
                            "Floor":{}}
 
+        # Cuurent inputs required for the calculations
         current_input = { "Level" : self.dungeon_level }
 
-        # Calculate floor level parameters
-        ltype = "Floor"
+        #For each of the Room and Floor level parameters
+        for scope in game_parameters.keys():
 
-        # Get the list of entities that are enemies
-        equipable = EntityFactory.get_entities_by_property("IsEquipable")
-        parameters = ("Rooms", "Gold", "Sword", "Axe")
-        types = ("Count", "Probability")
+            # Get the list of parameters that we need to calculate
+            scope_parameters = list(GameParameters.get_parameters_by_scope(scope))
 
-        for param in parameters:
-            for type in types:
-                yname = f'{param} {type}'
+            # For each parameter...
+            for yname, ymetric in scope_parameters:
+
                 # Get the name of the x input parameter that we need for y=f(x)
-                xname = GameParameters.get_parameter_input(yname)
+                xname = GameParameters.get_parameter_input(yname, ymetric)
 
                 # Calculate y value based on x value
-                yvalue = int(GameParameters.get_parameter(yname, current_input[xname]))
+                yvalue = int(GameParameters.get_parameter(yname, ymetric, current_input[xname]))
 
-                # Store yname and value
-                game_parameters[ltype][yname] = yvalue
+                # Store yname, ymetric and yvalue in our results dictionary
+                if yname not in game_parameters[scope].keys():
+                    game_parameters[scope][yname]={}
+                game_parameters[scope][yname][ymetric] = yvalue
 
-        #max_room_size = int(GameParameters.get_parameter("Max Room Size", num_rooms))
-
-        #Room level parameters
-        ltype = "Room"
-        # Now calculate enemy related parameters
-        # Get the list of entities that are enemies
-        enemies = EntityFactory.get_entities_by_property("IsEnemy")
-
-        # We want to calculate for each enemy the max count of each enemy per room and probability of adding one
-        parameter_types = ("Count", "Probability")
-
-        # For each type of enemy...
-        for enemy in enemies:
-
-            # For each type parameter...
-            for type in parameter_types:
-
-                # Make the name of the y parameter
-                param_name = f'{enemy.name} {type}'
-
-                # Get the name of the x input parameter that we need for y=f(x)
-                gp = GameParameters.get_parameter_input(param_name)
-
-                # Get the current value of x based on its name
-                gp_value = current_input[gp]
-
-                # Calculate y based on the current value of x
-                gp_y = int(GameParameters.get_parameter(param_name, gp_value))
-                print(f'{param_name}: input is "{gp}" = {gp_value}, output={gp_y}')
-
-                # Store the y and its value  in a dictionary of parameters
-                game_parameters[ltype][param_name] = gp_y
-
-        print(game_parameters)
+            print(game_parameters)
 
         #assert False
 
@@ -982,9 +1011,6 @@ class Model():
     def next_floor(self):
 
             self.dungeon_level += 1
-
-            num_rooms = int(GameParameters.get_parameter("Rooms Count", self.dungeon_level))
-            max_room_size = int(GameParameters.get_parameter("Max Room Size", num_rooms))
 
             game_parameters = self.load_game_parameters()
 
