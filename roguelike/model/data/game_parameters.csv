@@ -1,14 +1,14 @@
 Entity,Metric,Scope,x,a,b,d,ad,min,max
 Room,Count,Floor,Level,0.25,5,8,2,6,20
-Room,Probability,Floor,Level,0,100,1,0,100,100
+Room,Probability,Floor,Level,0,0,1,0,0,0
 Orc,Count,Room,Level,0.25,1,10,0.25,0,4
 Orc,Probability,Room,Level,2,40,1,-3,0,50
-Troll,Count,Room,Level,1,0,5,1,0,6
+Troll,Count,Room,Level,0.2,-1,10,0.25,0,5
 Troll,Probability,Room,Level,2,-10,3,3,0,40
 Spider,Count,Room,Level,0.2,2,10,-0.5,0,4
 Spider,Probability,Room,Level,2,40,1,-3,0,50
-Gold,Count,Floor,Level,0.15,1,10,1,0,5
-Gold,Probability,Floor,Level,1,5,10,3,0,45
+Gold,Count,Floor,Level,0.15,1,10,0.25,0,6
+Gold,Probability,Floor,Level,1,5,10,2,10,45
 Sword,Count,Floor,Level,0.15,1,10,1,0,5
 Sword,Probability,Floor,Level,1,5,10,3,0,45
 Axe,Count,Floor,Level,0.15,0,10,0,0,3
@@ -19,3 +19,4 @@ Healing Scroll,Count,Floor,Level,0.2,1,10,0.1,2,7
 Healing Scroll,Probability,Floor,Level,2,0,10,3,15,40
 Helmet,Count,Floor,Level,0.1,1,10,0,0,3
 Helmet,Probability,Floor,Level,2,0,10,3,15,40
+Player,Level,Game,XP,0.1,1,10,-0.2,1,100

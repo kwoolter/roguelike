@@ -5,3 +5,5 @@ from . model import EventQueue
 from . entity_factory import Entity
 from . entity_factory import EntityFactory
 from . events import Event
+from . combat import CombatEquipment
+from . combat import CombatEquipmentFactory

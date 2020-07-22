@@ -76,7 +76,7 @@ class Controller():
             key = libtcod.console_wait_for_keypress(True)
             action = self.handle_keys(key)
 
-            print(f'Game Mode={self.mode}; last mode={self.last_mode}')
+            #print(f'Game Mode={self.mode}; last mode={self.last_mode}')
 
             # Common actions
             exit = action.get('exit')
@@ -121,6 +121,13 @@ class Controller():
                     self.set_mode(Controller.GAME_MODE_PLAYING)
                 elif exit:
                     return True
+
+            # If we are in INVENTORY mode
+            elif self.mode == Controller.GAME_MODE_CHARACTER:
+                level_up = action.get('level-up')
+
+                if level_up:
+                    self.model.player.level_up()
 
             # If we are in INVENTORY mode
             elif self.mode == Controller.GAME_MODE_INVENTORY:
@@ -250,10 +257,10 @@ class Controller():
         return {}
 
     def handle_character_view_keys(self, key):
-        index = key.c - ord('a')
+        key_char = chr(key.c)
 
-        if index >= 0:
-            return {'inventory_index': index}
+        if key_char == 'l':
+            return {'level-up': True}
 
         if key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
