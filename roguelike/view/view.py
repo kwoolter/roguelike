@@ -416,6 +416,7 @@ class MessagePanel(View):
 class InventoryView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
+    STATUS_PANEL_HEIGHT = 4
 
     def __init__(self, width: int, height: int,
                  fg=libtcod.white, bg=libtcod.black,
@@ -663,7 +664,7 @@ class InventoryView(View):
                 so.render(self.con, 1, y)
 
         # Print any event messages that we have received
-        y = self.height - 4
+        y = self.height - InventoryView.STATUS_PANEL_HEIGHT - 1
 
         # Draw a divider
         divider.render(self.con, 0, y)
@@ -677,12 +678,12 @@ class InventoryView(View):
 
             so = ScreenStringRect(message_text,
                                   width=self.width - 2,
-                                  height=2,
+                                  height=InventoryView.STATUS_PANEL_HEIGHT,
                                   fg=fg,
                                   bg=self.bg,
                                   alignment=libtcod.CENTER)
 
-            so.render(self.con, int(self.width / 2), self.height - 3)
+            so.render(self.con, int(self.width / 2), self.height - InventoryView.STATUS_PANEL_HEIGHT)
 
 
 class CharacterView(View):

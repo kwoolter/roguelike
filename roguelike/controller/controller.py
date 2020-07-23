@@ -122,7 +122,7 @@ class Controller():
                 elif exit:
                     return True
 
-            # If we are in INVENTORY mode
+            # If we are in CHARACTER mode
             elif self.mode == Controller.GAME_MODE_CHARACTER:
                 level_up = action.get('level-up')
 

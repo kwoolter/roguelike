@@ -467,7 +467,7 @@ class Floor():
             self.remove_entity(e)
         self.entities.append(new_entity)
 
-    def move_player(self, dx, dy)->bool:
+    def move_player(self, dx, dy, relative:bool =True)->bool:
         """
         Attempt to move the Player on the Floor
         :param dx: change in x position
@@ -475,7 +475,7 @@ class Floor():
         :return: True if the Player actually moved otherwise False
         """
         # If the player moved...
-        moved = self.move_entity(self.player, dx, dy)
+        moved = self.move_entity(self.player, dx, dy, relative)
         if moved is True:
 
             # Recalculate their current FOV
@@ -525,7 +525,7 @@ class Floor():
 
         return moved
 
-    def move_entity(self, entity: Entity, dx: int, dy: int) -> bool:
+    def move_entity(self, entity: Entity, dx: int, dy: int, relative:bool = True) -> bool:
         """
         Attempt to move a specified Entity across the Floor
         :param entity: the Entity object that you want to move
@@ -534,6 +534,10 @@ class Floor():
         :return: True if we succeeded in moving teh Entity otherwise Falee
         """
         success = True
+
+        if relative is False:
+            entity.xy = [0,0]
+
         # If the destination is a valid path on the map...
         if self.walkable[entity.x + dx, entity.y + dy] > 0:
 
@@ -750,9 +754,11 @@ class Floor():
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
 
+    def reveal_exit(self):
+
         # Show where the final room of the floor is (CHEAT)
-        # x, y, w, h = self.last_room.rect
-        # self.explored[x:x + w, y: y + h] = 1
+        x, y, w, h = self.last_room.rect
+        self.explored[x:x + w, y: y + h] = 1
 
 
     def recompute_fov(self, x=None, y=None, radius=None, light_walls=True, algorithm=0):
@@ -1141,17 +1147,76 @@ class Model():
         success = False
 
         if new_item.get_property("IsInteractable") == True:
-            success = self.player.drop_item(new_item)
+
+            use = ItemUser(new_item, self.current_floor)
+            success, effect = use.process()
+
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
-                                            description=f"You use {new_item.description}"))
+                                            description=f"You use {new_item.description}: {effect}"))
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"{effect}"))
+
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"You can't use {new_item.description}"))
-        return success
 
+        return success is not None
+
+
+
+class ItemUser():
+    def __init__(self, item : Entity, floor: Floor):
+        self.item = item
+        self.floor = floor
+        self.player = self.floor.player
+        self.item_at_tile = self.floor.get_entity_at_pos(self.player.xy)
+
+    def process(self) -> bool:
+        success = True
+        drop = True
+        effect = None
+        HP_increase = {"Food":10, "Small Green Potion":15, "Healing Scroll":20}
+        item_swap = {"Key":{"Locked Chest":("Gold", "Food", "Small Green Potion", "Helmet")}}
+
+        if self.item.name in HP_increase:
+            self.player.heal(HP_increase[self.item.name])
+            effect = "You regain some HP"
+
+        elif self.item.name == "Scroll of Secrets":
+            self.floor.reveal_exit()
+            effect = "You learn where the exit to the next floor is"
+
+        elif self.item.name == "Scroll of Teleportation":
+            self.floor.move_player(self.floor.last_room.centerx,
+                                   self.floor.last_room.centery,
+                                   relative=False)
+            effect = "You are teleported to the exit to the next floor"
+
+        elif self.item.name in item_swap:
+            swaps = item_swap[self.item.name]
+            if self.item_at_tile is not None and self.item_at_tile.name in swaps:
+                new_entity = EntityFactory.get_entity_by_name(random.choice(swaps[self.item_at_tile.name]))
+                self.floor.swap_entity(self.item_at_tile, new_entity)
+                effect = f'You use {self.item.description}' \
+                         f' on {self.item_at_tile.description}' \
+                         f' and reveal {new_entity.description}'
+            else:
+                success=False
+                effect=f"Can't use {self.item.description} right now"
+        else:
+            success = False
+            effect = "Nothing happens"
+
+        # If we succssfully used the item then remove it from Player's Inventory
+        if success is True and drop is True:
+            success = self.player.drop_item(self.item)
+
+        return success, effect
 
 import math
 

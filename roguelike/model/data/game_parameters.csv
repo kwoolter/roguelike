@@ -20,3 +20,13 @@ Healing Scroll,Probability,Floor,Level,2,0,10,3,15,40
 Helmet,Count,Floor,Level,0.1,1,10,0,0,3
 Helmet,Probability,Floor,Level,2,0,10,3,15,40
 Player,Level,Game,XP,0.1,1,10,-0.2,1,100
+Scroll of Secrets,Count,Floor,Level,0.2,1,10,0.1,2,2
+Scroll of Secrets,Probability,Floor,Level,1,0,1,0,100,100
+Scroll of Teleportation,Count,Floor,Level,0.2,1,10,0.1,2,2
+Scroll of Teleportation,Probability,Floor,Level,1,0,1,0,100,100
+Small Green Potion,Count,Floor,Level,0.2,1,10,0.1,2,2
+Small Green Potion,Probability,Floor,Level,1,0,1,0,100,100
+Key,Count,Floor,Level,0.2,1,10,0.1,2,2
+Key,Probability,Floor,Level,1,0,1,0,100,100
+Locked Chest,Count,Floor,Level,0.2,1,10,0.1,2,2
+Locked Chest,Probability,Floor,Level,1,0,1,0,100,100

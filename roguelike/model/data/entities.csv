@@ -33,3 +33,6 @@ Pillar,a stone pillar,+,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,FALSE,FA
 War Hammer,a mighty War Hammer,t,black,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Goblin,an evil Goblin,g,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Room,a room,O,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+Scroll of Secrets,a mysterious scroll,~,white,blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Scroll of Teleportation,a green scroll,~,white,green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Green Potion,a small bottle of green potion,p,dark_green,,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
