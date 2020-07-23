@@ -191,17 +191,30 @@ class Floor():
 
 
     def initialise(self, events: EventQueue):
+        """
+        Initialise the whole Floor object by:-
+        - creating some random rooms on the Floor
+        - joining the rooms together by tunnels
+        - adding random entities to the rooms
+        - adding random entities to the whole floor
+        - building a map of the floor tile properties
+
+        :param events: the event queue that the Floor object can use to report game events
+        """
 
         self.events = events
 
+        # Lists for storing rooms and tunnels that we want to add to the Floor
         self.map_rooms = []
         self.map_tunnels = []
+
+        # Arrays to hold properties of each tile on the Floor
         self.walkable = None
         self.explored = None
         self.fov_map = None
         self.floor_tile_colours = None
 
-        # Template that contains the list of entities that we want to add to each Room
+        # Build template that contains the list of entities that we want to add to each Room
         room_entities_template = []
         enames = self.room_parameters.keys()
         for ename in enames:
@@ -212,7 +225,7 @@ class Floor():
         print("*"*40)
         print(room_entities_template)
 
-        # Template that contains the list of entities that we want to add to the Floor
+        # Build template that contains the list of entities that we want to add to the Floor
         floor_entities = []
         enames = self.floor_parameters.keys()
         for ename in enames:
@@ -238,8 +251,10 @@ class Floor():
 
         print(valid_room_colours)
 
+        # Define initial values for teh first and last room
         self.last_room = None
         self.first_room = None
+
 
         for i in range(self.room_count):
 
@@ -274,13 +289,16 @@ class Floor():
             else:
                 print('\t**Couldnt add room so skipping an moving on')
 
+        # redefine first and last rooms
         self.last_room = self.map_rooms[-1]
         self.first_room = self.map_rooms[0]
         self.last_room.name = "Exit to next floor"
         self.first_room.name = "The Entrance"
 
+        # Add random entities to the whole floor
         self.add_entities_to_floor(entities = floor_entities)
 
+        # Build a map of the floor
         self.build_floor_map()
 
 
@@ -309,6 +327,11 @@ class Floor():
             print(bot)
 
     def add_entities_to_room(self, room : Room, entities):
+        """
+        Using a specified template add some random entities to a specified Room object
+        :param room: the Room object that you want to add entities to
+        :param entities: a list of tuples that each specifies entity name, entity probability and max entity count
+        """
 
         # loop through the entities that we are randomly deploying
         for ename, eprob, emax in entities:
@@ -362,6 +385,7 @@ class Floor():
 
         new_fighter = Fighter(combat_class=cc)
         new_fighter.equip_item(eq)
+        new_fighter.level_up()
         new_entity.fighter = new_fighter
         #new_fighter.print()
 
@@ -558,14 +582,33 @@ class Floor():
             print(f"Couldn't find {old_entity.name} on this floor!")
 
     def attack_entity(self, attacker : Entity, target : Entity):
+        """
+        Process an attacker performing an attack on a target.  The process is:-
+        - Did the attack succeed?
+        - If it did what damage did it inflict?
+        - Did the attack kill the target Entity?
 
+        :param attacker: the Entity that is attacking
+        :param target: The Entity that is the target of the attack
+        """
         self.events.add_event(
             Event(type=Event.GAME,
                   name=Event.ACTION_ATTACK,
                   description=f"{attacker.description} attacks {target.description}"))
 
-        if random.randint(1,10) > 5:
+        # Roll a 20 sided dice and add to attack power
+        attack = attacker.fighter.get_attack() + random.randint(1,20)
 
+        target_armour_class = target.fighter.get_stat_total("AC")
+        target_level = target.fighter.get_property("Level")
+        defence = 10 + target_armour_class + math.floor(target_level/2)
+
+        print(f'{attacker.name} ATK={attack} vs {target.name} AC={defence}')
+
+        # Did the attack succeed...?
+        if attack > defence:
+
+            # Roll some damage based on the attackers fighting abilties and deduct damage from target's HP
             dmg = attacker.fighter.roll_damage()
             target.fighter.take_damage(dmg)
 
@@ -574,17 +617,25 @@ class Floor():
                       name=Event.ACTION_SUCCEEDED,
                       description=f"{attacker.description}'s {attacker.fighter.current_weapon.description} deals {dmg} damage"))
 
+            # If the target died...
             if target.fighter.is_dead:
                 target.state = Entity.STATE_DEAD
+
+                # Update attacker stats
                 attacker.fighter.add_kills()
                 XP = target.fighter.get_XP_reward()
                 attacker.fighter.add_XP(XP)
+
+                # Swap the target on the floor to a corpse
                 corpse = EntityFactory.get_entity_by_name("Corpse")
                 self.swap_entity(target, corpse)
+
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
                           description=f"{attacker.description} kills {target.description} and gains {XP} XP"))
+
+        # The attack failed...
         else:
             self.events.add_event(
                 Event(type=Event.GAME,
@@ -666,7 +717,12 @@ class Floor():
                 print(f'room {room1.name} vs. room {room2.name}touching={x}')
 
     def build_floor_map(self):
-
+        """
+        Build arrays the represent different properties of each floor til in the Floor.  The arrays are:-
+        - walkable - can you walk on a tile?
+        - explored - have you seen this tile yet?
+        - floor_tile_colours - the colour of each floor tile
+        """
         assert self.first_room in self.map_rooms
         assert self.last_room in self.map_rooms
 
@@ -903,6 +959,8 @@ class Model():
         for item in basic_items:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
+            
+        new_player.level_up()
 
         return new_player
 

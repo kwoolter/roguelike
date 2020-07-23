@@ -1,4 +1,5 @@
 import tcod as libtcod
+import math
 import random
 from .combat import CombatClass, CombatEquipmentFactory
 
@@ -131,7 +132,6 @@ class Player(Entity):
         # Components
         # Give the player an inventory to store items in
         self.inventory = Inventory(max_items=Player.MAX_INVENTORY_ITEMS)
-        self.level_up()
 
     def get_property(self, property_name: str):
         value = self.properties.get(property_name)
@@ -167,18 +167,8 @@ class Player(Entity):
         return self.inventory.remove_item(old_item)
 
     def level_up(self, stat_name: str = None):
-        level = self.properties.get("Level")
-        if level is None:
-            level = 1
-        else:
-            level +=1
-        self.properties["Level"] = level
-        
+        self.fighter.level_up(stat_name)
         self.heal(20)
-
-        if stat_name is not None:
-            self.fighter.level_up(stat_name)
-
 
     def get_stat_total(self, stat_name: str) -> int:
         totals = self.fighter.get_equipment_stat_totals([stat_name])
@@ -216,7 +206,55 @@ class Fighter():
         return eq
 
     def get_property(self, property_name:str):
-        return self.combat_class.properties.get(property_name)
+        property_value = self.combat_class.get_property(property_name)
+        return property_value
+
+    def set_property(self, property_name: str, new_value: int, increment:bool = False):
+        self.combat_class.update_property(property_name, new_value, increment)
+
+    def get_property_modifier(self, property_name:str):
+        modifier = 0
+        property_value = self.combat_class.properties.get(property_name)
+        if property is not None:
+            modifier = math.floor((property_value - 10)/2)
+        return modifier
+
+    def get_stat_total(self, stat_name: str) -> int:
+
+        # Get the stat total from your equipment
+        totals = self.get_equipment_stat_totals([stat_name])
+        total = totals.get(stat_name)
+        print(f'Equipment {stat_name} total = {total}')
+        if total is None:
+            total = 0
+
+        # Get the same stat from your abilities add add it
+        v = self.combat_class.get_property(stat_name)
+        if v is not None:
+            total += v
+
+        return total
+
+    def get_attack(self):
+        """
+        Get the fighter's attack power
+        :return: vurrent total attack power
+        """
+        str_mod = self.get_property_modifier("STR")
+        attacker_level = self.get_property("Level")
+        attack = str_mod + math.floor(attacker_level/2)
+
+        return attack
+
+    def get_defence(self):
+        """
+        Get the fighter's defence
+        :return: current total defence value
+        """
+        armour_class = self.get_stat_total("AC")
+        level = self.get_property("Level")
+        return 10 + armour_class + math.floor(level/2)
+
 
     def take_damage(self, damage_amount: int):
         self.combat_class.update_property("HP", damage_amount * -1, increment=True)
@@ -231,13 +269,23 @@ class Fighter():
     def add_kills(self, kill_count: int = 1):
         self.combat_class.update_property("KILLS", kill_count, increment=True)
 
-    def level_up(self, stat_name):
-        value = self.combat_class.get(stat_name)
-        if value is None:
-            value = 1
+    def level_up(self, stat_name = None):
+
+        level = self.get_property("Level")
+        if level is None:
+            level = 1
         else:
-            value +=1
-        self.combat_class[stat_name] = value
+            level += 1
+
+        self.set_property("Level", level)
+
+        if stat_name is not None:
+            value = self.combat_class.get(stat_name)
+            if value is None:
+                value = 1
+            else:
+                value +=1
+            self.combat_class[stat_name] = value
 
     def equip_item(self, new_item: Entity) -> Entity:
         new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)

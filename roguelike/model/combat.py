@@ -21,14 +21,10 @@ class CombatClass:
         return self.properties.get(property_name)
 
     def update_property(self, property_name : str, new_value : float, increment=False):
-        if property_name in self.properties.keys():
-            if increment is False:
-                self.properties[property_name] = new_value
-            else:
-                self.properties[property_name] += new_value
+        if increment is False or property_name not in self.properties:
+            self.properties[property_name] = new_value
         else:
-            print(f"Can't find property {property_name} in {self.name} list of properties")
-
+            self.properties[property_name] += new_value
 
 class CombatClassFactory:
     combat_classes = None
@@ -77,10 +73,12 @@ class CombatEquipment:
     def get_property(self, property_name : str):
         return self.properties.get(property_name)
 
+    def set_property(self, property_name: str, new_value:int):
+        self.properties[property_name] = new_value
+
     def get_damage_roll(self)->int:
         dmg_dice = self.get_property("DMG")
         return CombatEquipment.dnd_dice_text_to_roll(dmg_dice)
-
 
 
     @staticmethod

@@ -199,7 +199,7 @@ class MainFrame(View):
         else:
             # Draw box with current game mode
             bw = int(self.width / 2)
-            bh = 5
+            bh = 8
             bx = int((self.width - bw) / 2)
             by = int((self.height - bh) / 2)
 
