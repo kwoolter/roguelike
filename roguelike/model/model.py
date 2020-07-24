@@ -189,6 +189,12 @@ class Floor():
         self.events = None
 
 
+    @property
+    def revealed_entities(self):
+        self._revealed_entities = list(set(self.entities) & set(self._revealed_entities))
+        return self._revealed_entities
+
+
     def initialise(self, events: EventQueue):
         """
         Initialise the whole Floor object by:-
@@ -212,6 +218,7 @@ class Floor():
         self.explored = None
         self.fov_map = None
         self.floor_tile_colours = None
+        self._revealed_entities = []
 
         # Build template that contains the list of entities that we want to add to each Room
         room_entities_template = []
@@ -576,11 +583,15 @@ class Floor():
 
 
     def swap_entity(self, old_entity : Entity, new_entity : Entity = None):
+        """
+        Swap an entity on the floor with a new entity
+        :param old_entity: the entity that you want to swap out
+        :param new_entity: the new entity that uyou want to replace it with. Default is None which means remove the old entity
+        """
         if old_entity in self.entities:
             if new_entity is not None:
                 new_entity.xy = old_entity.xy
                 self.entities.append(new_entity)
-
             self.entities.remove(old_entity)
         else:
             print(f"Couldn't find {old_entity.name} on this floor!")
@@ -775,7 +786,22 @@ class Floor():
         # Show where the final room of the floor is (CHEAT)
         x, y, w, h = self.last_room.rect
         self.explored[x:x + w, y: y + h] = 1
+        self.reveal_entities_by_name("Down Stairs")
 
+    def reveal_entities_by_property(self, property_name: str, probability: int = 100):
+        self._revealed_entities = list(set(self.entities) & set(self._revealed_entities))
+        for e in self.entities:
+            if random.randint(1, 100) <= probability:
+                if e.get_property(property_name) == True:
+                    self._revealed_entities.append(e)
+
+
+    def reveal_entities_by_name(self, entity_name: str, probability: int = 100):
+        self._revealed_entities = list(set(self.entities) & set(self._revealed_entities))
+        for e in self.entities:
+            if random.randint(1, 100) <= probability:
+                if e.name == entity_name:
+                    self._revealed_entities.append(e)
 
     def recompute_fov(self, x=None, y=None, radius=None, light_walls=True, algorithm=0):
 
@@ -794,7 +820,7 @@ class Floor():
             if e.get_property("IsTransparent") == False:
                 walkable[e.x,e.y] = False
 
-        # Use libtcod to calculate field of view
+        # Use libtcod librarty function to calculate field of view
         self.fov_map = libtcod.map.compute_fov(walkable,
                                                (x, y),
                                                radius,
@@ -821,6 +847,10 @@ class Floor():
     def get_fov_light_attenuation(self, ox: int, oy:int, factor:float = 1.0):
         px, py = self.player.xy
         return ((px-ox)**2 + (py-oy)**2) * factor/ self.fov_radius2
+
+    def get_revealed_entities(self):
+
+        return self.revealed_entities
 
 
     def tick(self):
@@ -1248,6 +1278,15 @@ class ItemUser():
                                    self.floor.last_room.centery,
                                    relative=False)
             effect = "You are teleported to the exit to the next floor"
+
+
+        elif self.item.name == "Scroll of Revelation":
+            self.floor.reveal_entities_by_property("IsEnemy", 50)
+            effect = "You reveal the location of some enemies on this floor."
+
+        elif self.item.name == "Scroll of Greed":
+            self.floor.reveal_entities_by_property("IsCollectable", 50)
+            effect = "You reveal the location of some items on this floor"
 
         elif self.item.name == "Fireball Scroll":
             if self.player.fighter.last_target is not None:

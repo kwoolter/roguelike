@@ -32,3 +32,7 @@ Key,Count,Floor,Level,2,1,10,0.1,2,2
 Key,Probability,Floor,Level,1,0,1,0,100,100
 Locked Chest,Count,Floor,Level,2,1,10,0.1,2,2
 Locked Chest,Probability,Floor,Level,1,0,1,0,100,100
+Scroll of Revelation,Count,Floor,Level,2,1,10,0.1,2,2
+Scroll of Revelation,Probability,Floor,Level,1,0,1,0,100,100
+Scroll of Greed,Count,Floor,Level,2,1,10,0.1,2,2
+Scroll of Greed,Probability,Floor,Level,1,0,1,0,100,100

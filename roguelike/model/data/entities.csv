@@ -35,4 +35,6 @@ Goblin,an evil Goblin,g,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRU
 Room,a room,O,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 Scroll of Secrets,a mysterious scroll,~,white,blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Scroll of Teleportation,a green scroll,~,white,green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Scroll of Revelation,a revealing dark scroll,~,white,black,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Scroll of Greed,an ornate scroll,~,white,purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Small Green Potion,a small bottle of green potion,p,dark_green,,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE

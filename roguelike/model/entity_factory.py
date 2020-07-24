@@ -118,7 +118,7 @@ class Player(Entity):
         MAX_INVENTORY_ITEMS (int): What is the max allowable size of the player's inventory
 
     """
-    MAX_INVENTORY_ITEMS = 10
+    MAX_INVENTORY_ITEMS = 15
 
     def __init__(self, name: str, x: int = 0, y: int = 0):
         """
@@ -442,7 +442,7 @@ class EntityFactory:
         return matches
 
 class Inventory:
-    def __init__(self, max_items: int = 10):
+    def __init__(self, max_items: int = 15):
         self.max_items = max_items
         self.stackable_items = {}
         self.other_items = []

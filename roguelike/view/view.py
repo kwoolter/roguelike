@@ -301,7 +301,7 @@ class FloorView(View):
             if (x, y) in fov_cells:
 
                 # Get how much we should dim the tile colour based on distance from player
-                a = int(self.floor.get_fov_light_attenuation(x, y, 50))
+                a = int(self.floor.get_fov_light_attenuation(x, y, 40))
 
                 # Lit path
                 if (x, y) in walkable_cells:
@@ -327,6 +327,20 @@ class FloorView(View):
                 # Else unlit wall
                 else:
                     libtcod.console_set_char_background(self.con, x, y, self.bg_explored_wall)
+
+
+        # Draw any entities that have been revealed to the player
+        for e in self.floor.get_revealed_entities():
+            x, y = e.xy
+            bg = e.bg
+            try:
+                libtcod.console_set_default_foreground(self.con, e.fg)
+                libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
+                if bg is not None:
+                    libtcod.console_set_char_background(self.con, x, y, bg)
+            except e:
+                print("Problem drawing {e.name} {e.fg} {e.bg}")
+                print(e)
 
         # Draw all of the entities in the current FOV
         fov_entities = [e for e in self.floor.entities if e.xy in fov_cells]
@@ -468,13 +482,14 @@ class InventoryView(View):
 
     def draw(self):
 
+        # Get some short cuts to rthe data that we are going to display
         cc = self.character.fighter.combat_class
         equipment = self.character.fighter.equipment
+        equipment_to_slot = {v:k for k,v in equipment.items()}
         equipped_item = self.character.fighter.current_item
 
         equipment_stat_names = ("AC", "Weight")
         equipment_totals = self.character.fighter.get_equipment_stat_totals(equipment_stat_names)
-        print(equipment_totals)
 
         inv = self.character.inventory
         inventory = self.character.inventory.get_other_items()
@@ -604,9 +619,10 @@ class InventoryView(View):
                 text = f'{item.description}'
 
                 # Flag if item is currently equipped
-                equipped = item in equipment.values()
-                if equipped is True:
-                    text = f'{item.description} (Equipped)'
+                slot = equipment_to_slot.get(item)
+                equipped = slot is not None
+                if slot is not None:
+                    text = f'{item.description} ({slot})'
 
                 # If this is the currently selected item...
                 if i == self.selected_item:
@@ -649,12 +665,13 @@ class InventoryView(View):
             # Then Draw all of the stackable items...
             for i, (item, count) in enumerate(inventory_stackable.items()):
 
-                text = f'{item.description}: {count}'
+                text = f'{item.description}:{count}'
 
-                # Flag if the item is equipped
-                equipped = equipped_item is not None and item.name == equipped_item.name
+                # Flag if item is currently equipped
+                equipped = equipped_item is not None and equipped_item.name == item.name
                 if equipped is True:
-                    text = f'{item.description}: {count} (Equipped)'
+                    slot = model.Fighter.ITEM_SLOT
+                    text = f'{item.description}:{count} ({slot})'
 
                 # If this is the currently selected item...
                 if i == (self.selected_item - len(inventory)):
