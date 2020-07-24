@@ -27,7 +27,7 @@ class Controller():
         self.model.initialise()
         self.events = self.model.events
 
-        self.view = view.MainFrame(80,60)
+        self.view = view.MainFrame(50,60)
         self.view.initialise(self.model)
         self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
@@ -82,6 +82,7 @@ class Controller():
             exit = action.get('exit')
             fullscreen = action.get('fullscreen')
             move = action.get('move')
+            use = action.get('use')
 
             # If we are in PLAYING mode
             if self.mode == Controller.GAME_MODE_PLAYING:
@@ -100,6 +101,8 @@ class Controller():
                     self.model.take_stairs()
                 elif pickup:
                     self.model.take_item()
+                elif use:
+                    self.model.use_item()
                 elif inventory:
                     self.set_mode(Controller.GAME_MODE_INVENTORY)
                 elif character:
@@ -133,7 +136,6 @@ class Controller():
             elif self.mode == Controller.GAME_MODE_INVENTORY:
                 equip = action.get('equip')
                 drop = action.get('drop')
-                use = action.get('use')
 
                 e = self.view.inventory_view.get_selected_item()
 
@@ -206,6 +208,8 @@ class Controller():
             return {'pickup': True}
         elif key_char == 'z':
             return {'wait': True}
+        elif key_char == 'u':
+            return {'use': True}
         elif key_char == 'i':
             return {'show_inventory': True}
         elif key_char == 'c':

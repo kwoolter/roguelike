@@ -58,14 +58,14 @@ class MainFrame(View):
                                           border_bg=libtcod.black,
                                           border_fg=libtcod.green)
 
-        self.inventory_view = InventoryView(width=int(self.width / 2),
+        self.inventory_view = InventoryView(width=int(self.width -2),
                                             height=int(self.height * 2 / 3),
                                             fg=libtcod.white,
                                             bg=libtcod.black,
                                             border_bg=libtcod.black,
                                             border_fg=libtcod.green)
 
-        self.character_view = CharacterView(width=int(self.width / 2),
+        self.character_view = CharacterView(width=int(self.width -2),
                                             height=int(self.height * 2 / 3),
                                             fg=libtcod.white,
                                             bg=libtcod.black,
@@ -470,6 +470,7 @@ class InventoryView(View):
 
         cc = self.character.fighter.combat_class
         equipment = self.character.fighter.equipment
+        equipped_item = self.character.fighter.current_item
 
         equipment_stat_names = ("AC", "Weight")
         equipment_totals = self.character.fighter.get_equipment_stat_totals(equipment_stat_names)
@@ -479,6 +480,7 @@ class InventoryView(View):
         inventory = self.character.inventory.get_other_items()
         inventory_stackable = self.character.inventory.get_stackable_items()
 
+        # Determine which item should be the  current highlighted item in the inventory list
         if inv.items > 0:
             self.selected_item = min(max(0, self.selected_item), inv.items - 1)
         else:
@@ -501,9 +503,8 @@ class InventoryView(View):
 
         y = 2
 
+        # Print the boxh eader
         text = f"Inventory for {self.character.name} the {cc.name}"
-
-        # Print the panel text
         so = ScreenStringRect(text,
                               width=self.width - 2,
                               height=self.height - 2,
@@ -521,9 +522,8 @@ class InventoryView(View):
         y += 2
 
         # Print what is currently equipped
+        # Start with the header
         text = f'Equipment: AC={equipment_totals["AC"]}, Weight={equipment_totals["Weight"]}'
-
-        # Print the panel text
         so = ScreenStringRect(text,
                               width=self.width - 2,
                               height=self.height - 2,
@@ -535,6 +535,7 @@ class InventoryView(View):
 
         y += 2
 
+        # If nothing equipped then say so
         if len(equipment) == 0:
 
             text = "Nothing"
@@ -547,11 +548,12 @@ class InventoryView(View):
 
             so.render(self.con, cx, y)
 
+        # Else loop through the equipment...
         else:
 
             for slot, item in equipment.items():
+                # Print each item that is equipped and in which slot
                 text = f'{slot}: {item.description}'
-                # Print the panel text
                 so = ScreenString(text,
                                   fg=self.fg,
                                   bg=self.bg,
@@ -567,9 +569,9 @@ class InventoryView(View):
 
         y += 2
 
-        # Print what items are being carried
+        # Now print ALL items that are being carried
+        # Start with the header
         text = f"Carrying {inv.items} item(s) (max {inv.max_items})"
-
         so = ScreenStringRect(text,
                               width=self.width - 2,
                               height=self.height - 2,
@@ -581,6 +583,7 @@ class InventoryView(View):
 
         y += 2
 
+        # If carrying nothing then say so
         if inv.items == 0:
             text = "Nothing"
             so = ScreenStringRect(text,
@@ -592,68 +595,122 @@ class InventoryView(View):
 
             so.render(self.con, cx, y)
 
-        # Draw all of the normal items...
-        for i, item in enumerate(inventory):
+        # Otherwise...
+        else:
 
-            text = f'{item.description}'
+            # Otherwise draw all of the normal items first...
+            for i, item in enumerate(inventory):
 
-            # If this is the currently selected item...
-            if i == self.selected_item:
-                bg = libtcod.red
-                fg = libtcod.black
-                self.selected_item_entity = item
-                text = f'--> {text} <--'
-            else:
-                bg = libtcod.black
-                fg = libtcod.yellow
+                text = f'{item.description}'
 
-            so = ScreenString(text,
-                              fg=fg,
-                              bg=bg,
-                              alignment=libtcod.CENTER)
+                # Flag if item is currently equipped
+                equipped = item in equipment.values()
+                if equipped is True:
+                    text = f'{item.description} (Equipped)'
 
-            so.render(self.con, cx, y)
-            y += 1
+                # If this is the currently selected item...
+                if i == self.selected_item:
+                    bg = libtcod.dark_yellow
+                    fg = libtcod.black
+                    self.selected_item_entity = item
 
-        # Draw all of the stackable items...
-        for i, (item, count) in enumerate(inventory_stackable.items()):
+                # If this item is equipped..
+                elif equipped is True:
+                    fg = libtcod.dark_sea
+                    bg = libtcod.black
 
-            text = f'{item.description}: {count}'
+                # Otherwise default colours
+                else:
+                    bg = libtcod.black
+                    fg = libtcod.yellow
 
-            if i == (self.selected_item - len(inventory)):
-                bg = libtcod.red
-                fg = libtcod.black
-                self.selected_item_entity = item
-                text = f'--> {text} <--'
-            else:
-                bg = libtcod.black
-                fg = libtcod.yellow
+                so = ScreenString(text,
+                                  fg=fg,
+                                  bg=bg,
+                                  alignment=libtcod.CENTER)
 
-            # Print the panel text
-            so = ScreenString(text,
-                              fg=fg,
-                              bg=bg,
-                              alignment=libtcod.CENTER)
+                so.render(self.con, cx, y)
 
-            so.render(self.con, cx, y)
-            y += 1
+                # Draw the coloured character of the item
+                bg = item.bg
+                fg = item.fg
+                try:
+                    libtcod.console_set_default_foreground(self.con, fg)
+                    libtcod.console_put_char(self.con, 2, y, item.char, libtcod.BKGND_NONE)
+                    if bg is not None:
+                        libtcod.console_set_char_background(self.con, 2, y, bg)
+                    else:
+                        libtcod.console_set_char_background(self.con, 2, y, libtcod.darkest_gray)
+                except Exception:
+                    print("Problem drawing {e.name} {e.fg} {e.bg}")
+
+                y += 1
+
+            # Then Draw all of the stackable items...
+            for i, (item, count) in enumerate(inventory_stackable.items()):
+
+                text = f'{item.description}: {count}'
+
+                # Flag if the item is equipped
+                equipped = equipped_item is not None and item.name == equipped_item.name
+                if equipped is True:
+                    text = f'{item.description}: {count} (Equipped)'
+
+                # If this is the currently selected item...
+                if i == (self.selected_item - len(inventory)):
+                    bg = libtcod.dark_yellow
+                    fg = libtcod.black
+                    self.selected_item_entity = item
+
+                # if this item is equipped...
+                elif equipped is True:
+                    fg = libtcod.dark_sea
+                    bg = libtcod.black
+
+                # Otherwise use default colours
+                else:
+                    bg = libtcod.black
+                    fg = libtcod.yellow
+
+                # Print the panel text
+                so = ScreenString(text,
+                                  fg=fg,
+                                  bg=bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, cx, y)
+
+                # Draw the coloured character of the item
+                bg = item.bg
+                fg = item.fg
+                try:
+                    libtcod.console_set_default_foreground(self.con, fg)
+                    libtcod.console_put_char(self.con, 2, y, item.char, libtcod.BKGND_NONE)
+                    if bg is not None:
+                        libtcod.console_set_char_background(self.con, 2, y, bg)
+                    else:
+                        libtcod.console_set_char_background(self.con, 2, y, libtcod.darkest_gray)
+                except Exception:
+                    print("Problem drawing {e.name} {e.fg} {e.bg}")
+
+                y += 1
 
 
+        # If an item is selected...
         if self.selected_item_entity is not None:
 
+            # See if it is a piece of combat equipment....
             combat_eq = model.CombatEquipmentFactory.get_equipment_by_name(self.selected_item_entity.name)
-
             if combat_eq is not None:
 
+                # Draw a divider and section title
                 y = self.height - 8
-
-                # Draw a divider
                 divider.render(self.con, 0, y)
                 properties = f"Stats:"
 
+                # Print out the properties of the selected item
                 for k, v in combat_eq.properties.items():
                     properties += f'{k}={v} '
-                print(properties)
                 so = ScreenStringRect(properties,
                                       width=self.width-2,
                                       height=2,

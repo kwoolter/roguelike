@@ -1,7 +1,7 @@
 import tcod as libtcod
 import math
 import random
-from .combat import CombatClass, CombatEquipmentFactory
+from .combat import CombatClass, CombatEquipmentFactory, CombatEquipment
 
 
 def text_to_color(color_text: str) -> libtcod.color.Color:
@@ -105,6 +105,9 @@ class Entity():
         self.x += dx
         self.y += dy
 
+    def distance_to_target(self, other_entity) -> float:
+        return math.sqrt((self.x - other_entity.x)**2 + (self.y - other_entity.y)**2)
+
 
 class Player(Entity):
     """
@@ -143,20 +146,29 @@ class Player(Entity):
         if self.fighter is not None:
             self.fighter.heal(heal_amount=heal_amount)
 
-    def equip_item(self, new_item: Entity) -> bool:
+    def equip_item(self, new_item: Entity, slot = None) -> bool:
 
         assert self.fighter is not None, "Trying to equip an item when you don't have a fighter set-up"
 
         success = False
-        if new_item.get_property("IsEquipable") == True:
-            old_item = self.fighter.equip_item(new_item)
-            self.inventory.remove_item(new_item)
+
+        if new_item is None:
+            old_item = self.fighter.equip_item(new_item, slot)
             success = True
-            if old_item is not None:
-                success = self.inventory.add_item(old_item)
+
+        elif new_item.get_property("IsEquippable") == True or \
+            (new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True):
+
+            old_item = self.fighter.equip_item(new_item, slot)
+            #self.inventory.remove_item(new_item)
+
+            # if old_item is not None:
+            #     success = self.inventory.add_item(old_item)
+
+            success = True
 
         else:
-            print(f"{new_item.name} is not equipable")
+            print(f"{new_item.name} is not equippable")
 
         return success
 
@@ -188,8 +200,10 @@ class Fighter():
     DEFAULT_WEAPON = None
     DEFAULT_WEAPON_NAME = "Hands"
     WEAPON_SLOT = "Main Hand"
+    ITEM_SLOT = "Item Slot"
 
     def __init__(self, combat_class: CombatClass):
+        self.last_target=None
         self.combat_class = combat_class
         self.equipment = {}
         Fighter.DEFAULT_WEAPON = EntityFactory.get_entity_by_name(Fighter.DEFAULT_WEAPON_NAME)
@@ -204,6 +218,20 @@ class Fighter():
         if eq is None:
             eq = Fighter.DEFAULT_WEAPON
         return eq
+
+    @property
+    def current_item(self) -> Entity:
+        eq = self.equipment.get(Fighter.ITEM_SLOT)
+        return eq
+
+    @property
+    def current_weapon_details(self) -> CombatEquipment:
+        eq = self.equipment.get(Fighter.WEAPON_SLOT)
+        if eq is None:
+            eq = Fighter.DEFAULT_WEAPON
+
+        ce = CombatEquipmentFactory.get_equipment_by_name(eq.name)
+        return ce
 
     def get_property(self, property_name:str):
         property_value = self.combat_class.get_property(property_name)
@@ -287,10 +315,29 @@ class Fighter():
                 value +=1
             self.combat_class[stat_name] = value
 
-    def equip_item(self, new_item: Entity) -> Entity:
-        new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)
-        existing_item = self.equipment.get(new_eq.slot)
-        self.equipment[new_eq.slot] = new_item
+    def equip_item(self, new_item: Entity, slot:str = None) -> Entity:
+        """
+        Equip an item in the specified equipment slot.
+        :param new_item: the new item that we are equipping.  If None you are uneqipping back to inventory
+        :param slot: which slot we want to equip it to.  Default None which uses the combat equipment slot
+        :return: the item that was replaced in the equipment slot
+        """
+
+        # If no slot specified use the default slot for this type of equipment
+        if slot is None:
+            new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)
+            slot = new_eq.slot
+
+        # Get any item that is currently equipped in the target slot
+        existing_item = self.equipment.get(slot)
+
+        # If no new item is being equipped then remove existing item from the slot
+        if new_item is None:
+            del self.equipment[slot]
+        # Otherwise fill the slot with teh new item
+        else:
+            self.equipment[slot] = new_item
+
         return existing_item
 
     def get_equipment_stat_totals(self, stat_names: list = ["AC", "Weight", "Value"]):
@@ -300,9 +347,10 @@ class Fighter():
             totals[stat] = 0
             for e in self.equipment.values():
                 eq = CombatEquipmentFactory.get_equipment_by_name(e.name)
-                v = eq.get_property(stat)
-                if v is not None:
-                    totals[stat] += v
+                if eq is not None:
+                    v = eq.get_property(stat)
+                    if v is not None:
+                        totals[stat] += v
 
         return totals
 
@@ -455,7 +503,8 @@ class Inventory:
 
             success = True
         else:
-            self.other_items.remove(old_item)
+            if old_item in self.other_items:
+                self.other_items.remove(old_item)
             success = True
 
         return success

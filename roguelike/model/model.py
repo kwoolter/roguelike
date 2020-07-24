@@ -1,16 +1,15 @@
 import collections
-import random
 
 import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
 
-from . game_parameters import GameParameters
-from . entity_factory import Entity, Player, EntityFactory, Fighter
-from . entity_factory import text_to_color
+from .combat import *
+from .entity_factory import Entity, Player, EntityFactory, Fighter
+from .entity_factory import text_to_color
+from .events import Event
+from .game_parameters import GameParameters
 
-from . combat import *
-from . events import Event
 
 class EventQueue():
     def __init__(self):
@@ -254,7 +253,7 @@ class Floor():
         # Define initial values for teh first and last room
         self.last_room = None
         self.first_room = None
-
+        self.last_enemy=None
 
         for i in range(self.room_count):
 
@@ -508,6 +507,7 @@ class Floor():
                 # If it is an enemy then attack it
                 if e.get_property("IsEnemy"):
                     self.attack_entity(self.player, e)
+                    self.last_enemy = e
 
                 # Else raise event about what entity is blocking you
                 else:
@@ -585,7 +585,7 @@ class Floor():
         else:
             print(f"Couldn't find {old_entity.name} on this floor!")
 
-    def attack_entity(self, attacker : Entity, target : Entity):
+    def attack_entity(self, attacker : Entity, target : Entity, weapon : CombatEquipment = None):
         """
         Process an attacker performing an attack on a target.  The process is:-
         - Did the attack succeed?
@@ -601,6 +601,8 @@ class Floor():
                   description=f"{attacker.description} attacks {target.description}"))
 
         # Roll a 20 sided dice and add to attack power
+        attacker.fighter.last_target = target
+
         attack = attacker.fighter.get_attack() + random.randint(1,20)
 
         target_armour_class = target.fighter.get_stat_total("AC")
@@ -612,32 +614,46 @@ class Floor():
         # Did the attack succeed...?
         if attack > defence:
 
-            # Roll some damage based on the attackers fighting abilties and deduct damage from target's HP
-            dmg = attacker.fighter.roll_damage()
-            target.fighter.take_damage(dmg)
+            # Target out of range???
+            d = attacker.distance_to_target(target)
+            if weapon is None:
+                weapon = attacker.fighter.current_weapon_details
 
-            self.events.add_event(
-                Event(type=Event.GAME,
-                      name=Event.ACTION_SUCCEEDED,
-                      description=f"{attacker.description}'s {attacker.fighter.current_weapon.description} deals {dmg} damage"))
+            if d > weapon.get_property("Range"):
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_FAILED,
+                          description=f"{target.description} is out of range for {weapon.description}"))
 
-            # If the target died...
-            if target.fighter.is_dead:
-                target.state = Entity.STATE_DEAD
+            else:
 
-                # Update attacker stats
-                attacker.fighter.add_kills()
-                XP = target.fighter.get_XP_reward()
-                attacker.fighter.add_XP(XP)
-
-                # Swap the target on the floor to a corpse
-                corpse = EntityFactory.get_entity_by_name("Corpse")
-                self.swap_entity(target, corpse)
+                # Roll some damage based on the attackers fighting abilities and deduct damage from target's HP
+                dmg = attacker.fighter.roll_damage()
+                target.fighter.take_damage(dmg)
 
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"{attacker.description} kills {target.description} and gains {XP} XP"))
+                          description=f"{attacker.description}'s {attacker.fighter.current_weapon.description} deals {dmg} damage"))
+
+                # If the target died...
+                if target.fighter.is_dead:
+                    target.state = Entity.STATE_DEAD
+
+                    # Update attacker stats
+                    attacker.fighter.add_kills()
+                    XP = target.fighter.get_XP_reward()
+                    attacker.fighter.add_XP(XP)
+                    attacker.fighter.last_target = None
+
+                    # Swap the target on the floor to a corpse
+                    corpse = EntityFactory.get_entity_by_name("Corpse")
+                    self.swap_entity(target, corpse)
+
+                    self.events.add_event(
+                        Event(type=Event.GAME,
+                              name=Event.ACTION_SUCCEEDED,
+                              description=f"{attacker.description} kills {target.description} and gains {XP} XP"))
 
         # The attack failed...
         else:
@@ -958,6 +974,7 @@ class Model():
         basic_equipment = ("Dagger", "Robe", "Sandals")
         for item in basic_equipment:
             eq = EntityFactory.get_entity_by_name(item)
+            new_player.take_item(eq)
             new_player.fighter.equip_item(eq)
 
         # Give the player some basic items
@@ -1110,12 +1127,22 @@ class Model():
 
         success = False
 
-        if new_item.get_property("IsEquipable") == True:
+        if new_item.get_property("IsEquippable") == True:
             success = self.player.equip_item(new_item)
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
                                             description=f"You equip {new_item.description}"))
+
+        elif new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True:
+
+            success = self.player.equip_item(new_item, Fighter.ITEM_SLOT)
+
+            if success is True:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You take {new_item.description} out of your backpack"))
+
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
@@ -1142,11 +1169,28 @@ class Model():
 
         return success
 
-    def use_item(self, new_item : Entity)->bool:
-
+    def use_item(self, new_item : Entity = None)->bool:
+        """
+        Attempt to use a specified item. Default is to use item in Item Slot
+        :param new_item:
+        :return:
+        """
+        use_equipped_item = new_item is None
+        
         success = False
 
-        if new_item.get_property("IsInteractable") == True:
+        # No item specified so get the current equipped item
+        if use_equipped_item is True:
+            new_item = self.player.fighter.current_item
+
+        # If we haven't got an item to use then fail
+        if new_item is None:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You don't have an item equipped to use!"))
+
+        # If we have an item that you can interact with...
+        elif new_item.get_property("IsInteractable") == True:
 
             use = ItemUser(new_item, self.current_floor)
             success, effect = use.process()
@@ -1160,13 +1204,20 @@ class Model():
                                             name=Event.ACTION_FAILED,
                                             description=f"{effect}"))
 
+        # Otherwise we can't use this item
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"You can't use {new_item.description}"))
 
-        return success is not None
+        if success is True:
 
+            if use_equipped_item is True:
+                self.player.equip_item(None, slot=Fighter.ITEM_SLOT)
+
+            self.player.drop_item(new_item)
+
+        return success
 
 
 class ItemUser():
@@ -1175,6 +1226,7 @@ class ItemUser():
         self.floor = floor
         self.player = self.floor.player
         self.item_at_tile = self.floor.get_entity_at_pos(self.player.xy)
+        self.last_enemy = self.floor.last_enemy
 
     def process(self) -> bool:
         success = True
@@ -1197,6 +1249,16 @@ class ItemUser():
                                    relative=False)
             effect = "You are teleported to the exit to the next floor"
 
+        elif self.item.name == "Fireball Scroll":
+            if self.player.fighter.last_target is not None:
+                effect = f"You hurl a fireball at {self.player.fighter.last_target.description}"
+                ce = CombatEquipmentFactory.get_equipment_by_name(self.item.name)
+                self.floor.attack_entity(self.player, self.last_enemy, weapon=ce)
+            else:
+                effect = f'No target for {self.item.description}'
+                success = False
+
+
         elif self.item.name in item_swap:
             swaps = item_swap[self.item.name]
             if self.item_at_tile is not None and self.item_at_tile.name in swaps:
@@ -1212,9 +1274,10 @@ class ItemUser():
             success = False
             effect = "Nothing happens"
 
-        # If we succssfully used the item then remove it from Player's Inventory
+        # If we successfully used the item then remove it from Player's Inventory
         if success is True and drop is True:
-            success = self.player.drop_item(self.item)
+            pass
+            #success = self.player.drop_item(self.item)
 
         return success, effect
 
@@ -1314,6 +1377,8 @@ class AIBotTracker(AIBot):
         target_in_sight = d <= self.sight_range
 
         # If we can attack it....
+
+        #if d < self.bot_entity.fighter.current_weapon_details.get_property("Range"):
         if d < 2:
 
             print(f'{self.bot_entity.name}: "I can attack you {self.target_entity.name}"')
