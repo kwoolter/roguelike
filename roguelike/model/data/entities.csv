@@ -1,5 +1,6 @@
 Name,Description,Char,FG,BG,Zorder,IsTransparent,IsWalkable,IsInteractable,IsCollectable,IsStackable,IsEquippable,IsEnemy
 Player,the player,@,black,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+Dead Player,the player,@,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 NPC,a strange man,K,yellow,,1,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE
 Up Stairs,some stairs leading up,^,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
 Down Stairs,some stairs leading down,v,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
@@ -24,17 +25,24 @@ Hands,bare hands,@,pink,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Spear,a wooden spear,I,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Leather Armour,a leather tunic,#,orange,dark_red,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Leather Boots,a pair of old leather boots,b,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Plate Armour,plate chest armour,#,gold,silver,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Plate Boots,plate armour boots,b,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Scale Armour,scale chest armour,#,gold,brass,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Scale Boots,scale boots,b,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Bronze Ring,a plain bronze ring,o,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Gold Ring,a gold ring,o,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Robe,a ragged cloth robe,#,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Sandals,a pair of leather sandals,b,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Food,a simple meal,O,red,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Pillar,a stone pillar,+,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
-War Hammer,a mighty War Hammer,t,black,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Goblin,an evil Goblin,g,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Room,a room,O,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 Scroll of Secrets,a mysterious scroll,~,white,blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Scroll of Teleportation,a green scroll,~,white,green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Scroll of Revelation,a revealing dark scroll,~,white,black,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Scroll of Revelation,a dark scroll,~,white,black,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Scroll of Greed,an ornate scroll,~,white,purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Small Green Potion,a small bottle of green potion,p,dark_green,,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Green Potion,a bottle of green potion,p,white,dark_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Purple Potion,a bottle of purple potion,p,white,dark_purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Red Potion,a bottle of red potion,p,white,red,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Bubbling Potion,a bottle of bubbling potion,p,sky,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+War Hammer,a mighty War Hammer,T,dark_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE

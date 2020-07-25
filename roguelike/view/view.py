@@ -59,7 +59,7 @@ class MainFrame(View):
                                           border_fg=libtcod.green)
 
         self.inventory_view = InventoryView(width=int(self.width -2),
-                                            height=int(self.height * 2 / 3),
+                                            height=int(self.height - 10),
                                             fg=libtcod.white,
                                             bg=libtcod.black,
                                             border_bg=libtcod.black,
@@ -171,6 +171,7 @@ class MainFrame(View):
             self.inventory_view.draw()
             bx = int((self.width - self.inventory_view.width) / 2)
             by = int((self.height - self.inventory_view.height) / 2)
+            by = 1
             # Blit the inventory panel
             libtcod.console_blit(self.inventory_view.con,
                                  0, 0,
@@ -482,7 +483,7 @@ class InventoryView(View):
 
     def draw(self):
 
-        # Get some short cuts to rthe data that we are going to display
+        # Get some short cuts to the data that we are going to display
         cc = self.character.fighter.combat_class
         equipment = self.character.fighter.equipment
         equipment_to_slot = {v:k for k,v in equipment.items()}
@@ -518,7 +519,7 @@ class InventoryView(View):
 
         y = 2
 
-        # Print the boxh eader
+        # Print the box header
         text = f"Inventory for {self.character.name} the {cc.name}"
         so = ScreenStringRect(text,
                               width=self.width - 2,
@@ -529,15 +530,13 @@ class InventoryView(View):
 
         so.render(self.con, cx, y)
 
-        y += 2
-
         # Draw a divider
-        divider.render(self.con, 0, y)
-
-        y += 2
+        # y += 2
+        # divider.render(self.con, 0, y)
 
         # Print what is currently equipped
         # Start with the header
+        y += 2
         text = f'Equipment: AC={equipment_totals["AC"]}, Weight={equipment_totals["Weight"]}'
         so = ScreenStringRect(text,
                               width=self.width - 2,
@@ -565,12 +564,12 @@ class InventoryView(View):
 
         # Else loop through the equipment...
         else:
-
+            fg = libtcod.light_sepia
             for slot, item in equipment.items():
                 # Print each item that is equipped and in which slot
                 text = f'{slot}: {item.description}'
                 so = ScreenString(text,
-                                  fg=self.fg,
+                                  fg=fg,
                                   bg=self.bg,
                                   alignment=libtcod.CENTER)
 

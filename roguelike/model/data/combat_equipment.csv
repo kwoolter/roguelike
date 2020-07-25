@@ -6,8 +6,13 @@ Helmet,a helmet,Head,,1,0,1,1,0
 Hands,bare hands,Main Hand,1H,0,1d1,0,1,1
 Dagger,a small dagger,Main Hand,1H,0,1d3,1,1,1
 Spear,a wooden spear,Main Hand,2H,0,1d4,2,1,2
-Leather Armour,a leather tunic,Body,,1,0,2,1,0
-Leather Boots,a pair of old leather boots,Feet,,1,0,2,1,0
+Leather Armour,a leather tunic,Body,,2,0,2,1,0
+Leather Boots,a pair of old leather boots,Feet,,1,0,1,1,0
 War Hammer,a mighty War Hammer,Main Hand,2H,0,2d4,4,4,2
 Robe,a ragged cloth robe,Body,,0,0,1,0,0
 Sandals,a pair of leather sandals,Feet,,0,0,1,0,0
+Fireball Scroll,a magic fireball scroll,Item Slot,,0,2d6,0,5,3
+Plate Armour,plate chest armour,Body,,3,0,3,5,0
+Plate Boots,plate armour boots,Feet,,2,0,2,2,0
+Scale Armour,scale chest armour,Body,,4,0,4,8,0
+Scale Boots,scale boots,Feet,,3,0,3,4,0

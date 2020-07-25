@@ -611,11 +611,11 @@ class Floor():
                   name=Event.ACTION_ATTACK,
                   description=f"{attacker.description} attacks {target.description}"))
 
-        # Roll a 20 sided dice and add to attack power
+
         attacker.fighter.last_target = target
 
+        # Roll a 20 sided dice and add to attack power
         attack = attacker.fighter.get_attack() + random.randint(1,20)
-
         target_armour_class = target.fighter.get_stat_total("AC")
         target_level = target.fighter.get_property("Level")
         defence = 10 + target_armour_class + math.floor(target_level/2)
@@ -638,14 +638,16 @@ class Floor():
 
             else:
 
-                # Roll some damage based on the attackers fighting abilities and deduct damage from target's HP
-                dmg = attacker.fighter.roll_damage()
+                # Roll some damage based on the attackers weapon and deduct damage from target's HP
+                dmg = CombatEquipmentFactory.get_damage_roll_by_name(weapon.name)
+                print(f'\t{weapon.name} deals {dmg} damage')
+
                 target.fighter.take_damage(dmg)
 
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"{attacker.description}'s {attacker.fighter.current_weapon.description} deals {dmg} damage"))
+                          description=f"{attacker.description}'s {weapon.description} deals {dmg} damage"))
 
                 # If the target died...
                 if target.fighter.is_dead:
@@ -1262,12 +1264,17 @@ class ItemUser():
         success = True
         drop = True
         effect = None
-        HP_increase = {"Food":10, "Small Green Potion":15, "Healing Scroll":20}
+
+        HP_increase = {"Food":10, "Small Green Potion":15, "Healing Scroll":20, "Small Purple Potion":-10}
         item_swap = {"Key":{"Locked Chest":("Gold", "Food", "Small Green Potion", "Helmet")}}
 
         if self.item.name in HP_increase:
-            self.player.heal(HP_increase[self.item.name])
-            effect = "You regain some HP"
+            hp_change = HP_increase[self.item.name]
+            self.player.heal(hp_change)
+            if hp_change>0:
+                effect = "You regain some HP"
+            else:
+                effect = "You loose some HP"
 
         elif self.item.name == "Scroll of Secrets":
             self.floor.reveal_exit()
@@ -1279,13 +1286,16 @@ class ItemUser():
                                    relative=False)
             effect = "You are teleported to the exit to the next floor"
 
-
         elif self.item.name == "Scroll of Revelation":
-            self.floor.reveal_entities_by_property("IsEnemy", 50)
+            intelligence = self.player.get_property("INT")
+            probability = int(100 * intelligence/50)
+            self.floor.reveal_entities_by_property("IsEnemy", probability)
             effect = "You reveal the location of some enemies on this floor."
 
         elif self.item.name == "Scroll of Greed":
-            self.floor.reveal_entities_by_property("IsCollectable", 50)
+            intelligence = self.player.get_property("INT")
+            probability = int(100 * intelligence/50)
+            self.floor.reveal_entities_by_property("IsCollectable", probability)
             effect = "You reveal the location of some items on this floor"
 
         elif self.item.name == "Fireball Scroll":
@@ -1298,6 +1308,7 @@ class ItemUser():
                 success = False
 
 
+        # Is the item swappable?
         elif self.item.name in item_swap:
             swaps = item_swap[self.item.name]
             if self.item_at_tile is not None and self.item_at_tile.name in swaps:

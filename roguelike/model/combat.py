@@ -138,7 +138,7 @@ class CombatEquipmentFactory:
 
         else:
             print(f"Can't find combat equipment {name} in factory!")
-            print(f'Index: {CombatEquipmentFactory.combat_equipment.index}')
+            #print(f'Index: {CombatEquipmentFactory.combat_equipment.index}')
 
         return e
 
@@ -148,7 +148,7 @@ class CombatEquipmentFactory:
         if eq is not None:
             dmg = eq.get_damage_roll()
         else:
-            print(f"{__class__}: Can't ding equipment {equipment_name}")
+            print(f"{__class__}: Can't find equipment {equipment_name}")
             dmg = 0
 
         return dmg

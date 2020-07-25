@@ -36,3 +36,19 @@ Scroll of Revelation,Count,Floor,Level,2,1,10,0.1,2,2
 Scroll of Revelation,Probability,Floor,Level,1,0,1,0,100,100
 Scroll of Greed,Count,Floor,Level,2,1,10,0.1,2,2
 Scroll of Greed,Probability,Floor,Level,1,0,1,0,100,100
+Small Purple Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Purple Potion,Probability,Floor,Level,1,0,1,0,100,100
+Small Red Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Red Potion,Probability,Floor,Level,1,0,1,0,100,100
+Small Bubbling Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Bubbling Potion,Probability,Floor,Level,1,0,1,0,100,100
+Plate Armour,Count,Floor,Level,2,1,10,0.1,2,2
+Plate Armour,Probability,Floor,Level,1,0,1,0,100,100
+Plate Boots,Count,Floor,Level,2,1,10,0.1,2,2
+Plate Boots,Probability,Floor,Level,1,0,1,0,100,100
+Scale Armour,Count,Floor,Level,2,1,10,0.1,2,2
+Scale Armour,Probability,Floor,Level,1,0,1,0,100,100
+Scale Boots,Count,Floor,Level,2,1,10,0.1,2,2
+Scale Boots,Probability,Floor,Level,1,0,1,0,100,100
+War Hammer,Count,Floor,Level,2,1,10,0.1,2,2
+War Hammer,Probability,Floor,Level,1,0,1,0,100,100
