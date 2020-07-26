@@ -35,6 +35,7 @@ class Entity():
                  name: str,
                  description: str,
                  char: str,
+                 category: str = "default",
                  x: int = 0, y: int = 0,
                  fg=libtcod.white, bg=None,
                  state=STATE_INERT):
@@ -55,6 +56,7 @@ class Entity():
         self.name = name
         self.description = description
         self.char = char
+        self.category = category
         self._state = state
         self.x = x
         self.y = y
@@ -241,18 +243,30 @@ class Fighter():
         self.combat_class.update_property(property_name, new_value, increment)
 
     def get_property_modifier(self, property_name:str):
+        """
+
+        :param property_name:
+        :return:
+        """
         modifier = 0
         property_value = self.combat_class.properties.get(property_name)
-        if property is not None:
+        if property_value is not None:
             modifier = math.floor((property_value - 10)/2)
         return modifier
+
+    def get_max_HP(self)->int:
+        con = self.get_property("CON")
+        level  = self.get_property("Level")
+        level_1_HP = self.get_property("Level1HP")
+        HP_per_level = self.get_property("HPPerLevel")
+
+        return con + level_1_HP + ((level-1) * HP_per_level)
 
     def get_stat_total(self, stat_name: str) -> int:
 
         # Get the stat total from your equipment
         totals = self.get_equipment_stat_totals([stat_name])
         total = totals.get(stat_name)
-        print(f'Equipment {stat_name} total = {total}')
         if total is None:
             total = 0
 
@@ -261,34 +275,37 @@ class Fighter():
         if v is not None:
             total += v
 
+        print(f'\tEquipment {stat_name} total = {total}')
+
         return total
 
-    def get_attack(self):
+    def get_attack(self, ability:str = "STR"):
         """
-        Get the fighter's attack power
-        :return: vurrent total attack power
+        Get the fighter's attack power for the specified ability.  Default = STR
+        :param ability: the nme of the ability that you will be using to attack
+        :return: current total attack power
         """
-        str_mod = self.get_property_modifier("STR")
+        ability_modifier = self.get_property_modifier(ability)
         attacker_level = self.get_property("Level")
-        attack = str_mod + math.floor(attacker_level/2)
+        attack = ability_modifier + math.floor(attacker_level/2)
 
         return attack
 
-    def get_defence(self):
+    def get_defence(self, ability:str = "AC"):
         """
-        Get the fighter's defence
+        Get the fighter's defence that uses the specified ability
+        :param ability: the nme of the ability that you will be using to attack
         :return: current total defence value
         """
-        armour_class = self.get_stat_total("AC")
+        ability_modifier = self.get_stat_total(ability)
         level = self.get_property("Level")
-        return 10 + armour_class + math.floor(level/2)
-
+        return 10 + ability_modifier + math.floor(level/2)
 
     def take_damage(self, damage_amount: int):
         self.combat_class.update_property("HP", damage_amount * -1, increment=True)
 
     def heal(self, heal_amount: int):
-        new_hp = min(self.combat_class.get_property("HP") + heal_amount, self.combat_class.get_property("MAX_HP"))
+        new_hp = min(self.combat_class.get_property("HP") + heal_amount, self.get_max_HP())
         self.combat_class.update_property("HP", new_hp)
 
     def add_XP(self, xp_amount: int):
@@ -298,7 +315,10 @@ class Fighter():
         self.combat_class.update_property("KILLS", kill_count, increment=True)
 
     def level_up(self, stat_name = None):
-
+        """
+        Level up a Fighter and increase the specified stat
+        :param stat_name: the stat that you want to increase
+        """
         level = self.get_property("Level")
         if level is None:
             level = 1
@@ -315,10 +335,12 @@ class Fighter():
                 value +=1
             self.combat_class[stat_name] = value
 
+        self.set_property("MaxHP", self.get_max_HP())
+
     def equip_item(self, new_item: Entity, slot:str = None) -> Entity:
         """
         Equip an item in the specified equipment slot.
-        :param new_item: the new item that we are equipping.  If None you are uneqipping back to inventory
+        :param new_item: the new item that we are equipping.  If None you are un-eqipping back to inventory
         :param slot: which slot we want to equip it to.  Default None which uses the combat equipment slot
         :return: the item that was replaced in the equipment slot
         """
@@ -340,7 +362,7 @@ class Fighter():
 
         return existing_item
 
-    def get_equipment_stat_totals(self, stat_names: list = ["AC", "Weight", "Value"]):
+    def get_equipment_stat_totals(self, stat_names: list = ["AC", "INT", "Weight", "Value"]):
         totals = {}
 
         for stat in stat_names:
@@ -359,7 +381,23 @@ class Fighter():
         return dmg
 
     def get_XP_reward(self) -> int:
-        reward = random.randint(1, 3)
+        """
+        Calculate and return the XP reward for defecting this Fighter
+        :return: the XP reward
+        """
+
+        # Define multipliers for the combat classes of the enemy
+        XP_by_monster_difficulty = {"Standard":1, "Minion": 0.25, "Elite": 2}
+
+        level = self.get_property("Level")
+        class_ = self.combat_class.name
+        class_XP_multiplier = XP_by_monster_difficulty.get(class_)
+        if class_XP_multiplier is None:
+            class_XP_multiplier = 0
+        ldiv5 = level // 5
+
+        reward = int(max(25,50 * ldiv5) * class_XP_multiplier)
+
         return reward
 
     def print(self):
@@ -404,9 +442,10 @@ class EntityFactory:
             e = Entity(name=name,
                        description=row["Description"],
                        char=row["Char"],
+                       category=row["Category"],
                        fg=fg, bg=bg)
 
-            e.add_properties(row.iloc[4:].to_dict())
+            e.add_properties(row.iloc[5:].to_dict())
 
         else:
             print(f"Can't find entity {name} in factory!")
@@ -518,15 +557,15 @@ def main():
     names = {"Player", "Corpse", "Stairs Up", "Orc", "Dagger"}
 
     for name in names:
-        for c in range(random.randint(1.3)):
+        for c in range(random.randint(1,3)):
             new_enity = EntityFactory.get_entity_by_name(name)
             entities.append(new_enity)
 
     print(entities)
 
 
-    e = ef.get_entity_by_name("rubbish")
-    e = ef.get_entity_by_name("Gold")
+    e = EntityFactory.get_entity_by_name("rubbish")
+    e = EntityFactory.get_entity_by_name("Gold")
     print(e)
     property_name = "IsCollectable"
     property_value = e.get_property(property_name)
@@ -543,5 +582,5 @@ def main():
     print(matches)
 
 
-if __name__ == "__main__":#
+if __name__ == "__main__":
     main()

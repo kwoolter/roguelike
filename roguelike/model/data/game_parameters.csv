@@ -1,54 +1,70 @@
 Entity,Metric,Scope,x,a,b,d,ad,min,max
-Room,Count,Floor,Level,0.25,5,8,2,6,20
-Room,Probability,Floor,Level,0,0,1,0,0,0
-Orc,Count,Room,Level,0.25,1,10,0.25,0,4
-Orc,Probability,Room,Level,2,40,1,-3,0,50
-Troll,Count,Room,Level,0.2,-1,10,0.25,0,5
-Troll,Probability,Room,Level,2,-10,3,3,0,40
-Spider,Count,Room,Level,0.2,2,10,-0.5,0,4
-Spider,Probability,Room,Level,2,40,1,-3,0,50
-Gold,Count,Floor,Level,0.15,1,10,0.25,0,6
-Gold,Probability,Floor,Level,1,5,10,2,10,45
-Sword,Count,Floor,Level,0.15,1,10,1,1,5
-Sword,Probability,Floor,Level,1,5,10,3,100,100
 Axe,Count,Floor,Level,0.15,0,10,0,0,3
 Axe,Probability,Floor,Level,2,-10,10,3,0,45
-Goblin,Count,Room,Level,1,-15,10,0.05,0,8
-Goblin,Probability,Room,Level,1,-5,10,1,0,40
+Bronze Ring,Count,Floor,Level,2,1,10,0.1,2,2
+Bronze Ring,Probability,Floor,Level,1,0,1,0,100,100
+Buckler,Count,Floor,Level,2,1,10,0.1,2,2
+Buckler,Probability,Floor,Level,1,0,1,0,100,100
+Fireball Scroll,Count,Floor,Level,2,1,10,0.1,2,2
+Fireball Scroll,Probability,Floor,Level,1,0,1,0,100,100
+Gold,Count,Floor,Level,0.15,1,10,0.25,0,6
+Gold,Probability,Floor,Level,1,5,10,2,10,45
+Gold Crown,Count,Floor,Level,2,1,10,0.1,2,2
+Gold Crown,Probability,Floor,Level,1,0,1,0,100,100
+Gold Ring,Count,Floor,Level,2,1,10,0.1,2,2
+Gold Ring,Probability,Floor,Level,1,0,1,0,100,100
 Healing Scroll,Count,Floor,Level,0.2,1,10,0.1,2,7
 Healing Scroll,Probability,Floor,Level,2,0,10,3,15,40
 Helmet,Count,Floor,Level,0.1,1,10,0,0,3
 Helmet,Probability,Floor,Level,2,0,10,3,15,40
-Player,Level,Game,XP,0.1,1,10,-0.2,1,100
-Scroll of Secrets,Count,Floor,Level,0.2,1,10,0.1,2,2
-Scroll of Secrets,Probability,Floor,Level,1,0,1,0,100,100
-Scroll of Teleportation,Count,Floor,Level,0.2,1,10,0.1,2,2
-Scroll of Teleportation,Probability,Floor,Level,1,0,1,0,100,100
-Fireball Scroll,Count,Floor,Level,2,1,10,0.1,2,2
-Fireball Scroll,Probability,Floor,Level,1,0,1,0,100,100
-Small Green Potion,Count,Floor,Level,2,1,10,0.1,2,2
-Small Green Potion,Probability,Floor,Level,1,0,1,0,100,100
+Iron Crown,Count,Floor,Level,2,1,10,0.1,2,2
+Iron Crown,Probability,Floor,Level,1,0,1,0,100,100
 Key,Count,Floor,Level,2,1,10,0.1,2,2
 Key,Probability,Floor,Level,1,0,1,0,100,100
+Lightning Scroll,Count,Floor,Level,2,1,10,0.1,2,2
+Lightning Scroll,Probability,Floor,Level,1,0,1,0,100,100
 Locked Chest,Count,Floor,Level,2,1,10,0.1,2,2
 Locked Chest,Probability,Floor,Level,1,0,1,0,100,100
-Scroll of Revelation,Count,Floor,Level,2,1,10,0.1,2,2
-Scroll of Revelation,Probability,Floor,Level,1,0,1,0,100,100
-Scroll of Greed,Count,Floor,Level,2,1,10,0.1,2,2
-Scroll of Greed,Probability,Floor,Level,1,0,1,0,100,100
-Small Purple Potion,Count,Floor,Level,2,1,10,0.1,2,2
-Small Purple Potion,Probability,Floor,Level,1,0,1,0,100,100
-Small Red Potion,Count,Floor,Level,2,1,10,0.1,2,2
-Small Red Potion,Probability,Floor,Level,1,0,1,0,100,100
-Small Bubbling Potion,Count,Floor,Level,2,1,10,0.1,2,2
-Small Bubbling Potion,Probability,Floor,Level,1,0,1,0,100,100
+Metal Shield,Count,Floor,Level,2,1,10,0.1,2,2
+Metal Shield,Probability,Floor,Level,1,0,1,0,100,100
 Plate Armour,Count,Floor,Level,2,1,10,0.1,2,2
 Plate Armour,Probability,Floor,Level,1,0,1,0,100,100
 Plate Boots,Count,Floor,Level,2,1,10,0.1,2,2
 Plate Boots,Probability,Floor,Level,1,0,1,0,100,100
+Poison Scroll,Count,Floor,Level,2,1,10,0.1,2,2
+Poison Scroll,Probability,Floor,Level,1,0,1,0,100,100
+Room,Count,Floor,Level,0.25,5,8,2,6,20
+Room,Probability,Floor,Level,0,0,1,0,0,0
 Scale Armour,Count,Floor,Level,2,1,10,0.1,2,2
 Scale Armour,Probability,Floor,Level,1,0,1,0,100,100
 Scale Boots,Count,Floor,Level,2,1,10,0.1,2,2
 Scale Boots,Probability,Floor,Level,1,0,1,0,100,100
+Scroll of Greed,Count,Floor,Level,2,1,10,0.1,2,2
+Scroll of Greed,Probability,Floor,Level,1,0,1,0,100,100
+Scroll of Revelation,Count,Floor,Level,2,1,10,0.1,2,2
+Scroll of Revelation,Probability,Floor,Level,1,0,1,0,100,100
+Scroll of Secrets,Count,Floor,Level,0.2,1,10,0.1,2,2
+Scroll of Secrets,Probability,Floor,Level,1,0,1,0,100,100
+Scroll of Teleportation,Count,Floor,Level,0.2,1,10,0.1,2,2
+Scroll of Teleportation,Probability,Floor,Level,1,0,1,0,100,100
+Small Bubbling Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Bubbling Potion,Probability,Floor,Level,1,0,1,0,100,100
+Small Green Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Green Potion,Probability,Floor,Level,1,0,1,0,100,100
+Small Purple Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Purple Potion,Probability,Floor,Level,1,0,1,0,100,100
+Small Red Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Red Potion,Probability,Floor,Level,1,0,1,0,100,100
+Sword,Count,Floor,Level,0.15,1,10,1,1,5
+Sword,Probability,Floor,Level,1,5,10,3,100,100
 War Hammer,Count,Floor,Level,2,1,10,0.1,2,2
 War Hammer,Probability,Floor,Level,1,0,1,0,100,100
+Player,Level,Game,XP,0.1,1,10,-0.2,1,100
+Goblin,Count,Room,Level,1,-15,10,0.05,0,8
+Goblin,Probability,Room,Level,1,-5,10,1,0,40
+Orc,Count,Room,Level,0.25,1,10,0.25,0,4
+Orc,Probability,Room,Level,2,40,1,-3,0,50
+Spider,Count,Room,Level,0.2,2,10,-0.5,0,4
+Spider,Probability,Room,Level,2,40,1,-3,0,50
+Troll,Count,Room,Level,0.2,-1,10,0.25,0,5
+Troll,Probability,Room,Level,2,-10,3,3,0,40

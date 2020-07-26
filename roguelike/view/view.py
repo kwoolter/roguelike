@@ -8,9 +8,12 @@ class View():
     events = None
 
     def __init__(self, width: int = 0, height: int = 0):
+
+        # Properties
         self.width = width
         self.height = height
         self.tick_count = 0
+        self._debug = False
 
     @property
     def center(self):
@@ -20,8 +23,8 @@ class View():
         self.tick_count += 0
 
     def process_event(self, new_event: model.Event):
-        pass
-        # print(f'{__class__} processing event {new_event}')
+        if self._debug is True:
+            print(f'{__class__} processing event {new_event}')
 
     def draw(self):
         pass
@@ -58,14 +61,14 @@ class MainFrame(View):
                                           border_bg=libtcod.black,
                                           border_fg=libtcod.green)
 
-        self.inventory_view = InventoryView(width=int(self.width -2),
+        self.inventory_view = InventoryView(width=int(self.width - 6),
                                             height=int(self.height - 10),
                                             fg=libtcod.white,
                                             bg=libtcod.black,
                                             border_bg=libtcod.black,
                                             border_fg=libtcod.green)
 
-        self.character_view = CharacterView(width=int(self.width -2),
+        self.character_view = CharacterView(width=int(self.width - 6),
                                             height=int(self.height * 2 / 3),
                                             fg=libtcod.white,
                                             bg=libtcod.black,
@@ -164,9 +167,9 @@ class MainFrame(View):
                                  self.message_panel.height,
                                  0,
                                  0, self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
-                                 ffade=0.7, bfade=0.7)
+                                 ffade=1, bfade=1)
 
-        # If we are in INVENTORY mode the draw the inventory screen
+        # If we are in INVENTORY mode then draw the inventory screen
         elif self.mode == MainFrame.MODE_INVENTORY_SCREEN:
             self.inventory_view.draw()
             bx = int((self.width - self.inventory_view.width) / 2)
@@ -211,14 +214,12 @@ class MainFrame(View):
             bo.render(0, bx, by)
 
             panel_text = self.mode.upper()
-            # Print the panel text
             so = ScreenString(panel_text,
                               fg=libtcod.yellow,
                               bg=libtcod.darkest_gray)
             so.render(0, bw, by + 2, alignment=libtcod.CENTER)
 
             # Add game title
-
             bw = int(self.width / 2)
             bh = 5
             bx = int((self.width - bw) / 2)
@@ -251,8 +252,6 @@ class FloorView(View):
     def __init__(self, width: int, height: int, fg=libtcod.white, bg=libtcod.black):
         super().__init__(width=width, height=height)
 
-        self.con = None
-
         # Appearance of the view content
         self.fg = fg
         self.bg = bg
@@ -263,6 +262,10 @@ class FloorView(View):
 
         # Model Floor that we are going to render
         self.floor = None
+
+        # The console taht we are going to draw onto
+        self.con = None
+
 
     def initialise(self, floor: model.Floor):
         # Connect the view to the model
@@ -365,11 +368,12 @@ class FloorView(View):
         libtcod.console_put_char(self.con, x=p.x, y=p.y, c="&", flag=libtcod.BKGND_NONE)
 
         # Draw name of current room
-        room_name = self.floor.current_room.name if self.floor.current_room is not None else "???"
-        s = ScreenString(
-            f'{self.floor.name}:{room_name}: room={self.floor.room_count}, room_max_size={self.floor.room_max_size}',
-            fg=libtcod.red, bg=libtcod.white)
-        s.render(self.con, 0, 0, alignment=libtcod.LEFT)
+        if self._debug is True:
+            room_name = self.floor.current_room.name if self.floor.current_room is not None else "???"
+            s = ScreenString(
+                f'{self.floor.name}:{room_name}: room={self.floor.room_count}, room_max_size={self.floor.room_max_size}',
+                fg=libtcod.red, bg=libtcod.white)
+            s.render(self.con, 0, 0, alignment=libtcod.LEFT)
 
 
 class MessagePanel(View):
@@ -489,7 +493,7 @@ class InventoryView(View):
         equipment_to_slot = {v:k for k,v in equipment.items()}
         equipped_item = self.character.fighter.current_item
 
-        equipment_stat_names = ("AC", "Weight")
+        equipment_stat_names = ("AC", "INT", "Weight")
         equipment_totals = self.character.fighter.get_equipment_stat_totals(equipment_stat_names)
 
         inv = self.character.inventory
@@ -537,7 +541,7 @@ class InventoryView(View):
         # Print what is currently equipped
         # Start with the header
         y += 2
-        text = f'Equipment: AC={equipment_totals["AC"]}, Weight={equipment_totals["Weight"]}'
+        text = f'Equipment:AC={equipment_totals["AC"]},INT={equipment_totals["INT"]},Weight={equipment_totals["Weight"]}'
         so = ScreenStringRect(text,
                               width=self.width - 2,
                               height=self.height - 2,
@@ -623,14 +627,8 @@ class InventoryView(View):
                 if slot is not None:
                     text = f'{item.description} ({slot})'
 
-                # If this is the currently selected item...
-                if i == self.selected_item:
-                    bg = libtcod.dark_yellow
-                    fg = libtcod.black
-                    self.selected_item_entity = item
-
                 # If this item is equipped..
-                elif equipped is True:
+                if equipped is True:
                     fg = libtcod.dark_sea
                     bg = libtcod.black
 
@@ -638,6 +636,12 @@ class InventoryView(View):
                 else:
                     bg = libtcod.black
                     fg = libtcod.yellow
+
+                # If this is the currently selected item the swap bg and fg...
+                if i == self.selected_item:
+                    fg, bg = bg,fg
+                    fg = libtcod.black
+                    self.selected_item_entity = item
 
                 so = ScreenString(text,
                                   fg=fg,
@@ -672,14 +676,8 @@ class InventoryView(View):
                     slot = model.Fighter.ITEM_SLOT
                     text = f'{item.description}:{count} ({slot})'
 
-                # If this is the currently selected item...
-                if i == (self.selected_item - len(inventory)):
-                    bg = libtcod.dark_yellow
-                    fg = libtcod.black
-                    self.selected_item_entity = item
-
                 # if this item is equipped...
-                elif equipped is True:
+                if equipped is True:
                     fg = libtcod.dark_sea
                     bg = libtcod.black
 
@@ -688,7 +686,12 @@ class InventoryView(View):
                     bg = libtcod.black
                     fg = libtcod.yellow
 
-                # Print the panel text
+
+                # If this is the currently selected item swap fg and bg
+                if i == (self.selected_item - len(inventory)):
+                    fg,bg = bg,fg
+                    self.selected_item_entity = item
+
                 so = ScreenString(text,
                                   fg=fg,
                                   bg=bg,

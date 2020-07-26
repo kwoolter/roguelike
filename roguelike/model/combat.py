@@ -16,6 +16,7 @@ class CombatClass:
 
     def add_properties(self, new_properties: dict):
         self.properties.update(new_properties)
+        self.properties["HP"] = self.properties["Level1HP"]
 
     def get_property(self, property_name : str):
         return self.properties.get(property_name)
@@ -28,6 +29,8 @@ class CombatClass:
 
 class CombatClassFactory:
     combat_classes = None
+    STANDARD_ABILITIES = ["STR", "CON", "INT", "DEX", "CHA", "WIS"]
+    STANDARD_ARRAY = [16, 14, 13, 12, 11, 10]
 
     def __init__(self):
         pass
@@ -45,9 +48,10 @@ class CombatClassFactory:
 
     @staticmethod
     def get_combat_class_by_name(name: str) -> CombatClass:
+        ccf = CombatClassFactory.combat_classes
         e = None
-        if name in CombatClassFactory.combat_classes.index:
-            row = CombatClassFactory.combat_classes.loc[name]
+        if name in ccf.index:
+            row = ccf.loc[name]
             e = CombatClass(name)
             e.add_properties(row.iloc[:].to_dict())
 
@@ -55,6 +59,12 @@ class CombatClassFactory:
             print(f"Can't find combat class {name} in factory!")
 
         return e
+
+    @staticmethod
+    def get_playable_classes(playable:bool = True)->list:
+        ccf = CombatClassFactory.combat_classes
+        rows = ccf[ccf.Playable == playable]
+        return list(rows.index)
 
 class CombatEquipment:
     def __init__(self, name : str, description : str, slot :str):
@@ -83,23 +93,32 @@ class CombatEquipment:
 
     @staticmethod
     def dnd_dice_text_to_roll(dice_text:str):
+        """
 
+        :param dice_text: the DnD text representation of dice
+        :return: the result of rolling the dice combo
+        """
+        # Define regex for parsing the text
         number_of_dice = re.compile(r'^\d+(?=d)')
         dice_sides = re.compile(r'(?<=\dd)\d+')
         extra_bonus = re.compile(r'(?<=\d\+)\d+$')
 
+        # Use regex to extract the dice info from the text
         r = number_of_dice.search(dice_text)
         assert r is not None, "Can't find number of dice"
         num_dice = int(r[0])
         r = dice_sides.search(dice_text)
         assert r is not None, "Can't find number of dice sides"
         num_dice_sides = int(r[0])
+
+        # Bonus is optional
         r = extra_bonus.search(dice_text)
         if r is not None:
             bonus = int(r[0])
         else:
             bonus = 0
 
+        # Now time to roll the dice!
         result = 0
 
         for i in range(num_dice):
@@ -153,4 +172,24 @@ class CombatEquipmentFactory:
 
         return dmg
 
+
+if __name__ == "__main__":
+
+
+
+    CombatClassFactory.load("combat_classes.csv")
+
+
+    r = CombatClassFactory.get_combat_class_by_name("Fighter")
+    print(r)
+
+    r = CombatClassFactory.get_combat_class_by_name("Standard")
+    print(r)
+
+
+    r = CombatClassFactory.get_playable_classes()
+    print(r)
+
+    r = CombatClassFactory.get_playable_classes(playable=False)
+    print(r)
 

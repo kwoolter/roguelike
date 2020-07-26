@@ -19,6 +19,7 @@ class Event():
 
     # Game events
     GAME_NEW_FLOOR = "new floor"
+    GAME_FLOOR_COMPLETED = "floor completed"
     TICK = "Tick"
 
 

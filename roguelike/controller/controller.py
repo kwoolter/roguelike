@@ -83,6 +83,10 @@ class Controller():
             fullscreen = action.get('fullscreen')
             move = action.get('move')
             use = action.get('use')
+            debug = action.get('debug')
+
+            if debug is True:
+                self.model.print()
 
             # If we are in PLAYING mode
             if self.mode == Controller.GAME_MODE_PLAYING:
@@ -229,8 +233,7 @@ class Controller():
             print(text)
             self.view.add_message(text)
         elif key.vk == libtcod.KEY_F11:
-            text = self.view.do_text_entry()
-            self.view.add_message(text)
+            return {'debug': True}
         elif key.vk == libtcod.KEY_F10:
             self.model.next_floor()
 

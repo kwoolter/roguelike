@@ -144,7 +144,7 @@ class Floor():
 
     ROOM_NAMES = ("The Guard Room", "The Store", "A Stone Chamber", "The Armoury", "Sleeping Quarters",
                   "The Crypt", "The Kitchen", "Torture Room", "The Wizard's Laboratory", "The Ossary",
-                  "The Wine Cellar", "Food Store")
+                  "The Wine Cellar", "Food Store" , "Dank Cell")
 
     def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
 
@@ -185,6 +185,8 @@ class Floor():
         self.fov_radius = 7
         self.fov_radius2 = self.fov_radius**2
         self.floor_tile_colours = None
+        self._explored_rooms = set()
+        self.entities_added = 0
 
         self.events = None
 
@@ -219,6 +221,7 @@ class Floor():
         self.fov_map = None
         self.floor_tile_colours = None
         self._revealed_entities = []
+        self._explored_rooms = set()
 
         # Build template that contains the list of entities that we want to add to each Room
         room_entities_template = []
@@ -293,7 +296,7 @@ class Floor():
                 self.last_room = new_room
 
             else:
-                print('\t**Couldnt add room so skipping an moving on')
+                print('\t**Couldnt add room so skipping and moving on')
 
         # redefine first and last rooms
         self.last_room = self.map_rooms[-1]
@@ -307,6 +310,8 @@ class Floor():
         # Build a map of the floor
         self.build_floor_map()
 
+        self.entities_added = len(self.entities)
+
 
     def print(self):
         print(f'Floor {self.name}: ({self.width},{self.height})')
@@ -315,6 +320,26 @@ class Floor():
 
         for tunnel in self.map_tunnels:
             tunnel.print()
+
+        self.get_stats()
+
+    def get_stats(self):
+        stats_text = []
+
+        rooms = len(self.map_rooms)
+        rooms_explored = len(self._explored_rooms)
+        rooms_explored_pct = rooms_explored * 100/ rooms
+
+        stats_text.append(f"Rooms explored={rooms_explored_pct:0.0f}%")
+
+        tiles = np.count_nonzero(self.walkable)
+        tiles_explored = np.count_nonzero((np.logical_and(self.walkable,self.explored)))
+        tiles_explored_pct = tiles_explored*100/tiles
+
+        stats_text.append(f"Tiles explored={tiles_explored_pct:0.0f}%")
+
+        return stats_text
+
 
     def add_player(self, new_player: Player, first_room = True):
 
@@ -382,8 +407,11 @@ class Floor():
                             self.bots.append(new_bot)
 
     def generate_new_enemy(self, new_entity : Entity):
-
-        class_name = random.choice(("Minion", "Guard", "Chief"))
+        """
+        Add random Fighter characteristics to an Entity
+        :param new_entity: the entity that we want to turn into a Fighter
+        """
+        class_name = random.choice(("Minion", "Standard", "Elite", "Solo"))
         equipment = random.choice(("Hands", "Dagger", "Spear"))
 
         cc = CombatClassFactory.get_combat_class_by_name(class_name)
@@ -391,7 +419,11 @@ class Floor():
 
         new_fighter = Fighter(combat_class=cc)
         new_fighter.equip_item(eq)
-        new_fighter.level_up()
+
+        for i  in range(self.level):
+            if i % 2 == 0:
+                new_fighter.level_up()
+
         new_entity.fighter = new_fighter
         #new_fighter.print()
 
@@ -498,7 +530,12 @@ class Floor():
             # See if we changed rooms/tunnels
             if self.current_room != self.get_current_room():
                 self.current_room = self.get_current_room()
-                room_name = "a tunnel" if self.current_room is None else self.current_room.name
+                if self.current_room is None:
+                    room_name = "a tunnel"
+                else:
+                    room_name = self.current_room.name
+                    self._explored_rooms.add(self.current_room)
+
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
@@ -614,21 +651,31 @@ class Floor():
 
         attacker.fighter.last_target = target
 
-        # Roll a 20 sided dice and add to attack power
-        attack = attacker.fighter.get_attack() + random.randint(1,20)
-        target_armour_class = target.fighter.get_stat_total("AC")
-        target_level = target.fighter.get_property("Level")
-        defence = 10 + target_armour_class + math.floor(target_level/2)
+        # What weapon are we using for the attack?
+        if weapon is None:
+            weapon = attacker.fighter.current_weapon_details
 
-        print(f'{attacker.name} ATK={attack} vs {target.name} AC={defence}')
+        # What are the attack and defence abilities for this weapon?
+        attack_ability = weapon.get_property("ATK")
+        defence_ability = weapon.get_property("DEF")
+
+        print(f'using weapon {weapon.description} ({attack_ability} vs {defence_ability}')
+
+        # Roll a 20 sided dice and add to attack power
+        attack = attacker.fighter.get_attack(attack_ability) + random.randint(1,20)
+
+        # Calculate the target's ability defence
+        target_defence = target.fighter.get_stat_total(defence_ability)
+        target_level = target.fighter.get_property("Level")
+        defence = 10 + target_defence + math.floor(target_level/2)
+
+        print(f'{attacker.name} ATK ({attack_ability}={attack}) vs ({defence_ability}={defence}) DEF of {target.name}')
 
         # Did the attack succeed...?
         if attack > defence:
 
             # Target out of range???
             d = attacker.distance_to_target(target)
-            if weapon is None:
-                weapon = attacker.fighter.current_weapon_details
 
             if d > weapon.get_property("Range"):
                 self.events.add_event(
@@ -999,7 +1046,7 @@ class Model():
         new_player = Player(name=name)
 
         # Assign them a combat class
-        cc = CombatClassFactory.get_combat_class_by_name("Warrior")
+        cc = CombatClassFactory.get_combat_class_by_name("Fighter")
         new_player.fighter = Fighter(combat_class=cc)
 
         # Give the player some basic equipment
@@ -1114,6 +1161,19 @@ class Model():
                                         description=f"There are no levels above this one!"))
 
     def next_floor(self):
+
+            # Print the stats for the Floor that you just completed
+            if self.current_floor is not None:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.GAME_FLOOR_COMPLETED,
+                                            description=f"{self.current_floor.name} completed:"))
+
+                stats = self.current_floor.get_stats()
+                for stat in stats:
+                    self.events.add_event(Event(type=Event.GAME,
+                                                name=Event.GAME_FLOOR_COMPLETED,
+                                                description=f"  * {stat}"))
+
 
             self.dungeon_level += 1
 
@@ -1298,9 +1358,10 @@ class ItemUser():
             self.floor.reveal_entities_by_property("IsCollectable", probability)
             effect = "You reveal the location of some items on this floor"
 
-        elif self.item.name == "Fireball Scroll":
+        #elif self.item.name in ("Fireball Scroll", "Lightning Scroll", "Poison Scroll"):
+        elif self.item.category == "Combat":
             if self.player.fighter.last_target is not None:
-                effect = f"You hurl a fireball at {self.player.fighter.last_target.description}"
+                effect = f"You invoke {self.item.description}"
                 ce = CombatEquipmentFactory.get_equipment_by_name(self.item.name)
                 self.floor.attack_entity(self.player, self.last_enemy, weapon=ce)
             else:
