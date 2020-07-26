@@ -831,6 +831,9 @@ class Floor():
         self.walkable = self.walkable > 0
 
     def reveal_exit(self):
+        """
+        Show where the final room is by "exploring" it and reveal the down stairs entity
+        """
 
         # Show where the final room of the floor is (CHEAT)
         x, y, w, h = self.last_room.rect
@@ -838,6 +841,11 @@ class Floor():
         self.reveal_entities_by_name("Down Stairs")
 
     def reveal_entities_by_property(self, property_name: str, probability: int = 100):
+        """
+        Randomly reveal all entities on this Floor that have a property and value matching those specified
+        :param property_name:
+        :param probability: probability of success for each entity that matches
+        """
         self._revealed_entities = list(set(self.entities) & set(self._revealed_entities))
         for e in self.entities:
             if e.get_property(property_name) == True and random.randint(1, 100) <= probability:
@@ -845,12 +853,23 @@ class Floor():
 
 
     def reveal_entities_by_name(self, entity_name: str, probability: int = 100):
+        """
+        Randomly reveal entities that have a specified name
+        :param entity_name: name of entities to be revealed
+        :param probability: probability of success for each entity that matches
+        """
         self._revealed_entities = list(set(self.entities) & set(self._revealed_entities))
         for e in self.entities:
             if e.name == entity_name and random.randint(1, 100) <= probability:
                 self._revealed_entities.append(e)
 
     def swap_entities_by_name(self, entity_name: str, new_entity_list, probability: int = 100):
+        """
+        Randomly swap entities of a specified name with  a random list of new entities
+        :param entity_name: name of the entity to swap
+        :param new_entity_list: the list of entity names to swap it with
+        :param probability: the probability of a successful swap happening for each matching entity
+        """
         for e in self.entities:
             if e.name == entity_name and random.randint(1, 100) <= probability:
                 new_entity = EntityFactory.get_entity_by_name(random.choice(new_entity_list))
@@ -919,11 +938,14 @@ class Floor():
 
         dead_bots = []
 
+        # Tick all bots and collect any dead ones
         for bot in self.bots:
             bot.tick()
             if bot.is_dead is True:
                 dead_bots.append(bot)
 
+        # Remove any dead bots
+        # (can't remove and iterate at the same time!)
         for bot in dead_bots:
             print(f'Bot {bot} is dead')
             self.bots.remove(bot)

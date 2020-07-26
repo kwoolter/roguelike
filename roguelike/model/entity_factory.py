@@ -35,7 +35,7 @@ class Entity():
                  name: str,
                  description: str,
                  char: str,
-                 category: str = "default",
+                 category: str,
                  x: int = 0, y: int = 0,
                  fg=libtcod.white, bg=None,
                  state=STATE_INERT):
@@ -132,7 +132,7 @@ class Player(Entity):
         """
 
         # Initialise parent class
-        super().__init__(name=name, description="The player", char='@', x=x, y=y)
+        super().__init__(name=name, description="The player", category='Player', char='@', x=x, y=y)
 
         # Components
         # Give the player an inventory to store items in
@@ -489,7 +489,9 @@ class EntityFactory:
         e = Entity(name=name,
                    description=row["Description"],
                    char=row["Char"],
-                   fg=fg, bg=bg)
+                   category=row["Category"],
+                   fg=fg,
+                   bg=bg)
 
         e.add_properties(row.iloc[4:].to_dict())
 
