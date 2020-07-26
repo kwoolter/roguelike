@@ -55,6 +55,8 @@ Small Purple Potion,Count,Floor,Level,2,1,10,0.1,2,2
 Small Purple Potion,Probability,Floor,Level,1,0,1,0,100,100
 Small Red Potion,Count,Floor,Level,2,1,10,0.1,2,2
 Small Red Potion,Probability,Floor,Level,1,0,1,0,100,100
+Small Blue Potion,Count,Floor,Level,2,1,10,0.1,2,2
+Small Blue Potion,Probability,Floor,Level,1,0,1,0,100,100
 Sword,Count,Floor,Level,0.15,1,10,1,1,5
 Sword,Probability,Floor,Level,1,5,10,3,100,100
 War Hammer,Count,Floor,Level,2,1,10,0.1,2,2

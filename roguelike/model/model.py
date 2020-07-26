@@ -840,20 +840,33 @@ class Floor():
     def reveal_entities_by_property(self, property_name: str, probability: int = 100):
         self._revealed_entities = list(set(self.entities) & set(self._revealed_entities))
         for e in self.entities:
-            if random.randint(1, 100) <= probability:
-                if e.get_property(property_name) == True:
-                    self._revealed_entities.append(e)
+            if e.get_property(property_name) == True and random.randint(1, 100) <= probability:
+                self._revealed_entities.append(e)
 
 
     def reveal_entities_by_name(self, entity_name: str, probability: int = 100):
         self._revealed_entities = list(set(self.entities) & set(self._revealed_entities))
         for e in self.entities:
-            if random.randint(1, 100) <= probability:
-                if e.name == entity_name:
-                    self._revealed_entities.append(e)
+            if e.name == entity_name and random.randint(1, 100) <= probability:
+                self._revealed_entities.append(e)
+
+    def swap_entities_by_name(self, entity_name: str, new_entity_list, probability: int = 100):
+        for e in self.entities:
+            if e.name == entity_name and random.randint(1, 100) <= probability:
+                new_entity = EntityFactory.get_entity_by_name(random.choice(new_entity_list))
+                self.swap_entity(e, new_entity)
+                print(f'\tyou swap {entity_name} for {new_entity.name}')
 
     def recompute_fov(self, x=None, y=None, radius=None, light_walls=True, algorithm=0):
-
+        """
+        Update the Field of View numpy array and teh explored array based on:-
+        :param x: x position on Floor.  Default use player's x
+        :param y: y position on Floor.  Default use player's y
+        :param radius: radius of the Field of View.  Defult use the class default
+        :param light_walls: Are list walls included in the FOV results?
+        :param algorithm:
+        :return: the updated FOV map in np as an numpy array
+        """
         # Use the player's xy if non specified
         if x is None and self.player is not None:
             x = self.player.x
@@ -943,22 +956,34 @@ class Model():
         self.floors=[]
         self.current_floor = None
         self.events = EventQueue()
+        self.item_user = None
 
     def initialise(self):
         """
-        Description: Initialise an instance of the Model.
-        :arg None
+        Initialise an instance of the Model.
+
         """
+
+        # Load game data from specified files
         GameParameters.load("game_parameters.csv")
         EntityFactory.load("entities.csv")
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
 
-        #self.load_game_parameters()
-
         self.add_player(self.generate_player(name="Keith"))
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)
+
+        self.item_user = ItemUser()
+        self.item_user.initialise()
+
+        random_categories = ("Potion", "Scroll")
+        for category in random_categories:
+            entities = EntityFactory.get_entities_by_category(category)
+            self.item_user.add_randomiser_group(category, entities)
+        self.item_user.randomise()
+
+
 
     def load_game_parameters(self)->dict:
         """
@@ -1284,8 +1309,7 @@ class Model():
         # If we have an item that you can interact with...
         elif new_item.get_property("IsInteractable") == True:
 
-            use = ItemUser(new_item, self.current_floor)
-            success, effect = use.process()
+            success, effect = self.item_user.process(new_item, self.current_floor)
 
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
@@ -1313,74 +1337,104 @@ class Model():
 
 
 class ItemUser():
-    def __init__(self, item : Entity, floor: Floor):
-        self.item = item
-        self.floor = floor
-        self.player = self.floor.player
-        self.item_at_tile = self.floor.get_entity_at_pos(self.player.xy)
-        self.last_enemy = self.floor.last_enemy
+    def __init__(self):
+        self.randomisations = {}
+        self.random_entity_map = {}
 
-    def process(self) -> bool:
+    def initialise(self):
+        self.HP_increase = {"Food": 10, "Small Green Potion": 15, "Healing Scroll": 20, "Small Purple Potion": -10}
+        self.entity_swaps = {"Locked Chest":("Gold", "Food", "Small Green Potion", "Helmet")}
+        self.item_swaps = {"Key":{"Locked Chest":self.entity_swaps["Locked Chest"]}}
+
+    def add_randomiser_group(self, group_name, entities):
+        if group_name not in self.randomisations:
+            self.randomisations[group_name] = []
+        self.randomisations[group_name] = entities
+
+    def randomise(self):
+        for group, entities in self.randomisations.items():
+            a = list(entities)
+            a_names = [i.name for i in a]
+            b = random.sample(a, len(a))
+            c = zip(a_names,b)
+            self.random_entity_map.update(dict(c))
+        print(f'\t{self.random_entity_map}')
+
+    def process(self, item: Entity, floor: Floor) -> bool:
+
+        player = floor.player
+        item_at_tile = floor.get_entity_at_pos(player.xy)
+        last_enemy = floor.last_enemy
+        original_item = item
+
+        if item.name in self.random_entity_map.keys():
+            item = self.random_entity_map[original_item.name]
+            print(f'\t** Using {item.name} instead of {original_item.name}')
+
         success = True
         drop = True
         effect = None
 
-        HP_increase = {"Food":10, "Small Green Potion":15, "Healing Scroll":20, "Small Purple Potion":-10}
-        item_swap = {"Key":{"Locked Chest":("Gold", "Food", "Small Green Potion", "Helmet")}}
-
-        if self.item.name in HP_increase:
-            hp_change = HP_increase[self.item.name]
-            self.player.heal(hp_change)
+        if item.name in self.HP_increase:
+            hp_change = self.HP_increase[item.name]
+            player.heal(hp_change)
             if hp_change>0:
                 effect = "You regain some HP"
             else:
                 effect = "You loose some HP"
 
-        elif self.item.name == "Scroll of Secrets":
-            self.floor.reveal_exit()
+        elif item.name == "Scroll of Secrets":
+            floor.reveal_exit()
             effect = "You learn where the exit to the next floor is"
 
-        elif self.item.name == "Scroll of Teleportation":
-            self.floor.move_player(self.floor.last_room.centerx,
-                                   self.floor.last_room.centery,
+        elif item.name == "Scroll of Teleportation":
+            floor.move_player(floor.last_room.centerx,
+                                   floor.last_room.centery,
                                    relative=False)
             effect = "You are teleported to the exit to the next floor"
 
-        elif self.item.name == "Scroll of Revelation":
-            intelligence = self.player.get_property("INT")
+        elif item.name == "Scroll of Revelation":
+            intelligence = player.get_property("INT")
             probability = int(100 * intelligence/50)
-            self.floor.reveal_entities_by_property("IsEnemy", probability)
+            floor.reveal_entities_by_property("IsEnemy", probability)
             effect = "You reveal the location of some enemies on this floor."
 
-        elif self.item.name == "Scroll of Greed":
-            intelligence = self.player.get_property("INT")
+        elif item.name == "Scroll of Greed":
+            intelligence = player.get_property("INT")
             probability = int(100 * intelligence/50)
-            self.floor.reveal_entities_by_property("IsCollectable", probability)
+            floor.reveal_entities_by_property("IsCollectable", probability)
             effect = "You reveal the location of some items on this floor"
 
+        elif item.name == "Scroll of XYZ":
+            ename = "Locked Chest"
+            dexterity = player.get_property("DEX")
+            probability = int(100 * dexterity/50)
+            floor.swap_entities_by_name(ename, self.entity_swaps[ename] , probability)
+            effect = "You unlock some locked treasure chests"
+
         #elif self.item.name in ("Fireball Scroll", "Lightning Scroll", "Poison Scroll"):
-        elif self.item.category == "Combat":
-            if self.player.fighter.last_target is not None:
-                effect = f"You invoke {self.item.description}"
-                ce = CombatEquipmentFactory.get_equipment_by_name(self.item.name)
-                self.floor.attack_entity(self.player, self.last_enemy, weapon=ce)
+        elif item.category == "Combat":
+            if player.fighter.last_target is not None:
+                effect = f"You invoke {original_item.description}"
+                ce = CombatEquipmentFactory.get_equipment_by_name(item.name)
+                floor.attack_entity(player, last_enemy, weapon=ce)
             else:
-                effect = f'No target for {self.item.description}'
+                effect = f'No target for {item.description}'
                 success = False
 
 
         # Is the item swappable?
-        elif self.item.name in item_swap:
-            swaps = item_swap[self.item.name]
-            if self.item_at_tile is not None and self.item_at_tile.name in swaps:
-                new_entity = EntityFactory.get_entity_by_name(random.choice(swaps[self.item_at_tile.name]))
-                self.floor.swap_entity(self.item_at_tile, new_entity)
-                effect = f'You use {self.item.description}' \
-                         f' on {self.item_at_tile.description}' \
+        elif item.name in self.item_swaps:
+            swaps = self.item_swaps[item.name]
+            if item_at_tile is not None and item_at_tile.name in swaps:
+                new_entity = EntityFactory.get_entity_by_name(random.choice(swaps[item_at_tile.name]))
+                floor.swap_entity(item_at_tile, new_entity)
+                effect = f'You use {item.description}' \
+                         f' on {item_at_tile.description}' \
                          f' and reveal {new_entity.description}'
             else:
                 success=False
-                effect=f"Can't use {self.item.description} right now"
+                effect=f"Can't use {item.description} right now"
         else:
             success = False
             effect = "Nothing happens"

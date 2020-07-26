@@ -437,15 +437,7 @@ class EntityFactory:
         if name in EntityFactory.entities.index:
             row = EntityFactory.entities.loc[name]
 
-            fg = text_to_color(row["FG"])
-            bg = text_to_color(row["BG"])
-            e = Entity(name=name,
-                       description=row["Description"],
-                       char=row["Char"],
-                       category=row["Category"],
-                       fg=fg, bg=bg)
-
-            e.add_properties(row.iloc[5:].to_dict())
+            e = EntityFactory.entity_from_row(name, row)
 
         else:
             print(f"Can't find entity {name} in factory!")
@@ -464,21 +456,46 @@ class EntityFactory:
             matched = df.query(q)
 
             for index, row in matched.iterrows():
-                name = index
-                fg = text_to_color(row["FG"])
-                bg = text_to_color(row["BG"])
-                e = Entity(name=name,
-                           description=row["Description"],
-                           char=row["Char"],
-                           fg=fg, bg=bg)
-
-                e.add_properties(row.iloc[4:].to_dict())
-
+                e = EntityFactory.entity_from_row(index, row)
                 matches.append(e)
         else:
             print(f"Can't find property {property_name} in factory!")
 
         return matches
+
+    @staticmethod
+    def get_entities_by_category(category_name: str) -> list:
+
+        matches = []
+        df = EntityFactory.entities
+
+        q = f"Category == '{category_name}'"
+        matched = df.query(q)
+
+        for index, row in matched.iterrows():
+
+            e = EntityFactory.entity_from_row(index, row)
+
+            matches.append(e)
+
+        return matches
+
+    @staticmethod
+    def entity_from_row(index, row)->Entity:
+
+        name = index
+        fg = text_to_color(row["FG"])
+        bg = text_to_color(row["BG"])
+        e = Entity(name=name,
+                   description=row["Description"],
+                   char=row["Char"],
+                   fg=fg, bg=bg)
+
+        e.add_properties(row.iloc[4:].to_dict())
+
+        return e
+
+
 
 class Inventory:
     def __init__(self, max_items: int = 15):
@@ -549,7 +566,8 @@ class Inventory:
         return success
 
 
-def main():
+
+if __name__ == "__main__":
     EntityFactory.load("entities.csv")
 
     entities = []
@@ -580,7 +598,3 @@ def main():
 
     matches = EntityFactory.get_entities_by_property("IsEnemy")
     print(matches)
-
-
-if __name__ == "__main__":
-    main()
