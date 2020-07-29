@@ -41,7 +41,7 @@ class MainFrame(View):
     MODE_CHARACTER_SCREEN = "character"
     MODE_PAUSED = "paused"
 
-    CONSOLE_MESSAGE_PANEL_HEIGHT = 10
+    CONSOLE_MESSAGE_PANEL_HEIGHT = 12
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
 
     def __init__(self, width: int = 50, height: int = 50):
@@ -400,13 +400,23 @@ class MessagePanel(View):
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
 
-    def add_message(self, new_message: str):
-        self.messages.append(new_message)
-        if len(self.messages) > self.height:
+    def add_message(self, new_message: str, fg=None, bg=None):
+
+        if fg is None:
+            fg = self.fg
+
+        if bg is None:
+            bg = self.bg
+
+        self.messages.append((new_message, fg, bg))
+        if len(self.messages) > self.height - 1:
             del self.messages[0]
 
     def process_event(self, new_event: model.Event):
-        self.add_message(new_event.description)
+
+        fg, bg = EventView.get_event_colours(new_event)
+
+        self.add_message(new_event.description, fg=fg, bg=bg)
 
     def draw(self):
 
@@ -418,24 +428,42 @@ class MessagePanel(View):
         bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
         bo.render(self.con, 0, 0)
 
+
+        x = 1
+        y = 1
+
+        for message, fg, bg in self.messages[-1:0:-1]:
+            if y > self.height - 2:
+                break
+
+            while y < self.height-1 and len(message)>0:
+                message_piece = message[0:self.width-2]
+                libtcod.console_set_default_foreground(self.con, fg)
+                libtcod.console_set_default_background(self.con, bg)
+                libtcod.console_print_ex(self.con,
+                                         x, y,
+                                         flag=libtcod.BKGND_OVERLAY,
+                                         alignment=libtcod.LEFT,
+                                         fmt=message_piece)
+                y+=1
+                message=message[self.width-2:]
+
+
         panel_text = ""
-        for message in self.messages[-1:0:-1]:
-            panel_text += message + "\n"
-
         # Print the panel text
-        so = ScreenStringRect(panel_text,
-                              width=self.width - 2,
-                              height=self.height - 2,
-                              fg=self.fg,
-                              bg=self.bg)
-
-        so.render(self.con, 1, 1)
+        # so = ScreenStringRect(panel_text,
+        #                       width=self.width - 2,
+        #                       height=self.height - 2,
+        #                       fg=self.fg,
+        #                       bg=self.bg)
+        #
+        # so.render(self.con, 1, 1)
 
 
 class InventoryView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
-    STATUS_PANEL_HEIGHT = 4
+    MESSAGE_PANEL_HEIGHT = 8
 
     def __init__(self, width: int, height: int,
                  fg=libtcod.white, bg=libtcod.black,
@@ -458,19 +486,29 @@ class InventoryView(View):
         self.message_event = None
         self.border = None
 
+        self.message_panel = MessagePanel(width=self.width,
+                                          height=InventoryView.MESSAGE_PANEL_HEIGHT,
+                                          fg=libtcod.white,
+                                          bg=libtcod.black,
+                                          border_bg=libtcod.black,
+                                          border_fg=libtcod.green)
+
     def initialise(self, character: model.Entity):
 
         self.character = character
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+        
+        self.message_panel.initialise()
 
     def process_event(self, new_event: model.Event):
         print(f'{__class__}: Event {new_event}')
-        if new_event.name in (model.Event.ACTION_SUCCEEDED, model.Event.ACTION_FAILED):
-            self.message_event = new_event
-        else:
-            self.message_event = None
+
+        self.message_event = new_event
+
+        self.message_panel.process_event(new_event)
+
 
     def change_selection(self, d: int):
 
@@ -493,7 +531,7 @@ class InventoryView(View):
         equipment_to_slot = {v:k for k,v in equipment.items()}
         equipped_item = self.character.fighter.current_item
 
-        equipment_stat_names = ("AC", "INT", "Weight")
+        equipment_stat_names = ("AC", "DEX", "INT", "Weight")
         equipment_totals = self.character.fighter.get_equipment_stat_totals(equipment_stat_names)
 
         inv = self.character.inventory
@@ -541,7 +579,10 @@ class InventoryView(View):
         # Print what is currently equipped
         # Start with the header
         y += 2
-        text = f'Equipment:AC={equipment_totals["AC"]},INT={equipment_totals["INT"]},Weight={equipment_totals["Weight"]}'
+        text = f'Equipment:AC={equipment_totals["AC"]},' \
+               f'INT={equipment_totals["INT"]},' \
+               f'DEX={equipment_totals["DEX"]},' \
+               f'Weight={equipment_totals["Weight"]}'
         so = ScreenStringRect(text,
                               width=self.width - 2,
                               height=self.height - 2,
@@ -723,7 +764,7 @@ class InventoryView(View):
             if combat_eq is not None:
 
                 # Draw a divider and section title
-                y = self.height - 8
+                y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT - 3
                 divider.render(self.con, 0, y)
                 properties = f"Stats:"
 
@@ -739,28 +780,37 @@ class InventoryView(View):
                 y += 1
                 so.render(self.con, 1, y)
 
+        # # Print any event messages that we have received
+        # y = self.height - InventoryView.STATUS_PANEL_HEIGHT - 1
+        #
+        # # Draw a divider
+        # divider.render(self.con, 0, y)
+        #
+        # if self.message_event is not None:
+        #     message_text = self.message_event.description
+        #     if self.message_event.name == model.Event.ACTION_FAILED:
+        #         fg = libtcod.lighter_yellow
+        #     else:
+        #         fg = libtcod.white
+        #
+        #     so = ScreenStringRect(message_text,
+        #                           width=self.width - 2,
+        #                           height=InventoryView.STATUS_PANEL_HEIGHT,
+        #                           fg=fg,
+        #                           bg=self.bg,
+        #                           alignment=libtcod.CENTER)
+        #
+        #     so.render(self.con, int(self.width / 2), self.height - InventoryView.STATUS_PANEL_HEIGHT)
+
         # Print any event messages that we have received
-        y = self.height - InventoryView.STATUS_PANEL_HEIGHT - 1
+        y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT
+        self.message_panel.draw()
+        libtcod.console_blit(self.message_panel.con,
+                             0,0,self.message_panel.width, self.message_panel.height,
+                             self.con,0,y)
 
         # Draw a divider
         divider.render(self.con, 0, y)
-
-        if self.message_event is not None:
-            message_text = self.message_event.description
-            if self.message_event.name == model.Event.ACTION_FAILED:
-                fg = libtcod.lighter_yellow
-            else:
-                fg = libtcod.white
-
-            so = ScreenStringRect(message_text,
-                                  width=self.width - 2,
-                                  height=InventoryView.STATUS_PANEL_HEIGHT,
-                                  fg=fg,
-                                  bg=self.bg,
-                                  alignment=libtcod.CENTER)
-
-            so.render(self.con, int(self.width / 2), self.height - InventoryView.STATUS_PANEL_HEIGHT)
-
 
 class CharacterView(View):
     BORDER_TYPE1 = "type1"
@@ -894,3 +944,33 @@ class CharacterView(View):
 
             so.render(self.con, cx, y)
             y += 1
+
+
+class EventView(View):
+
+    # Type to colour map
+    EVENT_TYPE_TO_COLOUR = {model.Event.STATE: (libtcod.red,None),
+                            model.Event.GAME: (libtcod.lightest_blue, None)}
+
+    EVENT_NAME_TO_COLOUR = {model.Event.ACTION_SUCCEEDED:(libtcod.lighter_green, None),
+                            model.Event.ACTION_FAILED:(libtcod.yellow, libtcod.darkest_red),
+                            model.Event.ACTION_ATTACK:(libtcod.light_red, libtcod.darkest_yellow),
+                            model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, libtcod.darkest_yellow),
+                            model.Event.ACTION_EQUIP: (libtcod.light_sky, libtcod.darkest_yellow),
+                            }
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def get_event_colours(event: model.Event) -> tuple:
+
+        fg, bg = EventView.EVENT_TYPE_TO_COLOUR.get(event.type)
+
+        if event.name in EventView.EVENT_NAME_TO_COLOUR:
+            fg, bg = EventView.EVENT_NAME_TO_COLOUR.get(event.name)
+
+        if fg is None:
+            fg = libtcod.white
+
+        return (fg,bg)

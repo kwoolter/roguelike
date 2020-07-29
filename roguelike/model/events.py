@@ -6,7 +6,6 @@ class Event():
     DEFAULT = "default"
     STATE = "state"
     GAME = "game"
-    WORLD = "world"
     EFFECT = "effect"
 
     # Define states
@@ -27,6 +26,8 @@ class Event():
     ACTION_FAILED = "action failed"
     ACTION_SUCCEEDED = "action succeeded"
     ACTION_ATTACK = "attack"
+    ACTION_EQUIP = "equip"
+    ACTION_TAKE_ITEM = "take_item"
 
     # Event Names
     EFFECT_START = "Effect Start"

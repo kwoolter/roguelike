@@ -830,14 +830,21 @@ class Floor():
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
 
-    def reveal_exit(self):
+    def reveal_map(self, only_exit = False):
         """
-        Show where the final room is by "exploring" it and reveal the down stairs entity
+        Reveal  parts of the Floor map by "exploring" them
+        :param only_exit:
         """
+        if only_exit is True:
+            # Show where the final room of the floor is (CHEAT)
+            x, y, w, h = self.last_room.rect
+            self.explored[x:x + w, y: y + h] = 1
 
-        # Show where the final room of the floor is (CHEAT)
-        x, y, w, h = self.last_room.rect
-        self.explored[x:x + w, y: y + h] = 1
+        # Explore the WHOLE map
+        else:
+            self.explored[:,:] = 1
+
+        # Show the stairs down to teh next level
         self.reveal_entities_by_name("Down Stairs")
 
     def reveal_entities_by_property(self, property_name: str, probability: int = 100):
@@ -1089,8 +1096,15 @@ class Model():
         :return: The newly created Player object
         """
 
+
+        player_entity = EntityFactory.get_entity_by_name("Player")
+
         # Create a new player
-        new_player = Player(name=name)
+        new_player = Player(name=name,
+                            char=player_entity.char,
+                            description=player_entity.description,
+                            category=player_entity.category,
+                            fg = player_entity.fg)
 
         # Assign them a combat class
         cc = CombatClassFactory.get_combat_class_by_name("Fighter")
@@ -1104,7 +1118,7 @@ class Model():
             new_player.fighter.equip_item(eq)
 
         # Give the player some basic items
-        basic_items = ("Food", "Food")
+        basic_items = ("Food", "Food", "Small Red Potion", "Key")
         for item in basic_items:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
@@ -1144,7 +1158,7 @@ class Model():
             if success is True:
                 self.current_floor.swap_entity(e)
                 self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_SUCCEEDED,
+                                            name=Event.ACTION_TAKE_ITEM,
                                             description=f"You picked up {e.description}!"))
             else:
                 self.events.add_event(Event(type=Event.GAME,
@@ -1270,7 +1284,7 @@ class Model():
             success = self.player.equip_item(new_item)
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_SUCCEEDED,
+                                            name=Event.ACTION_EQUIP,
                                             description=f"You equip {new_item.description}"))
 
         elif new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True:
@@ -1279,7 +1293,7 @@ class Model():
 
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_SUCCEEDED,
+                                            name=Event.ACTION_EQUIP,
                                             description=f"You take {new_item.description} out of your backpack"))
 
         else:
@@ -1364,31 +1378,63 @@ class ItemUser():
         self.random_entity_map = {}
 
     def initialise(self):
-        self.HP_increase = {"Food": 10, "Small Green Potion": 15, "Healing Scroll": 20, "Small Purple Potion": -10}
+
+
+        self.HP_increase = {"Food": 5, "Small Green Potion": 10, "Healing Scroll": 20, "Small Purple Potion": -10}
+
+        # What can you swap an entity for?
         self.entity_swaps = {"Locked Chest":("Gold", "Food", "Small Green Potion", "Helmet")}
+
+        # If you use an item what effect does it have on the item you used it on?
         self.item_swaps = {"Key":{"Locked Chest":self.entity_swaps["Locked Chest"]}}
 
     def add_randomiser_group(self, group_name, entities):
+        """
+        Add a group of items that you want to be randomised e.g. a group of potions
+        :param group_name: name of teh group of items e.g. Potion
+        :param entities: the list of entities that you want randomised using the randomise() method
+        """
         if group_name not in self.randomisations:
             self.randomisations[group_name] = []
         self.randomisations[group_name] = entities
 
     def randomise(self):
+        """
+        Randomise items and their effects that have been loaded using add_randomiser_group()
+        """
+        # For each group of items that you want to randomise...
         for group, entities in self.randomisations.items():
+            # Get the list of items
             a = list(entities)
+            # Build a list of just their names
             a_names = [i.name for i in a]
+
+            # Shuffle the list of items into a new list
             b = random.sample(a, len(a))
+
+            # Zip the original item names to teh shuffled list
             c = zip(a_names,b)
+
+            # Store the mapping
             self.random_entity_map.update(dict(c))
+
         print(f'\t{self.random_entity_map}')
 
     def process(self, item: Entity, floor: Floor) -> bool:
+        """
+        Use a specified item in the context of a specified floor
+        :param item: the item that is being used
+        :param floor: the floor that the item is being used on
+        :return: True is you successfully used the item else False
+        """
 
+        # Get useful objects that we will need when using items
         player = floor.player
         item_at_tile = floor.get_entity_at_pos(player.xy)
         last_enemy = floor.last_enemy
         original_item = item
 
+        # If the specified has been randomised then map it to the random item
         if item.name in self.random_entity_map.keys():
             item = self.random_entity_map[original_item.name]
             print(f'\t** Using {item.name} instead of {original_item.name}')
@@ -1397,6 +1443,7 @@ class ItemUser():
         drop = True
         effect = None
 
+        # See if the item being used provides a change in HP...
         if item.name in self.HP_increase:
             hp_change = self.HP_increase[item.name]
             player.heal(hp_change)
@@ -1405,28 +1452,59 @@ class ItemUser():
             else:
                 effect = "You loose some HP"
 
+        # Placeholder
+        elif item.name == "Small Red Potion":
+            effect = "Redness!"
+        # Placeholder
+        elif item.name == "Small Blue Potion":
+            effect = "It tastes good.  Buuuurrrrrrppp!"
+
+        # Gain experience
+        elif item.name == "Small Bubbling Potion":
+            level = player.get_property("Level")
+            effect = "The potion grants you increased experience!"
+            XP_reward = random.randint(level*10,level*50)
+            player.fighter.add_XP(XP_reward)
+
+        # Reveal the whole Floor map!!!
+        elif item.name == "Map":
+            intelligence = player.get_property("INT")
+            probability = int(100 * intelligence/50)
+            if random.randint(1,100) < probability:
+                floor.reveal_map()
+                effect = "You read the map to learn the layout of this floor!"
+            else:
+                effect = "You can't read the map so you throw it away in frustration!"
+                player.drop_item(item)
+                success = False
+
+        # Reveal where the exit is
         elif item.name == "Scroll of Secrets":
-            floor.reveal_exit()
+            floor.reveal_map(only_exit=True)
             effect = "You learn where the exit to the next floor is"
 
+        # Teleport to the exit
         elif item.name == "Scroll of Teleportation":
             floor.move_player(floor.last_room.centerx,
                                    floor.last_room.centery,
                                    relative=False)
             effect = "You are teleported to the exit to the next floor"
 
+        # Reveal the location of enemies.  Probability of success based on Player's Intelligence.
         elif item.name == "Scroll of Revelation":
             intelligence = player.get_property("INT")
             probability = int(100 * intelligence/50)
             floor.reveal_entities_by_property("IsEnemy", probability)
             effect = "You reveal the location of some enemies on this floor."
 
+        # Reveal the location of items. Probability of success based on Player's Intelligence.
         elif item.name == "Scroll of Greed":
             intelligence = player.get_property("INT")
             probability = int(100 * intelligence/50)
             floor.reveal_entities_by_property("IsCollectable", probability)
             effect = "You reveal the location of some items on this floor"
 
+        # Open locked chests.  Probability of success based on Player's Dexterity.
         elif item.name == "Scroll of XYZ":
             ename = "Locked Chest"
             dexterity = player.get_property("DEX")
@@ -1434,7 +1512,7 @@ class ItemUser():
             floor.swap_entities_by_name(ename, self.entity_swaps[ename] , probability)
             effect = "You unlock some locked treasure chests"
 
-        #elif self.item.name in ("Fireball Scroll", "Lightning Scroll", "Poison Scroll"):
+        # Attack an enemy
         elif item.category == "Combat":
             if player.fighter.last_target is not None:
                 effect = f"You invoke {original_item.description}"
@@ -1457,6 +1535,7 @@ class ItemUser():
             else:
                 success=False
                 effect=f"Can't use {item.description} right now"
+
         else:
             success = False
             effect = "Nothing happens"

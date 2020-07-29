@@ -122,7 +122,12 @@ class Player(Entity):
     """
     MAX_INVENTORY_ITEMS = 15
 
-    def __init__(self, name: str, x: int = 0, y: int = 0):
+    def __init__(self, name: str,
+                 description: str,
+                 category:str,
+                 char: str,
+                 fg,
+                 x: int = 0, y: int = 0):
         """
         Create a new instance of a Player.
 
@@ -132,7 +137,12 @@ class Player(Entity):
         """
 
         # Initialise parent class
-        super().__init__(name=name, description="The player", category='Player', char='@', x=x, y=y)
+        super().__init__(name=name,
+                         description=description,
+                         category=category,
+                         char=char,
+                         fg = fg,
+                         x=x, y=y)
 
         # Components
         # Give the player an inventory to store items in
