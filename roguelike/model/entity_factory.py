@@ -191,8 +191,10 @@ class Player(Entity):
         return self.inventory.remove_item(old_item)
 
     def level_up(self, stat_name: str = None):
-        self.fighter.level_up(stat_name)
-        self.heal(20)
+        success = self.fighter.level_up(stat_name)
+        if success is True:
+            self.heal(20)
+        return success
 
     def get_stat_total(self, stat_name: str) -> int:
         totals = self.fighter.get_equipment_stat_totals([stat_name])
@@ -222,7 +224,7 @@ class Fighter():
 
     @property
     def is_dead(self) -> bool:
-        return self.combat_class.get_property("HP") < 0
+        return self.get_property("HP") < 0
 
     @property
     def current_weapon(self) -> Entity:
@@ -326,9 +328,12 @@ class Fighter():
 
     def level_up(self, stat_name = None):
         """
-        Level up a Fighter and increase the specified stat
-        :param stat_name: the stat that you want to increase
+        Level up a Fighter and increase the specified stat.
+        :param stat_name: the stat that you want to increase. Default is None.
         """
+
+        success = True
+
         level = self.get_property("Level")
         if level is None:
             level = 1
@@ -338,14 +343,17 @@ class Fighter():
         self.set_property("Level", level)
 
         if stat_name is not None:
-            value = self.combat_class.get(stat_name)
+            value = self.combat_class.get_property(stat_name)
             if value is None:
                 value = 1
             else:
                 value +=1
-            self.combat_class[stat_name] = value
+
+            self.combat_class.update_property(property_name = stat_name, new_value=value)
 
         self.set_property("MaxHP", self.get_max_HP())
+
+        return success
 
     def equip_item(self, new_item: Entity, slot:str = None) -> Entity:
         """

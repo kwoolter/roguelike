@@ -19,7 +19,7 @@ Gold Ring,a gold ring,o,Equipment,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Helmet,a metal helmet,^,Equipment,black,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Iron Crown,a iron crown,~,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Leather Armour,a leather tunic,#,Equipment,orange,dark_red,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
-Robe of Learning,a glittering robe,#,Equipment,red,white,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
+Robe of Learning,a glittering robe,#,Equipment,lighter_azure,white,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Tunic of Dexterity,a shiny smooth tunic,#,Equipment,red,silver,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Leather Boots,a pair of old leather boots,b,Equipment,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Metal Shield,a metal shield,O,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
@@ -42,14 +42,14 @@ Pillar,a stone pillar,+,Object,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,F
 Room,a room,O,Object,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 Trap,a hidden trap,*,Object,yellow,red,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
 Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE
-Dead Player,the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
+Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 NPC,a strange man,K,Player,yellow,,1,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE
 Player,the player,@,Player,black,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 Small Bubbling Potion,a bottle of bubbling potion,P,Potion,sky,fuchsia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Small Green Potion,a bottle of green potion,P,Potion,white,dark_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Small Purple Potion,a bottle of purple potion,P,Potion,white,dark_purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Green Potion,a bottle of green potion,P,Potion,lightest_grey,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Purple Potion,a bottle of purple potion,P,Potion,lightest_grey,dark_purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Small Red Potion,a bottle of red potion,P,Potion,lightest_grey,dark_red,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
-Small Blue Potion,a bottle of blue potion,P,Potion,white,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
+Small Blue Potion,a bottle of blue potion,P,Potion,lightest_grey,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Healing Scroll,a magic healing scroll,+,Equipment,red,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Scroll of Greed,an ornate scroll,~,Scroll,white,purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Scroll of Revelation,a dark scroll,~,Scroll,white,black,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE

@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 import re
 import random
+import logging
 
 
 class CombatClass:
@@ -56,7 +57,7 @@ class CombatClassFactory:
             e.add_properties(row.iloc[:].to_dict())
 
         else:
-            print(f"Can't find combat class {name} in factory!")
+            logging.warning(f"Can't find combat class {name} in factory!")
 
         return e
 
@@ -154,10 +155,8 @@ class CombatEquipmentFactory:
             row = CombatEquipmentFactory.combat_equipment.loc[name]
             e = CombatEquipment(name=name, description=row["Description"], slot = row["Slot"])
             e.add_properties(row.iloc[2:].to_dict())
-
         else:
-            print(f"Can't find combat equipment {name} in factory!")
-            #print(f'Index: {CombatEquipmentFactory.combat_equipment.index}')
+            logging.info(f"Can't find combat equipment {name} in factory!")
 
         return e
 

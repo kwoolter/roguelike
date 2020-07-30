@@ -8,7 +8,6 @@ class View():
     events = None
 
     def __init__(self, width: int = 0, height: int = 0):
-
         # Properties
         self.width = width
         self.height = height
@@ -39,7 +38,9 @@ class MainFrame(View):
     MODE_PLAYING = "playing"
     MODE_INVENTORY_SCREEN = "inventory"
     MODE_CHARACTER_SCREEN = "character"
+    MODE_CHARACTER_CREATION_SCREEN = "character creation"
     MODE_PAUSED = "paused"
+    MODE_GAME_OVER = "game over"
 
     CONSOLE_MESSAGE_PANEL_HEIGHT = 12
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
@@ -48,6 +49,8 @@ class MainFrame(View):
 
         super().__init__(width=width, height=height)
         # Properties
+        self._mode = None
+        self._old_mode = None
         self.mode = MainFrame.MODE_PLAYING
 
         # Components
@@ -75,7 +78,27 @@ class MainFrame(View):
                                             border_bg=libtcod.black,
                                             border_fg=libtcod.green)
 
+        self.character_creation_view = CreateCharacterView(width=int(self.width - 6),
+                                                           height=int(self.height * 2 / 3),
+                                                           fg=libtcod.white,
+                                                           bg=libtcod.black,
+                                                           border_bg=libtcod.black,
+                                                           border_fg=libtcod.green)
+
         self.text_entry = TextEntryBox()
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @mode.setter
+    def mode(self, new_mode):
+        self._old_mode = self._mode
+        self._mode = new_mode
+
+    @property
+    def has_mode_changed(self) -> bool:
+        return self._mode != self._old_mode
 
     def initialise(self, model: model.Model):
 
@@ -122,9 +145,14 @@ class MainFrame(View):
         self.message_panel.add_message(f"Welcome to {self.game.name}")
         self.inventory_view.initialise(self.game.player)
         self.character_view.initialise(self.game.player)
+        self.character_creation_view.initialise(self.game)
 
     def set_mode(self, new_mode: str):
         self.mode = new_mode
+
+        if self.has_mode_changed is True:
+            self.inventory_view.clear_messages()
+            self.character_view.clear_messages()
 
     def process_event(self, new_event: model.Event):
 
@@ -134,18 +162,21 @@ class MainFrame(View):
             if new_event.name == model.Event.GAME_NEW_FLOOR:
                 self.floor_view.initialise(floor=self.game.current_floor)
 
-        self.floor_view.process_event(new_event)
         self.message_panel.process_event(new_event)
 
         if self.mode == MainFrame.MODE_INVENTORY_SCREEN:
             self.inventory_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_CHARACTER_SCREEN:
             self.character_view.process_event(new_event)
+        elif self.mode == MainFrame.MODE_PLAYING:
+            self.floor_view.process_event(new_event)
+
 
     def draw(self):
 
+        # Clear the root console
         self.con.default_bg = libtcod.black
-        libtcod.console_clear(self.con)
+        libtcod.console_clear(0)
 
         # If we are playing then draw the current floor, etc.
         if self.mode == MainFrame.MODE_PLAYING:
@@ -169,6 +200,15 @@ class MainFrame(View):
                                  0, self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
                                  ffade=1, bfade=1)
 
+            status = f'HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} '
+            stats = {"AC", "DEX", "INT", "XP"}
+            for stat in stats:
+                stat_value = self.game.player.get_property(stat)
+                status += f'{stat}={stat_value} '
+
+            so = ScreenString(text=status, alignment=libtcod.LEFT)
+            so.render(0, x=0, y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 1)
+
         # If we are in INVENTORY mode then draw the inventory screen
         elif self.mode == MainFrame.MODE_INVENTORY_SCREEN:
             self.inventory_view.draw()
@@ -190,6 +230,7 @@ class MainFrame(View):
             self.character_view.draw()
             bx = int((self.width - self.character_view.width) / 2)
             by = int((self.height - self.character_view.height) / 2)
+            by = 1
             # Blit the character panel
             libtcod.console_blit(self.character_view.con,
                                  0, 0,
@@ -199,11 +240,27 @@ class MainFrame(View):
                                  bx, by,
                                  ffade=1, bfade=1)
 
+        # If we are in CHARACTER CREATION mode then draw the character creation screen
+        elif self.mode == MainFrame.MODE_CHARACTER_CREATION_SCREEN:
+            # Redraw the character creation view
+            self.character_creation_view.draw()
+            bx = int((self.width - self.character_creation_view.width) / 2)
+            by = int((self.height - self.character_creation_view.height) / 2)
+            by = 1
+            # Blit the character panel
+            libtcod.console_blit(self.character_creation_view.con,
+                                 0, 0,
+                                 self.character_creation_view.width,
+                                 self.character_creation_view.height,
+                                 0,
+                                 bx, by,
+                                 ffade=1, bfade=1)
+
         # Otherwise just display current mode in a box!!!
         else:
             # Draw box with current game mode
             bw = int(self.width / 2)
-            bh = 8
+            bh = 7
             bx = int((self.width - bw) / 2)
             by = int((self.height - bh) / 2)
 
@@ -217,10 +274,11 @@ class MainFrame(View):
             so = ScreenString(panel_text,
                               fg=libtcod.yellow,
                               bg=libtcod.darkest_gray)
-            so.render(0, bw, by + 2, alignment=libtcod.CENTER)
+            so.render(0, bw, by + 3, alignment=libtcod.CENTER)
 
             # Add game title
-            bw = int(self.width / 2)
+            panel_text = " R o g u e   T o w e r ".upper()
+            bw = len(panel_text) + 7
             bh = 5
             bx = int((self.width - bw) / 2)
             by = 1
@@ -228,11 +286,10 @@ class MainFrame(View):
             bo = ScreenObject2DArray(box, fg=libtcod.green, bg=libtcod.grey)
             bo.render(0, bx, 1)
 
-            panel_text = "Rogue Tower"
             so = ScreenString(panel_text,
                               fg=libtcod.darker_green,
                               bg=libtcod.darkest_gray)
-            so.render(0, bw, by + 2, alignment=libtcod.CENTER)
+            so.render(0, int(self.width/2), by + 2, alignment=libtcod.CENTER)
 
         libtcod.console_flush()
 
@@ -263,9 +320,8 @@ class FloorView(View):
         # Model Floor that we are going to render
         self.floor = None
 
-        # The console taht we are going to draw onto
+        # The console that we are going to draw onto
         self.con = None
-
 
     def initialise(self, floor: model.Floor):
         # Connect the view to the model
@@ -332,7 +388,6 @@ class FloorView(View):
                 else:
                     libtcod.console_set_char_background(self.con, x, y, self.bg_explored_wall)
 
-
         # Draw any entities that have been revealed to the player
         for e in self.floor.get_revealed_entities():
             x, y = e.xy
@@ -365,7 +420,7 @@ class FloorView(View):
         # Draw the player
         p = self.floor.player
         libtcod.console_set_default_foreground(self.con, p.fg)
-        libtcod.console_put_char(self.con, x=p.x, y=p.y, c="&", flag=libtcod.BKGND_NONE)
+        libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_NONE)
 
         # Draw name of current room
         if self._debug is True:
@@ -418,6 +473,9 @@ class MessagePanel(View):
 
         self.add_message(new_event.description, fg=fg, bg=bg)
 
+    def clear_messages(self):
+        self.messages = []
+
     def draw(self):
 
         # Clear the screen with the background colour
@@ -428,7 +486,6 @@ class MessagePanel(View):
         bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
         bo.render(self.con, 0, 0)
 
-
         x = 1
         y = 1
 
@@ -436,8 +493,8 @@ class MessagePanel(View):
             if y > self.height - 2:
                 break
 
-            while y < self.height-1 and len(message)>0:
-                message_piece = message[0:self.width-2]
+            while y < self.height - 1 and len(message) > 0:
+                message_piece = message[0:self.width - 2]
                 libtcod.console_set_default_foreground(self.con, fg)
                 libtcod.console_set_default_background(self.con, bg)
                 libtcod.console_print_ex(self.con,
@@ -445,9 +502,8 @@ class MessagePanel(View):
                                          flag=libtcod.BKGND_OVERLAY,
                                          alignment=libtcod.LEFT,
                                          fmt=message_piece)
-                y+=1
-                message=message[self.width-2:]
-
+                y += 1
+                message = message[self.width - 2:]
 
         panel_text = ""
         # Print the panel text
@@ -476,7 +532,7 @@ class InventoryView(View):
         self.bg = bg
         self.border_fg = border_fg
         self.border_bg = border_bg
-        self.border_type = InventoryView.BORDER_TYPE1
+        self.border_type = InventoryView.BORDER_TYPE2
 
         # Components
         self.con = None
@@ -499,7 +555,8 @@ class InventoryView(View):
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
-        
+
+        self.message_panel.border_type = self.border_type
         self.message_panel.initialise()
 
     def process_event(self, new_event: model.Event):
@@ -508,7 +565,6 @@ class InventoryView(View):
         self.message_event = new_event
 
         self.message_panel.process_event(new_event)
-
 
     def change_selection(self, d: int):
 
@@ -523,12 +579,15 @@ class InventoryView(View):
 
         return self.selected_item_entity
 
+    def clear_messages(self):
+        self.message_panel.clear_messages()
+
     def draw(self):
 
         # Get some short cuts to the data that we are going to display
         cc = self.character.fighter.combat_class
         equipment = self.character.fighter.equipment
-        equipment_to_slot = {v:k for k,v in equipment.items()}
+        equipment_to_slot = {v: k for k, v in equipment.items()}
         equipped_item = self.character.fighter.current_item
 
         equipment_stat_names = ("AC", "DEX", "INT", "Weight")
@@ -680,7 +739,7 @@ class InventoryView(View):
 
                 # If this is the currently selected item the swap bg and fg...
                 if i == self.selected_item:
-                    fg, bg = bg,fg
+                    fg, bg = bg, fg
                     fg = libtcod.black
                     self.selected_item_entity = item
 
@@ -727,10 +786,9 @@ class InventoryView(View):
                     bg = libtcod.black
                     fg = libtcod.yellow
 
-
                 # If this is the currently selected item swap fg and bg
                 if i == (self.selected_item - len(inventory)):
-                    fg,bg = bg,fg
+                    fg, bg = bg, fg
                     self.selected_item_entity = item
 
                 so = ScreenString(text,
@@ -755,7 +813,6 @@ class InventoryView(View):
 
                 y += 1
 
-
         # If an item is selected...
         if self.selected_item_entity is not None:
 
@@ -772,11 +829,11 @@ class InventoryView(View):
                 for k, v in combat_eq.properties.items():
                     properties += f'{k}={v} '
                 so = ScreenStringRect(properties,
-                                      width=self.width-2,
+                                      width=self.width - 2,
                                       height=2,
-                                  fg=self.fg,
-                                  bg=self.bg,
-                                  alignment=libtcod.LEFT)
+                                      fg=self.fg,
+                                      bg=self.bg,
+                                      alignment=libtcod.LEFT)
                 y += 1
                 so.render(self.con, 1, y)
 
@@ -806,15 +863,18 @@ class InventoryView(View):
         y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT
         self.message_panel.draw()
         libtcod.console_blit(self.message_panel.con,
-                             0,0,self.message_panel.width, self.message_panel.height,
-                             self.con,0,y)
+                             0, 0, self.message_panel.width, self.message_panel.height,
+                             self.con, 0, y)
 
         # Draw a divider
         divider.render(self.con, 0, y)
 
+
 class CharacterView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
+
+    MESSAGE_PANEL_HEIGHT = 6
 
     def __init__(self, width: int, height: int,
                  fg=libtcod.white, bg=libtcod.black,
@@ -822,16 +882,28 @@ class CharacterView(View):
 
         super().__init__(width=width, height=height)
 
+        # Properties
         self.fg = fg
         self.bg = bg
         self.border_fg = border_fg
         self.border_bg = border_bg
-
-        self.con = None
-        self.character = None
-
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
+        self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
+        self.other_stats = ('XP', 'Level', 'HP')
+        self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
+
+        # Components
+        self.con = None
+        self.character = None
+        self.selected_item = 0
+
+        self.message_panel = MessagePanel(width=self.width,
+                                          height=CharacterView.MESSAGE_PANEL_HEIGHT,
+                                          fg=libtcod.white,
+                                          bg=libtcod.black,
+                                          border_bg=libtcod.black,
+                                          border_fg=libtcod.green)
 
     def initialise(self, character: model.Entity):
 
@@ -840,8 +912,27 @@ class CharacterView(View):
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
 
+        self.message_panel.border_type = self.border_type
+        self.message_panel.initialise()
+
     def process_event(self, new_event: model.Event):
-        pass
+        self.message_panel.process_event(new_event)
+
+    def change_selection(self, d: int):
+
+        self.selected_item += d
+        self.selected_item = min(max(0, self.selected_item), len(self.abilities) - 1)
+
+    def get_selected_stat(self) -> str:
+        stat_name = None
+
+        if self.selected_item >= 0 and self.selected_item < len(self.abilities):
+            return self.abilities[self.selected_item]
+
+        return stat_name
+
+    def clear_messages(self):
+        self.message_panel.clear_messages()
 
     def draw(self):
 
@@ -849,11 +940,8 @@ class CharacterView(View):
         cc = self.character.fighter.combat_class
 
         # Character Equipment stats
-        equipment_stat_names = ("AC", "Weight")
-        equipment_totals = self.character.fighter.get_equipment_stat_totals(equipment_stat_names)
-        print(equipment_totals)
-        ac = self.character.get_stat_total("AC")
-        print(f'Total AC={ac}')
+        equipment_totals = self.character.fighter.get_equipment_stat_totals(self.equipment_stats)
+        # ac = self.character.get_stat_total("AC")
 
         # Clear the screen with the background colour
         self.con.default_bg = self.bg
@@ -881,14 +969,122 @@ class CharacterView(View):
 
         y += 2
 
+        abilities_start_y = y
+
         # Draw a divider
-        divider.render(self.con, 0, y)
+        divider.render(self.con, 0, abilities_start_y)
+
+        y += 2
+        text = "Abilities:"
+        so = ScreenString(text,
+                          fg=libtcod.amber,
+                          bg=self.bg,
+                          alignment=libtcod.CENTER)
+
+        so.render(self.con, int(cx / 2), y)
 
         y += 2
 
-        for stat, value in cc.properties.items():
+        for i, stat in enumerate(self.abilities):
+            stat_value = self.character.fighter.get_property(stat)
+            stat_modifier = self.character.fighter.get_property_modifier(stat)
+            if stat is not None:
+
+                text = f'{stat}: {stat_value} ({stat_modifier})'
+
+                fg = self.fg
+                bg = self.bg
+
+                if i == self.selected_item:
+                    fg, bg = bg, fg
+
+                so = ScreenString(text,
+                                  fg=fg,
+                                  bg=bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, int(cx / 2), y)
+                y += 1
+
+        y += 1
+
+        abilities_end_y = y
+
+        y = abilities_start_y
+
+        y += 2
+
+        text = "Other Stats:"
+        so = ScreenString(text,
+                          fg=libtcod.amber,
+                          bg=self.bg,
+                          alignment=libtcod.CENTER)
+
+        so.render(self.con, int(cx * 3 / 2), y)
+
+        y += 2
+
+        for i, stat in enumerate(self.other_stats):
+            stat_value = cc.properties.get(stat)
+            if stat is not None:
+                text = f'{stat}: {stat_value}'
+
+                so = ScreenString(text,
+                                  fg=self.fg,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, int(cx * 3 / 2), y)
+                y += 1
+
+        # Draw a divider
+        divider.render(self.con, 0, abilities_end_y)
+
+        # Create a vertical divider
+        v_divider_box = Boxes.get_box_divider(length=abilities_end_y - abilities_start_y + 1,
+                                              border_type=self.border_type,
+                                              orient=Boxes.DIVIDER_VERTICAL)
+        v_divider = ScreenObject2DArray(v_divider_box, fg=self.border_fg, bg=self.border_bg)
+        v_divider.render(self.con, cx, abilities_start_y)
+
+        y = abilities_end_y + 2
+
+        # Print what is currently equipped
+        text = f'Equipment:AC={equipment_totals["AC"]},' \
+               f'INT={equipment_totals["INT"]},' \
+               f'DEX={equipment_totals["DEX"]},' \
+               f'Weight={equipment_totals["Weight"]}'
+        so = ScreenStringRect(text,
+                              width=self.width - 2,
+                              height=self.height - 2,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y += 2
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        # ??? print ???
+        y += 2
+
+        text = f"Stats:"
+
+        so = ScreenStringRect(text,
+                              width=self.width - 2,
+                              height=self.height - 2,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y += 2
+        for stat, value in entity_stats.items():
             text = f'{stat}: {value}'
-            # Print the panel text
             so = ScreenString(text,
                               fg=self.fg,
                               bg=self.bg,
@@ -897,15 +1093,104 @@ class CharacterView(View):
             so.render(self.con, cx, y)
             y += 1
 
-        y += 1
+        # Print any event messages that we have received
+        y = self.height - CharacterView.MESSAGE_PANEL_HEIGHT
+        self.message_panel.draw()
+        libtcod.console_blit(self.message_panel.con,
+                             0, 0, self.message_panel.width, self.message_panel.height,
+                             self.con, 0, y)
 
         # Draw a divider
         divider.render(self.con, 0, y)
 
-        y += 2
 
-        # Print what is currently equipped
-        text = f'Equipment: AC={equipment_totals["AC"]}, Weight={equipment_totals["Weight"]}'
+class CreateCharacterView(View):
+    MODE_DISPLAY_CHARACTER = "display_character"
+    MODE_NAME_PICK = "name_pick"
+    MODE_CLASS_PICK = "class_pick"
+
+    BORDER_TYPE1 = "type1"
+    BORDER_TYPE2 = "type2"
+
+    MESSAGE_PANEL_HEIGHT = 6
+
+    def __init__(self, width: int, height: int,
+                 fg=libtcod.white, bg=libtcod.black,
+                 border_fg=libtcod.white, border_bg=libtcod.black):
+        super().__init__(width=width, height=height)
+
+        # Properties
+        self.fg = fg
+        self.bg = bg
+        self.border_fg = border_fg
+        self.border_bg = border_bg
+        self.border_type = CreateCharacterView.BORDER_TYPE2
+        self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
+
+        # Components
+        self.border = None
+        self.con = None
+        self.character = None
+
+        self.message_panel = MessagePanel(width=self.width,
+                                          height=CreateCharacterView.MESSAGE_PANEL_HEIGHT,
+                                          fg=libtcod.white,
+                                          bg=libtcod.black,
+                                          border_bg=libtcod.black,
+                                          border_fg=libtcod.green)
+
+        self.character_view = CharacterView(width=self.width,
+                                            height=20,
+                                            fg=libtcod.white,
+                                            bg=libtcod.black,
+                                            border_bg=libtcod.black,
+                                            border_fg=libtcod.green)
+
+        self.text_entry = None
+
+    def initialise(self, game: model.Model):
+        self.game = game
+        self.character_name = "Unknown"
+        self.character_class = "Unknown"
+        self.character = self.game.player
+
+        self.con = libtcod.console_new(self.width, self.height)
+        self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+        self.message_panel.border_type = self.border_type
+        self.message_panel.initialise()
+
+        self.character_view.initialise(self.character)
+
+        self.text_entry = TextEntryBox(width=20, parent=self.con)
+
+    def process_event(self, new_event: model.Event):
+        self.message_panel.process_event(new_event)
+
+    def change_selection(self, d: int):
+        pass
+
+    def clear_messages(self):
+        self.message_panel.clear_messages()
+
+    def draw(self):
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+        #redraw=False
+
+        cx, cy = self.center
+
+        # Draw the border
+        bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
+        bo.render(self.con, 0, 0)
+
+        # Create a box divider
+        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
+        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
+
+        y = 2
+        text = f"Create a New Character"
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -921,42 +1206,72 @@ class CharacterView(View):
 
         y += 2
 
-        text = f"Stats:"
+        text = f'Name: {self.character_name}'
 
-        # Print the panel text
-        so = ScreenStringRect(text,
-                              width=self.width - 2,
-                              height=self.height - 2,
-                              fg=self.fg,
-                              bg=self.bg,
-                              alignment=libtcod.CENTER)
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.LEFT)
 
-        so.render(self.con, cx, y)
+        so.render(self.con, x=2, y=y)
+
+        if self.mode == CreateCharacterView.MODE_NAME_PICK:
+            text_entry = TextEntryBox(width=20, parent=self.con, xpos=8, ypos = 6)
+            self.character_name = text_entry.get_text(max_length=20)
+            self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
+
+        text = f'Name: {self.character_name}'
+
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.LEFT)
+
+        so.render(self.con, x=2, y=y)
 
         y += 2
-        for stat, value in entity_stats.items():
-            text = f'{stat}: {value}'
-            # Print the panel text
-            so = ScreenString(text,
-                              fg=self.fg,
-                              bg=self.bg,
-                              alignment=libtcod.CENTER)
 
-            so.render(self.con, cx, y)
-            y += 1
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y += 2
+
+        text = f'Class: {self.character_class}'
+
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.LEFT)
+
+        so.render(self.con, x=2, y=y)
+
+        y += 2
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        # Print any event messages that we have received
+        y = self.height - CharacterView.MESSAGE_PANEL_HEIGHT
+        self.message_panel.draw()
+        libtcod.console_blit(self.message_panel.con,
+                             0, 0, self.message_panel.width, self.message_panel.height,
+                             self.con, 0, y)
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
 
 
 class EventView(View):
-
     # Type to colour map
-    EVENT_TYPE_TO_COLOUR = {model.Event.STATE: (libtcod.red,None),
+    EVENT_TYPE_TO_COLOUR = {model.Event.STATE: (libtcod.red, None),
                             model.Event.GAME: (libtcod.lightest_blue, None)}
 
-    EVENT_NAME_TO_COLOUR = {model.Event.ACTION_SUCCEEDED:(libtcod.lighter_green, None),
-                            model.Event.ACTION_FAILED:(libtcod.yellow, libtcod.darkest_red),
-                            model.Event.ACTION_ATTACK:(libtcod.light_red, libtcod.darkest_yellow),
+    EVENT_NAME_TO_COLOUR = {model.Event.ACTION_SUCCEEDED: (libtcod.lighter_green, None),
+                            model.Event.ACTION_FAILED: (libtcod.yellow, libtcod.darkest_red),
+                            model.Event.ACTION_ATTACK: (libtcod.light_red, libtcod.darkest_yellow),
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, libtcod.darkest_yellow),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, libtcod.darkest_yellow),
+                            model.Event.LEVEL_UP_AVAILABLE: (libtcod.gold, libtcod.red)
                             }
 
     def __init__(self):
@@ -973,4 +1288,4 @@ class EventView(View):
         if fg is None:
             fg = libtcod.white
 
-        return (fg,bg)
+        return (fg, bg)

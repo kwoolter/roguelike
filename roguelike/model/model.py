@@ -1062,6 +1062,19 @@ class Model():
         if self.state == Model.GAME_STATE_PLAYING:
             self.current_floor.tick()
 
+        print(f'is dead?={self.player.fighter.is_dead}')
+            
+        if self.player.fighter.is_dead == True:
+            self.current_floor.swap_entity(self.player, "Dead Player")
+            self.state = Model.GAME_STATE_GAME_OVER
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.PLAYER_DEAD,
+                                        description=f"You died!"))
+
+            self.events.add_event(Event(type=Event.STATE,
+                                        name=Event.STATE_GAME_OVER,
+                                        description=f"Game Over!"))
+
     def set_state(self, new_state):
         """
         Change the stats of the model to a new state but store what the old state was
@@ -1271,7 +1284,7 @@ class Model():
             player_level = game_parameters["Game"]["Player"]["Level"]
             if player_level > self.player.get_property("Level"):
                 self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_SUCCEEDED,
+                                            name=Event.LEVEL_UP_AVAILABLE,
                                             description=f"*** Time to level up to level {player_level}! ***"))
 
 
@@ -1347,10 +1360,14 @@ class Model():
 
             success, effect = self.item_user.process(new_item, self.current_floor)
 
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_SUCCEEDED,
+                                        description=f"You use {new_item.description}"))
+
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
-                                            description=f"You use {new_item.description}: {effect}"))
+                                            description=f"{effect}"))
             else:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_FAILED,
@@ -1368,6 +1385,31 @@ class Model():
                 self.player.equip_item(None, slot=Fighter.ITEM_SLOT)
 
             self.player.drop_item(new_item)
+
+        return success
+
+
+    def level_up(self, stat_name = None)->bool:
+
+         # Update the game parameters and get the level that the player can upgrade to
+        game_parameters = self.load_game_parameters()
+        player_level = game_parameters["Game"]["Player"]["Level"]
+
+        if player_level > self.player.get_property("Level"):
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.LEVEL_UP,
+                                        description=f"You levelled up!"))
+
+
+            success = self.player.level_up(stat_name=stat_name)
+
+        else:
+
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You don't have enough XP to level up!"))
+
+            success = False
 
         return success
 
