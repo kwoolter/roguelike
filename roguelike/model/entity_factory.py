@@ -148,6 +148,10 @@ class Player(Entity):
         # Give the player an inventory to store items in
         self.inventory = Inventory(max_items=Player.MAX_INVENTORY_ITEMS)
 
+    @property
+    def combat_class(self):
+        return self.fighter.combat_class.name
+
     def get_property(self, property_name: str):
         value = self.properties.get(property_name)
         if value is None:

@@ -524,7 +524,7 @@ class Floor():
             if e is not None:
                 self.events.add_event(
                     Event(type=Event.GAME,
-                          name=Event.ACTION_SUCCEEDED,
+                          name=Event.ACTION_FOUND_ITEM,
                           description=f"You found {e.description}!"))
 
             # See if we changed rooms/tunnels
@@ -644,10 +644,9 @@ class Floor():
         :param target: The Entity that is the target of the attack
         """
         self.events.add_event(
-            Event(type=Event.GAME,
+            Event(type=Event.DEBUG,
                   name=Event.ACTION_ATTACK,
                   description=f"{attacker.description} attacks {target.description}"))
-
 
         attacker.fighter.last_target = target
 
@@ -681,20 +680,23 @@ class Floor():
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_FAILED,
-                          description=f"{target.description} is out of range for {weapon.description}"))
+                          description=f"{target.description.capitalize()} is out of range for {weapon.description}"))
 
             else:
 
                 # Roll some damage based on the attackers weapon and deduct damage from target's HP
                 dmg = CombatEquipmentFactory.get_damage_roll_by_name(weapon.name)
-                print(f'\t{weapon.name} deals {dmg} damage')
 
                 target.fighter.take_damage(dmg)
+
+                # Strip of the first word of the weapon description
+                # e.g 'a small dagger' -> 'small dagger'
+                weapon_name = weapon.description[weapon.description.find(' ')+1:]
 
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"{attacker.description}'s {weapon.description} deals {dmg} damage"))
+                          description=f"{attacker.description.capitalize()}'s {weapon_name} deals {dmg} damage"))
 
                 # If the target died...
                 if target.fighter.is_dead:
@@ -713,14 +715,14 @@ class Floor():
                     self.events.add_event(
                         Event(type=Event.GAME,
                               name=Event.ACTION_SUCCEEDED,
-                              description=f"{attacker.description} kills {target.description} and gains {XP} XP"))
+                              description=f"{attacker.description.capitalize()} kills {target.description} and gains {XP} XP"))
 
         # The attack failed...
         else:
             self.events.add_event(
                 Event(type=Event.GAME,
                       name=Event.ACTION_FAILED,
-                      description=f"{attacker.description} swings at {target.description}...and misses!"))
+                      description=f"{attacker.description.capitalize()} swings at {target.description} and misses!"))
 
     def get_current_room(self, xy:tuple = None) -> Room:
         """
@@ -974,6 +976,7 @@ class Model():
         """:arg name the name that you want to give to this game
         """
 
+        # Properties of the game
         self.name = name
         self.dungeon_level = 0
         self.state = None
@@ -999,7 +1002,9 @@ class Model():
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
 
-        self.add_player(self.generate_player(name="Keith"))
+        if self.player is None:
+            self.add_player(self.generate_player(name="Keith", class_name="Rogue"))
+
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)
 
@@ -1010,8 +1015,8 @@ class Model():
         for category in random_categories:
             entities = EntityFactory.get_entities_by_category(category)
             self.item_user.add_randomiser_group(category, entities)
-        self.item_user.randomise()
 
+        self.item_user.randomise()
 
 
     def load_game_parameters(self)->dict:
@@ -1062,8 +1067,6 @@ class Model():
         if self.state == Model.GAME_STATE_PLAYING:
             self.current_floor.tick()
 
-        print(f'is dead?={self.player.fighter.is_dead}')
-            
         if self.player.fighter.is_dead == True:
             self.current_floor.swap_entity(self.player, "Dead Player")
             self.state = Model.GAME_STATE_GAME_OVER
@@ -1085,6 +1088,10 @@ class Model():
             self._old_state = self.state
             self.state = new_state
 
+            self.events.add_event(Event(type=Event.STATE,
+                                        name=new_state,
+                                        description=f"{self.name}: {new_state.upper()}"))
+
     def set_mode(self, new_mode):
         self.set_state(new_mode)
 
@@ -1100,7 +1107,7 @@ class Model():
             next_event = self.events.pop_event()
         return next_event
 
-    def generate_player(self, name:str)->Player:
+    def generate_player(self, name:str, class_name:str)->Player:
         """
         Create an instance of a Player with the specified name, give them a combat class
         and give them some basic equipment.
@@ -1120,7 +1127,7 @@ class Model():
                             fg = player_entity.fg)
 
         # Assign them a combat class
-        cc = CombatClassFactory.get_combat_class_by_name("Fighter")
+        cc = CombatClassFactory.get_combat_class_by_name(class_name)
         new_player.fighter = Fighter(combat_class=cc)
 
         # Give the player some basic equipment
@@ -1142,6 +1149,13 @@ class Model():
 
     def add_player(self, new_player: Player):
         self.player = new_player
+
+        self.events.add_event(Event(type=Event.GAME,
+                                    name=Event.GAME_NEW_PLAYER,
+                                    description=f"{self.player.name} the {self.player.combat_class} joined {self.name}!"))
+
+        if self.current_floor is not None:
+            self.current_floor.add_player(self.player)
 
     def get_current_player(self):
         return self.player

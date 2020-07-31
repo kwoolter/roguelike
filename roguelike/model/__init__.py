@@ -7,3 +7,5 @@ from . entity_factory import EntityFactory
 from . events import Event
 from . combat import CombatEquipment
 from . combat import CombatEquipmentFactory
+from . combat import CombatClass
+from . combat import CombatClassFactory

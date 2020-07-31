@@ -6,6 +6,7 @@ class Event():
     DEFAULT = "default"
     STATE = "state"
     GAME = "game"
+    CONTROL = "control"
     EFFECT = "effect"
 
     # Define states
@@ -17,6 +18,7 @@ class Event():
     STATE_WORLD_COMPLETE = "Game World Complete"
 
     # Game events
+    GAME_NEW_PLAYER = "new player"
     GAME_NEW_FLOOR = "new floor"
     GAME_FLOOR_COMPLETED = "floor completed"
     TICK = "Tick"
@@ -28,6 +30,7 @@ class Event():
     ACTION_ATTACK = "attack"
     ACTION_EQUIP = "equip"
     ACTION_TAKE_ITEM = "take_item"
+    ACTION_FOUND_ITEM = "found_item"
     LEVEL_UP_AVAILABLE = "level up available"
     LEVEL_UP = "level up"
     PLAYER_DEAD = "player dead"

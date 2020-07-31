@@ -2,7 +2,7 @@ import roguelike.controller as cont
 
 def main():
 
-    c = cont.Controller("Rogue")
+    c = cont.Controller("Rogue Dungeon")
     c.initialise()
     c.run()
 

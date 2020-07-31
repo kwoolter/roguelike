@@ -33,6 +33,10 @@ class Controller():
         self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
 
+        self.events.add_event(model.Event(type=model.Event.CONTROL,
+                                    name=model.Event.STATE_LOADED,
+                                    description="Hit 'N' to create a new character"))
+
     def set_mode(self, new_mode):
 
         if new_mode != self.mode:
@@ -173,18 +177,31 @@ class Controller():
                     stat_name = self.view.character_view.get_selected_stat()
                     self.model.level_up(stat_name)
 
-            # If we are in CHARACTER mode
+            # If we are in CHARACTER CREATION mode
             elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
 
                 edit_name = action.get('edit_name')
                 edit_class = action.get('edit_class')
+                select = action.get("select")
 
                 if edit_name:
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_NAME_PICK
                 elif edit_class:
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_CLASS_PICK
-                else:
-                    self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
+                elif move:
+                    dx, dy = move
+                    self.view.character_creation_view.change_selection(dy)
+                elif select:
+                    if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
+                        name = self.view.character_creation_view.character_name
+                        class_name = self.view.character_creation_view.get_selected_class()
+                        self.model.add_player(self.model.generate_player(name, class_name))
+                        self.view.character_creation_view.initialise(self.model)
+                        self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
+
+
+                # else:
+                #     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
 
 
             # If we are in INVENTORY mode
@@ -224,9 +241,8 @@ class Controller():
             elif self.mode == Controller.GAME_MODE_GAME_OVER:
                 start = action.get("start")
                 if start:
-                    self.set_mode(Controller.GAME_MODE_START)
                     self.initialise()
-
+                    self.set_mode(Controller.GAME_MODE_START)
 
             if exit:
                 self.set_mode(self.last_mode)
@@ -373,11 +389,12 @@ class Controller():
             return {'edit_name': True}
         elif key_char == "c":
             return {'edit_class': True}
-        # Movement keys
         elif key.vk == libtcod.KEY_UP:
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN:
             return {'move': (0, 1)}
+        elif key.vk == libtcod.KEY_ENTER:
+            return {'select': True}
         elif key.vk == libtcod.KEY_ESCAPE or key_char == "c":
             # Exit the menu
             return {'exit': True}
