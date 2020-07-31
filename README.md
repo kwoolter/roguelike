@@ -4,8 +4,8 @@ This game is a rogue-like game that uses the `libtcod` library and is loosely ba
 
 ### Controls
 Game Ready
-* `N` creat a new character
-* `SPACE` to start
+* `N` create a new character
+* `SPACE` to start the game
 * `Esc` quit the game
 
 Create New Character Screen
@@ -99,18 +99,18 @@ Overview:
 <table>
 <tr>
 <td>
-<img height=350 width=300 src="https://github.com/kwoolter/roguelike/tree/master/roguelike/view/screenshots/new_character.JPG" alt="new character">
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/new_character.JPG" alt="new character">
 </td>
 <td>
-<img height=350 width=300 src="https://github.com/kwoolter/roguelike/tree/master/roguelike/view/screenshots/floor1.JPG" alt="exploring">
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/floor1.JPG" alt="exploring">
 </td>
 </tr>
 <tr>
 <td>
-<img height=350 width=300 src="https://github.com/kwoolter/roguelike/tree/master/roguelike/view/screenshots/inventor.JPG" alt="inventory">
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/inventory.JPG" alt="inventory">
 </td>
 <td>
-<img height=350 width=300 src="https://github.com/kwoolter/roguelike/tree/master/roguelike/view/screenshots/character.JPG" alt="character">
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/character.JPG" alt="character">
 </td>
 </tr>
 </table>
@@ -118,7 +118,7 @@ Overview:
 
 # Useful Links
 
-## Documentation
+## `libtcod` Documentation
 * https://libtcod.github.io/docs/index2.html?c=false&cpp=false&cs=false&py=true&lua=false
 
 ## Tutorial on writing a game using libtcod
