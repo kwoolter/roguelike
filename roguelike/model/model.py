@@ -748,7 +748,13 @@ class Floor():
                     self.events.add_event(
                         Event(type=Event.GAME,
                               name=Event.ACTION_SUCCEEDED,
-                              description=f"{attacker.description.capitalize()} kills {target.description} and gains {XP} XP"))
+                              description=f"{attacker.description.capitalize()} kills {target.description}."))
+
+                    self.events.add_event(
+                        Event(type=Event.GAME,
+                              name=Event.ACTION_GAIN_XP,
+                              description=f"{attacker.description.capitalize()} gains {XP} XP"))
+
 
         # The attack failed...
         else:

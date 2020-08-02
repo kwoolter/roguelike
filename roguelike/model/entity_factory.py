@@ -120,7 +120,7 @@ class Player(Entity):
         MAX_INVENTORY_ITEMS (int): What is the max allowable size of the player's inventory
 
     """
-    MAX_INVENTORY_ITEMS = 10
+    MAX_INVENTORY_ITEMS = 20
 
     def __init__(self, name: str,
                  description: str,

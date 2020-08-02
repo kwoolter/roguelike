@@ -60,3 +60,9 @@ Scroll of Secrets,a mysterious scroll,~,Scroll,white,dark_blue,4,TRUE,TRUE,TRUE,
 Scroll of Teleportation,a green scroll,~,Scroll,white,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Scroll of XYZ,a tattered scroll,~,Scroll,black,sepia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE
 Map,an old map,M,Object,black,sepia,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE
+Giant Centipede,a giant centipede,S,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Giant Rat,a giant rat,X,Enemy,darker_orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Giant Spider,a giant spider,*,Enemy,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Goblin Boss,a goblin boss,G,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Orc War Chief,an orc war chief,O,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Ogre,an ogre,O,Enemy,dark_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE

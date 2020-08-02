@@ -295,8 +295,8 @@ class MainFrame(View):
 
         # Draw the status line
         ac = self.game.player.fighter.get_defence("AC")
-        status = f'Floor={self.game.dungeon_level} HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} AC={ac} '
-        stats = {"DEX", "INT", "XP", "Level"}
+        status = f'Flr={self.game.dungeon_level} HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} AC={ac} '
+        stats = ["DEX", "INT", "XP", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
             status += f'{stat}={stat_value} '
