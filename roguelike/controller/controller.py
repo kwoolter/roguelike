@@ -422,7 +422,7 @@ class Controller():
         if key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
-        elif key.vk == libtcod.KEY_ENTER:
+        elif key.vk in (libtcod.KEY_ENTER, libtcod.KEY_SPACE):
             return {'start': True}
         elif key.vk == libtcod.KEY_ESCAPE or key_char == "c":
             # Exit the menu

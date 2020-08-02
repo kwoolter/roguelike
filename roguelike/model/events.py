@@ -31,6 +31,7 @@ class Event():
     ACTION_EQUIP = "equip"
     ACTION_TAKE_ITEM = "take_item"
     ACTION_FOUND_ITEM = "found_item"
+    ACTION_GAIN_XP = "gain XP"
     LEVEL_UP_AVAILABLE = "level up available"
     LEVEL_UP = "level up"
     PLAYER_DEAD = "player dead"

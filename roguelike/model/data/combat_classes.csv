@@ -1,12 +1,20 @@
-Name,Playable,Level1HP,HPPerLevel,STR,CON,DEX,INT,CHA,WIS,AC
-Cleric,TRUE,12,5,11,13,14,12,10,16,1
-Fighter,TRUE,15,6,16,14,11,10,13,12,2
-Paladin,TRUE,15,6,16,13,10,11,14,12,1
-Wizard,TRUE,10,4,10,11,14,16,12,13,0
-Rogue,TRUE,12,5,10,14,16,11,12,13,1
-Ranger,TRUE,12,5,11,14,16,12,10,13,1
-Minion,FALSE,6,1,10,10,10,10,10,10,0
-Standard,FALSE,11,2,12,12,12,12,12,12,1
-Elite,FALSE,15,3,15,15,15,15,15,15,2
-Solo,FALSE,30,5,20,20,20,20,20,20,5
-Template,FALSE,12,5,16,14,13,12,11,10,0
+Name,Playable,Level1HP,Level1HPDice,HPPerLevel,STR,DEX,CON,INT,WIS,CHA,AC,XP,DefaultATK,DefaultATKDice
+Cleric,TRUE,12,,5,11,14,13,12,16,10,1,0,Hands,1d2
+Fighter,TRUE,15,,6,16,11,14,10,12,13,2,0,Hands,1d2
+Paladin,TRUE,15,,6,16,10,13,11,12,14,1,0,Hands,1d2
+Wizard,TRUE,10,,4,10,14,11,16,13,12,0,0,Hands,1d2
+Rogue,TRUE,12,,5,10,16,14,11,13,12,1,0,Hands,1d2
+Ranger,TRUE,12,,5,11,16,14,12,13,10,1,0,Hands,1d2
+Orc,FALSE,0,2d8+6,0,16,12,16,7,11,10,13,100,a Greataxe,1d12+3
+Troll,FALSE,0,8d10+40,0,18,13,20,7,9,7,15,100,Bite,1d6+4
+Goblin,FALSE,0,2d6,0,8,14,10,10,8,8,15,50,a Scimitar,1d6+2
+Ogre,FALSE,0,7d10+21,0,19,8,16,5,7,7,11,450,a Greatclub,2d8+4
+Venomous Snake,FALSE,0,1d4,0,2,16,11,1,10,3,13,25,Bite,2d4
+Rat,FALSE,0,1d4,0,2,11,9,2,10,4,10,10,Bite,1d1
+Spider,FALSE,0,1d4,0,1,14,8,1,10,2,12,10,Bite,1d4
+Giant Spider,FALSE,0,4d10+4,0,14,16,12,2,11,4,14,200,Bite,1d8+3
+Scorpion,FALSE,0,1d4,0,2,11,8,1,8,2,11,10,a Sting,1d8
+Giant Rat,FALSE,0,2d6,0,7,15,11,2,10,4,12,25,Bite,1d4+2
+Giant Centipede,FALSE,0,1d6+1,0,5,14,12,1,7,3,13,50,Bite,1d4+2
+Orc War Chief,FALSE,0,11d8+44,0,18,12,18,11,11,16,16,1100,a Spear,1d6+4
+Goblin Boss,FALSE,0,6d6,0,10,14,10,10,8,10,17,200,a Scimitar,1d6+2

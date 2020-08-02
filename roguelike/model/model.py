@@ -158,7 +158,13 @@ class Floor():
         # Floor generation parameters
         self.room_parameters = params["Room"]
         self.floor_parameters = params["Floor"]
+
+        # Get the number of rooms we want to add to this floor
         self.room_count = self.floor_parameters["Room"]["Count"]
+
+        # Get the Max XP of enemies allowed per room
+        self.room_xp_cap = self.room_parameters["MaxXP"]["Count"]
+
         self.room_min_size = 4
         self.room_size_haircut = 0.75
         self.room_max_size = int(max(math.sqrt(self.width * self.height / self.room_count) * self.room_size_haircut, self.room_min_size))
@@ -229,7 +235,8 @@ class Floor():
         for ename in enames:
             emax = self.room_parameters[ename]['Count']
             eprob = self.room_parameters[ename]['Probability']
-            room_entities_template.append((ename,eprob,emax))
+            if emax>0 and eprob>0:
+                room_entities_template.append((ename,eprob,emax))
 
         print("*"*40)
         print(room_entities_template)
@@ -240,7 +247,8 @@ class Floor():
         for ename in enames:
             emax = self.floor_parameters[ename]['Count']
             eprob = self.floor_parameters[ename]['Probability']
-            floor_entities.append((ename,eprob,emax))
+            if emax>0 and eprob>0:
+                floor_entities.append((ename,eprob,emax))
 
         print("*"*40)
         print(floor_entities)
@@ -340,6 +348,19 @@ class Floor():
 
         return stats_text
 
+    def get_XP_reward(self) -> int:
+        reward = 0
+
+        rooms = len(self.map_rooms)
+        rooms_explored = len(self._explored_rooms)
+        reward += int(rooms_explored * 100/ rooms)
+
+        tiles = np.count_nonzero(self.walkable)
+        tiles_explored = np.count_nonzero((np.logical_and(self.walkable,self.explored)))
+        reward += int(tiles_explored*100/tiles)
+
+        return reward
+
 
     def add_player(self, new_player: Player, first_room = True):
 
@@ -364,6 +385,8 @@ class Floor():
         :param entities: a list of tuples that each specifies entity name, entity probability and max entity count
         """
 
+        enemy_xp_total = 0
+
         # loop through the entities that we are randomly deploying
         for ename, eprob, emax in entities:
 
@@ -374,12 +397,17 @@ class Floor():
             # Get a sample of the entity that we are trying deploy
             e=EntityFactory.get_entity_by_name(ename)
 
+            # If the entity is an enemy and we have already hit the XP cap then loop to next entity
+            if e.get_property("IsEnemy") == True and enemy_xp_total >= self.room_xp_cap:
+                print(f'XP at {enemy_xp_total} which exceeds cap of {self.room_xp_cap}')
+                continue
+
             # If it is solid and it doesn't move...
             # ...then avoid putting it around the edge of the room where it might block a tunnel!
             if e.get_property("IsWalkable") == False and \
                 e.get_property("IsEnemy") == False:
                 margin = 1
-                #print(f"margin = 1 for {e.name}:{e.description}")
+
             else:
                 margin = 0
 
@@ -402,6 +430,11 @@ class Floor():
 
                         # if the entity is an enemy then create an AI bot to control it
                         if new_entity.get_property("IsEnemy") == True:
+                            cc = CombatClassFactory.get_combat_class_by_name(new_entity.name)
+
+                            assert cc is not None,f'Trying to add an enemy {new_entity.name} that does not have a Combat Class set-up'
+
+                            enemy_xp_total += cc.get_property("XP")
                             self.generate_new_enemy(new_entity)
                             new_bot = AIBotTracker(new_entity, self)
                             self.bots.append(new_bot)
@@ -411,21 +444,22 @@ class Floor():
         Add random Fighter characteristics to an Entity
         :param new_entity: the entity that we want to turn into a Fighter
         """
-        class_name = random.choice(("Minion", "Standard", "Elite", "Solo"))
-        equipment = random.choice(("Hands", "Dagger", "Spear"))
+
+        class_name = new_entity.name
+        equipment = random.choices(("Hands", "Dagger", "Spear"), weights =[5,4,3], k=2)[0]
 
         cc = CombatClassFactory.get_combat_class_by_name(class_name)
         eq = EntityFactory.get_entity_by_name(equipment)
 
         new_fighter = Fighter(combat_class=cc)
-        new_fighter.equip_item(eq)
+        #new_fighter.level_up()
+        #new_fighter.equip_item(eq)
 
-        for i  in range(self.level):
-            if i % 2 == 0:
+        for i in range(1,self.level):
+            if i % 3 == 0:
                 new_fighter.level_up()
 
         new_entity.fighter = new_fighter
-        #new_fighter.print()
 
     def add_entities_to_floor(self, entities: dict):
 
@@ -658,17 +692,15 @@ class Floor():
         attack_ability = weapon.get_property("ATK")
         defence_ability = weapon.get_property("DEF")
 
-        print(f'using weapon {weapon.description} ({attack_ability} vs {defence_ability}')
-
         # Roll a 20 sided dice and add to attack power
         attack = attacker.fighter.get_attack(attack_ability) + random.randint(1,20)
 
         # Calculate the target's ability defence
-        target_defence = target.fighter.get_stat_total(defence_ability)
-        target_level = target.fighter.get_property("Level")
-        defence = 10 + target_defence + math.floor(target_level/2)
+        defence = target.fighter.get_defence(defence_ability)
 
+        print(f'{attacker.name} using weapon {weapon.description} ({attack_ability} vs {defence_ability})')
         print(f'{attacker.name} ATK ({attack_ability}={attack}) vs ({defence_ability}={defence}) DEF of {target.name}')
+        print(f'Defender HP={target.fighter.combat_class.get_property("HP")}')
 
         # Did the attack succeed...?
         if attack > defence:
@@ -685,7 +717,8 @@ class Floor():
             else:
 
                 # Roll some damage based on the attackers weapon and deduct damage from target's HP
-                dmg = CombatEquipmentFactory.get_damage_roll_by_name(weapon.name)
+                #dmg = CombatEquipmentFactory.get_damage_roll_by_name(weapon.name)
+                dmg = weapon.get_damage_roll()
 
                 target.fighter.take_damage(dmg)
 
@@ -696,7 +729,7 @@ class Floor():
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"{attacker.description.capitalize()}'s {weapon_name} deals {dmg} damage"))
+                          description=f"{attacker.description.capitalize()} deals {dmg} damage using {weapon.name}"))
 
                 # If the target died...
                 if target.fighter.is_dead:
@@ -1262,6 +1295,11 @@ class Model():
                                                 name=Event.GAME_FLOOR_COMPLETED,
                                                 description=f"  * {stat}"))
 
+                xp = self.current_floor.get_XP_reward()
+                self.player.fighter.add_XP(self.current_floor.get_XP_reward())
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_GAIN_XP,
+                                            description=f"{xp} XP awarded"))
 
             self.dungeon_level += 1
 
@@ -1288,7 +1326,7 @@ class Model():
             self.current_floor.add_player(self.player)
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.GAME_NEW_FLOOR,
-                                        description=f"{self.name}:'{self.current_floor.name}' at Level {self.dungeon_level} Ready!"))
+                                        description=f"{self.name}: Dungeon Level {self.dungeon_level} Ready!"))
 
             self.player.heal(10)
             self.events.add_event(Event(type=Event.GAME,
@@ -1436,7 +1474,7 @@ class ItemUser():
     def initialise(self):
 
 
-        self.HP_increase = {"Food": 5, "Small Green Potion": 10, "Healing Scroll": 20, "Small Purple Potion": -10}
+        self.HP_increase = {"Food": 5, "Small Green Potion": 10, "Small Red Potion": 15, "Healing Scroll": 20, "Small Purple Potion": -10}
 
         # What can you swap an entity for?
         self.entity_swaps = {"Locked Chest":("Gold", "Food", "Small Green Potion", "Helmet")}
@@ -1508,9 +1546,6 @@ class ItemUser():
             else:
                 effect = "You loose some HP"
 
-        # Placeholder
-        elif item.name == "Small Red Potion":
-            effect = "Redness!"
         # Placeholder
         elif item.name == "Small Blue Potion":
             effect = "It tastes good.  Buuuurrrrrrppp!"

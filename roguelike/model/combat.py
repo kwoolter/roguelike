@@ -4,6 +4,43 @@ import re
 import random
 import logging
 
+def dnd_dice_text_to_roll(dice_text: str):
+    """
+
+    :param dice_text: the DnD text representation of dice
+    :return: the result of rolling the dice combo
+    """
+    # Define regex for parsing the text
+    number_of_dice = re.compile(r'^\d+(?=d)')
+    dice_sides = re.compile(r'(?<=\dd)\d+')
+    extra_bonus = re.compile(r'(?<=\d\+)\d+$')
+
+    # Use regex to extract the dice info from the text
+    r = number_of_dice.search(dice_text)
+    assert r is not None, "Can't find number of dice"
+    num_dice = int(r[0])
+    r = dice_sides.search(dice_text)
+    assert r is not None, "Can't find number of dice sides"
+    num_dice_sides = int(r[0])
+
+    # Bonus is optional
+    r = extra_bonus.search(dice_text)
+    if r is not None:
+        bonus = int(r[0])
+    else:
+        bonus = 0
+
+    # Now time to roll the dice!
+    result = 0
+
+    for i in range(num_dice):
+        result += random.randint(1, num_dice_sides)
+    result += bonus
+
+    print(f"Rolling {num_dice} x {num_dice_sides} sided dice + {bonus} = {result}")
+
+    return result
+
 
 class CombatClass:
 
@@ -47,14 +84,24 @@ class CombatClassFactory:
         CombatClassFactory.combat_classes = pd.read_csv(file_to_open)
         CombatClassFactory.combat_classes.set_index("Name", drop=True, inplace=True)
 
+        print(CombatClassFactory.combat_classes.tail(10))
+
     @staticmethod
     def get_combat_class_by_name(name: str) -> CombatClass:
         ccf = CombatClassFactory.combat_classes
         e = None
-        if name in ccf.index:
+        if name in list(ccf.index):
             row = ccf.loc[name]
             e = CombatClass(name)
             e.add_properties(row.iloc[:].to_dict())
+
+            if e.get_property("Level1HP") <= 0:
+                hp_dice = e.get_property("Level1HPDice")
+                hp = dnd_dice_text_to_roll(hp_dice)
+                e.update_property("Level1HP", hp)
+
+                print(f'{e.name}: rolled HP {hp_dice}={hp}')
+
 
         else:
             logging.warning(f"Can't find combat class {name} in factory!")
@@ -89,7 +136,7 @@ class CombatEquipment:
 
     def get_damage_roll(self)->int:
         dmg_dice = self.get_property("DMG")
-        return CombatEquipment.dnd_dice_text_to_roll(dmg_dice)
+        return dnd_dice_text_to_roll(dmg_dice)
 
 
     @staticmethod

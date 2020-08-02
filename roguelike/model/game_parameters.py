@@ -18,6 +18,7 @@ class GameParameters:
 
         # Read in the csv file
         GameParameters.parameters = pd.read_csv(file_to_open)
+        GameParameters.parameters.dropna(inplace=True)
         GameParameters.parameters.set_index(["Entity", "Metric"], drop=True, inplace=True)
 
         print(GameParameters.parameters)
@@ -45,7 +46,7 @@ class GameParameters:
 
         # Calculate y = a*x + b + (x div d)*ad applying min and max constraints
         result = a*xvalue + b
-        result += (ad * xvalue//d)
+        result += (ad * (xvalue//d))
         result = min(max(result, min_), max_)
 
         print(f'When {xname}={xvalue} {yname} {ymetric}={result} per {yscope}')
@@ -79,11 +80,11 @@ if __name__ == "__main__":
     GameParameters.load("game_parameters.csv")
     GameParameters.parameters.head()
 
-    for yname, ymetric in GameParameters.parameters.index:
+    for yname, ymetric in GameParameters.parameters.index[:5]:
         xname = GameParameters.get_parameter_input(yname, ymetric)
         print(f'To calculate {yname} {ymetric} you need {xname}')
 
-    yname="Room"
+    yname="Orc"
     ymetric = "Count"
     xname = GameParameters.get_parameter_input(yname, ymetric)
     yscope = GameParameters.get_parameter_scope(yname, ymetric)
@@ -99,10 +100,10 @@ if __name__ == "__main__":
         result = GameParameters.get_parameter(yname=yname, ymetric = "Count", xvalue=level)
 
     results = GameParameters.get_parameters_by_scope("Room")
-    print(results)
-    print(list(results))
+    #print(results)
+    #print(list(results))
 
     results = GameParameters.get_parameters_by_scope("Floor")
-    print(results)
-    print(list(results))
+    #print(results)
+    #print(list(results))
 

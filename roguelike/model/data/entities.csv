@@ -11,6 +11,9 @@ War Hammer,a mighty War Hammer,T,Combat,darkest_grey,,4,TRUE,TRUE,FALSE,TRUE,FAL
 Goblin,an evil Goblin,g,Enemy,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Orc,a small green Orc,o,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Spider,a large spider,*,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Rat,a rat,x,Enemy,darker_orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Scorpion,a scorpion,s,Enemy,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
+Venomous Snake,a venomous snake,S,Enemy,dark_sea,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Troll,a large Troll,T,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE
 Bronze Ring,a plain bronze ring,o,Equipment,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE
 Buckler,a small buckler,O,Equipment,copper,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE

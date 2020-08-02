@@ -120,7 +120,7 @@ class Player(Entity):
         MAX_INVENTORY_ITEMS (int): What is the max allowable size of the player's inventory
 
     """
-    MAX_INVENTORY_ITEMS = 15
+    MAX_INVENTORY_ITEMS = 10
 
     def __init__(self, name: str,
                  description: str,
@@ -225,10 +225,13 @@ class Fighter():
         self.combat_class = combat_class
         self.equipment = {}
         Fighter.DEFAULT_WEAPON = EntityFactory.get_entity_by_name(Fighter.DEFAULT_WEAPON_NAME)
+        self.set_property("Level", 0)
+        self.set_property("HP", self.get_max_HP())
+
 
     @property
     def is_dead(self) -> bool:
-        return self.get_property("HP") < 0
+        return self.combat_class.get_property("HP") < 0
 
     @property
     def current_weapon(self) -> Entity:
@@ -245,10 +248,16 @@ class Fighter():
     @property
     def current_weapon_details(self) -> CombatEquipment:
         eq = self.equipment.get(Fighter.WEAPON_SLOT)
-        if eq is None:
-            eq = Fighter.DEFAULT_WEAPON
 
-        ce = CombatEquipmentFactory.get_equipment_by_name(eq.name)
+        if eq is None:
+            ce = CombatEquipmentFactory.get_equipment_by_name("Default Weapon")
+            ce.name = self.get_property("DefaultATK")
+            ce.description = self.get_property("DefaultATK")
+            ce.set_property("DMG", self.get_property("DefaultATKDice"))
+
+        else:
+            ce = CombatEquipmentFactory.get_equipment_by_name(eq.name)
+
         return ce
 
     def get_property(self, property_name:str):
@@ -271,7 +280,14 @@ class Fighter():
         return modifier
 
     def get_max_HP(self)->int:
-        con = self.get_property("CON")
+
+        # If this is a playable character then use their Constitution
+        if self.combat_class.get_property("Playable") == True:
+            con = self.get_property("CON")
+        # Else not required as already baked into "Level1HP" stat
+        else:
+            con = 0
+
         level  = self.get_property("Level")
         level_1_HP = self.get_property("Level1HP")
         HP_per_level = self.get_property("HPPerLevel")
@@ -291,7 +307,7 @@ class Fighter():
         if v is not None:
             total += v
 
-        print(f'\tEquipment {stat_name} total = {total}')
+        #print(f'\tEquipment {stat_name} total = {total}')
 
         return total
 
@@ -313,9 +329,17 @@ class Fighter():
         :param ability: the nme of the ability that you will be using to attack
         :return: current total defence value
         """
-        ability_modifier = self.get_stat_total(ability)
+
+        # If this is a playable character then add bonus
+        if self.combat_class.get_property("Playable") == True:
+            bonus = 10
+        # Else not required as already part of AC stats for the fighter
+        else:
+            bonus = 0
+
+        defence = self.get_stat_total(ability)
         level = self.get_property("Level")
-        return 10 + ability_modifier + math.floor(level/2)
+        return bonus + defence + math.floor(level/2)
 
     def take_damage(self, damage_amount: int):
         self.combat_class.update_property("HP", damage_amount * -1, increment=True)
@@ -367,6 +391,8 @@ class Fighter():
         :return: the item that was replaced in the equipment slot
         """
 
+
+
         # If no slot specified use the default slot for this type of equipment
         if slot is None:
             new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)
@@ -404,21 +430,13 @@ class Fighter():
 
     def get_XP_reward(self) -> int:
         """
-        Calculate and return the XP reward for defecting this Fighter
+        Calculate and return the XP reward for defeating this Fighter
         :return: the XP reward
         """
 
-        # Define multipliers for the combat classes of the enemy
-        XP_by_monster_difficulty = {"Standard":1, "Minion": 0.25, "Elite": 2}
-
-        level = self.get_property("Level")
-        class_ = self.combat_class.name
-        class_XP_multiplier = XP_by_monster_difficulty.get(class_)
-        if class_XP_multiplier is None:
-            class_XP_multiplier = 0
-        ldiv5 = level // 5
-
-        reward = int(max(25,50 * ldiv5) * class_XP_multiplier)
+        reward = self.get_property("XP")
+        if reward is None:
+            reward = 0
 
         return reward
 
@@ -456,7 +474,7 @@ class EntityFactory:
     @staticmethod
     def get_entity_by_name(name: str) -> Entity:
         e = None
-        if name in EntityFactory.entities.index:
+        if name in list(EntityFactory.entities.index):
             row = EntityFactory.entities.loc[name]
 
             e = EntityFactory.entity_from_row(name, row)
@@ -549,8 +567,11 @@ class Inventory:
 
         success = False
 
+        if self.full:
+            print(f'proccess full logic for {new_item.name}')
+
         # Have we got room in the inventory?
-        if self.full is False:
+        if self.full is False or (new_item.get_property("IsStackable") == True and new_item.name in self.stackable_items.keys()):
 
             # If the item is stackable then increase the number you are holding
             if new_item.get_property("IsStackable") == True:

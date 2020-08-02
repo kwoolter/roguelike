@@ -294,8 +294,9 @@ class MainFrame(View):
                              ffade=1, bfade=1)
 
         # Draw the status line
-        status = f'{self.game.player.name}:HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} '
-        stats = {"AC", "DEX", "INT", "XP"}
+        ac = self.game.player.fighter.get_defence("AC")
+        status = f'Floor={self.game.dungeon_level} HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} AC={ac} '
+        stats = {"DEX", "INT", "XP", "Level"}
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
             status += f'{stat}={stat_value} '
@@ -1424,6 +1425,7 @@ class EventView(View):
                             model.Event.ACTION_FOUND_ITEM: (libtcod.light_azure, libtcod.darkest_yellow),
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, libtcod.darkest_yellow),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, libtcod.darkest_yellow),
+                            model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_yellow),
                             model.Event.LEVEL_UP_AVAILABLE: (libtcod.gold, libtcod.red)
                             }
 
