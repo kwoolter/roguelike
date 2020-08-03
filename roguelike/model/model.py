@@ -11,6 +11,20 @@ from .events import Event
 from .game_parameters import GameParameters
 
 
+def dim_rgb(rgb, dc: int):
+    """
+    Dim a colour by a specified amount
+    :param rgb: the RGB colour that you want to dim
+    :param dc: how much do you want to dim it by?
+    :return: a libtcod.Color object with the dimmed RGB colour
+    """
+    r, g, b = rgb
+    r = max(0, r - dc)
+    g = max(0, g - dc)
+    b = max(0, b - dc)
+    return libtcod.Color(r, g, b)
+
+
 class EventQueue():
     def __init__(self):
         self.events = collections.deque()
@@ -139,7 +153,7 @@ class Floor():
                     "desaturated_flame",
                     "desaturated_lime",
                     "desaturated_chartreuse",
-                    "dark_grey",
+                    "grey",
                     "sepia_light"]
 
     ROOM_NAMES = ("The Guard Room", "The Store", "A Stone Chamber", "The Armoury", "Sleeping Quarters",
@@ -258,11 +272,13 @@ class Floor():
         for c in Floor.ROOM_COLOURS:
             lc = text_to_color(c)
             if lc is not None:
+                # Make the colour even darker!
+                lc = dim_rgb(list(lc), 35)
                 valid_room_colours.append(lc)
 
         # List of floor tile colours that can be randomly assigned to a Tunnel
         valid_tunnel_colours = []
-        for i in range(70,100,5):
+        for i in range(80,100,5):
             #valid_tunnel_colours.append(libtcod.Color(i,i,0))
             valid_tunnel_colours.append(libtcod.Color(i,i,i))
 
@@ -729,7 +745,7 @@ class Floor():
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"{attacker.description.capitalize()} deals {dmg} damage using {weapon.name}"))
+                          description=f"{attacker.description.capitalize()} deals {dmg} damage with {weapon.name}"))
 
                 # If the target died...
                 if target.fighter.is_dead:

@@ -1,6 +1,6 @@
+import roguelike.model as model
 from pathlib import Path
-
-from roguelike import model
+import math
 from .view_utils import *
 
 
@@ -295,7 +295,7 @@ class MainFrame(View):
 
         # Draw the status line
         ac = self.game.player.fighter.get_defence("AC")
-        status = f'Flr={self.game.dungeon_level} HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} AC={ac} '
+        status = f'F={self.game.dungeon_level} HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} AC={ac} '
         stats = ["DEX", "INT", "XP", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
@@ -345,19 +345,6 @@ class FloorView(View):
 
     def draw(self):
 
-        def dim_rgb(rgb, dc: int):
-            """
-            Dim a colour by a specified amount
-            :param rgb: the RGB colour that you want to dim
-            :param dc: how much do you want to dim it by?
-            :return: a libtcod.Color object with the dimmed RGB colour
-            """
-            r, g, b = rgb
-            r = max(0, r - dc)
-            g = max(0, g - dc)
-            b = max(0, b - dc)
-            return libtcod.Color(r, g, b)
-
         # Clear the screen with the background colour
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
@@ -374,7 +361,7 @@ class FloorView(View):
             if (x, y) in fov_cells:
 
                 # Get how much we should dim the tile colour based on distance from player
-                a = int(self.floor.get_fov_light_attenuation(x, y, 40))
+                a = int(self.floor.get_fov_light_attenuation(x, y, 45))
 
                 # Lit path
                 if (x, y) in walkable_cells:
@@ -422,9 +409,13 @@ class FloorView(View):
                 x, y = e.xy
                 bg = e.bg
                 try:
-                    libtcod.console_set_default_foreground(self.con, e.fg)
+                    # Get how much we should dim the entity colour based on distance from player
+                    a = int(self.floor.get_fov_light_attenuation(x, y, 80))
+                    fg = dim_rgb(e.fg, a*3)
+                    libtcod.console_set_default_foreground(self.con, fg)
                     libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
                     if bg is not None:
+                        bg = dim_rgb(bg, a)
                         libtcod.console_set_char_background(self.con, x, y, bg)
                 except e:
                     print("Problem drawing {e.name} {e.fg} {e.bg}")
@@ -841,9 +832,11 @@ class InventoryView(View):
                 divider.render(self.con, 0, y)
                 properties = f"Stats:"
 
-                # Print out the properties of the selected item
+                # Print out the properties of the selected item if they are numeric!
                 for k, v in combat_eq.properties.items():
-                    properties += f'{k}={v} '
+                    if type(v) is str or math.isnan(v) is False:
+                        properties += f'{k}={v} '
+
                 so = ScreenStringRect(properties,
                                       width=self.width - 2,
                                       height=2,
@@ -852,28 +845,6 @@ class InventoryView(View):
                                       alignment=libtcod.LEFT)
                 y += 1
                 so.render(self.con, 1, y)
-
-        # # Print any event messages that we have received
-        # y = self.height - InventoryView.STATUS_PANEL_HEIGHT - 1
-        #
-        # # Draw a divider
-        # divider.render(self.con, 0, y)
-        #
-        # if self.message_event is not None:
-        #     message_text = self.message_event.description
-        #     if self.message_event.name == model.Event.ACTION_FAILED:
-        #         fg = libtcod.lighter_yellow
-        #     else:
-        #         fg = libtcod.white
-        #
-        #     so = ScreenStringRect(message_text,
-        #                           width=self.width - 2,
-        #                           height=InventoryView.STATUS_PANEL_HEIGHT,
-        #                           fg=fg,
-        #                           bg=self.bg,
-        #                           alignment=libtcod.CENTER)
-        #
-        #     so.render(self.con, int(self.width / 2), self.height - InventoryView.STATUS_PANEL_HEIGHT)
 
         # Print any event messages that we have received
         y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT

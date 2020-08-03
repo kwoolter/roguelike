@@ -1,6 +1,21 @@
 import tcod as libtcod
 import textwrap
 import numpy as np
+import tcod as libtcod
+
+
+def dim_rgb(rgb, dc: int):
+    """
+    Dim a colour by a specified amount
+    :param rgb: the RGB colour that you want to dim
+    :param dc: how much do you want to dim it by?
+    :return: a libtcod.Color object with the dimmed RGB colour
+    """
+    r, g, b = rgb
+    r = max(0, r - dc)
+    g = max(0, g - dc)
+    b = max(0, b - dc)
+    return libtcod.Color(r, g, b)
 
 class ScreenObject:
 
