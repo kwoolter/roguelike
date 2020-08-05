@@ -908,7 +908,8 @@ class ShopView(View):
         self.border_fg = border_fg
         self.border_bg = border_bg
         self.border_type = InventoryView.BORDER_TYPE2
-        self.equipped_item_fg = libtcod.desaturated_chartreuse
+        self.sell_fg = libtcod.dark_red
+        self.buy_fg = libtcod.darker_green
         self.mode = ShopView.MODE_SELL
 
         # Components
@@ -1022,10 +1023,10 @@ class ShopView(View):
 
         y+=2
 
-        so = ScreenString("Sell", fg=self.fg, bg=self.bg,alignment=libtcod.CENTER)
+        so = ScreenString("SELL", fg=self.sell_fg, bg=self.bg,alignment=libtcod.CENTER)
         so.render(self.con, int(x=cx/2), y=y)
 
-        so = ScreenString("Buy",fg=self.fg, bg=self.bg,alignment=libtcod.CENTER)
+        so = ScreenString("BUY",fg=self.buy_fg, bg=self.bg,alignment=libtcod.CENTER)
         so.render(self.con, x=int(cx*3/2), y=y)
 
         y+=2
@@ -1041,13 +1042,16 @@ class ShopView(View):
             y += 1
 
             for i, sell_item in enumerate(self.sell_list):
-                fg = self.fg
+
+                item_value = sell_item.get_property("Value")
+
+                fg = self.sell_fg
                 bg = self.bg
                 if i == self.selected_sell_item:
                     fg,bg = bg,fg
                     self.selected_sell_item_entity = sell_item
 
-                so = ScreenString(f'{sell_item.description}', fg=fg, bg=bg, alignment=libtcod.CENTER)
+                so = ScreenString(f'{sell_item.description} ({item_value})', fg=fg, bg=bg, alignment=libtcod.CENTER)
                 so.render(self.con, x=cx, y=y)
                 y += 1
 
@@ -1059,11 +1063,13 @@ class ShopView(View):
             categories = f'{chr(div)}'
             for i,category in enumerate(self.buy_item_categories):
                 if i == self.selected_buy_item_category:
-                    category = f'*{category}*'
+                    category = f'<*{category}*>'
                     selected_category = self.buy_item_categories[i]
-                categories+=f' {category} {chr(div)}'
+                else:
+                    category = f'  {category}  '
+                categories+=f'{category}{chr(div)}'
 
-            fg = dim_rgb(self.fg, 180)
+            fg = self.border_bg
             bg = self.bg
 
             so = ScreenString(categories, fg=fg, bg=bg, alignment=libtcod.CENTER)
@@ -1080,7 +1086,7 @@ class ShopView(View):
 
             for i, buy_item in enumerate(filtered_list):
 
-                fg = self.fg
+                fg = self.buy_fg
                 bg = self.bg
 
                 if i == self.selected_buy_item:
