@@ -242,6 +242,7 @@ class Controller():
             elif self.mode == Controller.GAME_MODE_SHOP:
                 buy = action.get("buy")
                 sell = action.get("sell")
+                confirm = action.get("confirm")
                 if move:
                     dx, dy = move
                     self.view.shop_view.change_selection(dy=dy, dx=dx)
@@ -249,6 +250,13 @@ class Controller():
                     self.view.shop_view.mode = view.ShopView.MODE_BUY
                 elif sell:
                     self.view.shop_view.mode = view.ShopView.MODE_SELL
+                elif confirm:
+                    if self.view.shop_view.mode == view.ShopView.MODE_BUY:
+                        print(f'Buying {self.view.shop_view.get_selected_buy_item().description}')
+
+                    elif self.view.shop_view.mode == view.ShopView.MODE_SELL:
+                        print(f'Selling {self.view.shop_view.get_selected_sell_item().description}')
+
 
             # If we are in GAME PAUSED mode
             elif self.mode == Controller.GAME_MODE_PAUSED:

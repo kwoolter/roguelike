@@ -953,36 +953,37 @@ class ShopView(View):
 
     def change_selection(self, dy: int, dx: int = 0):
 
+        # If we are in BUY mode..
         if self.mode == ShopView.MODE_BUY:
-            category = self.buy_item_categories[self.selected_buy_item_category]
-            self.selected_buy_item_by_category[category] += dy
-            self.selected_buy_item = min(max(0,self.selected_buy_item_by_category[category]), len(self.category_to_entity[category]) - 1)
 
+            # process the category of item selection change
             self.selected_buy_item_category += dx
             self.selected_buy_item_category = min(max(0, self.selected_buy_item_category),
                                                   len(self.buy_item_categories) - 1)
 
+            # Change the selection of the item in chosen category that you want to buy
+            category = self.buy_item_categories[self.selected_buy_item_category]
+            self.selected_buy_item_by_category[category] += dy
+            self.selected_buy_item = min(max(0,self.selected_buy_item_by_category[category]), len(self.category_to_entity[category]) - 1)
+
+        # If we are in SELL mode...
         elif self.mode == ShopView.MODE_SELL:
+            # Change the selection of the item that you want to sell
             self.selected_sell_item += dy
             self.selected_sell_item = min(max(0, self.selected_sell_item), len(self.sell_list) - 1)
 
+    def get_selected_sell_item(self):
+        return self.selected_sell_item_entity
 
-    def get_selected_item(self):
-        return self.selected_item_entity
+    def get_selected_buy_item(self):
+        return self.selected_buy_item_entity
 
     def draw(self):
 
         # Get some short cuts to the data that we are going to display
         self.character = self.game.player
-        equipment = self.character.fighter.equipment
-
-        inv = self.character.inventory
-
         self.sell_list = self.character.inventory.get_other_items()
-        #elf.sell_list.extend(list(self.character.inventory.stackable_items.keys()))
 
-
-        
         self.change_selection(0, 0)
 
         cx, cy = self.center
@@ -1032,16 +1033,19 @@ class ShopView(View):
         # Draw a divider
         divider.render(self.con, 0, y)
 
-        y+=2
+        y+=1
 
         # We are in SELL item mode
         if self.mode == ShopView.MODE_SELL:
+
+            y += 1
 
             for i, sell_item in enumerate(self.sell_list):
                 fg = self.fg
                 bg = self.bg
                 if i == self.selected_sell_item:
                     fg,bg = bg,fg
+                    self.selected_sell_item_entity = sell_item
 
                 so = ScreenString(f'{sell_item.description}', fg=fg, bg=bg, alignment=libtcod.CENTER)
                 so.render(self.con, x=cx, y=y)
@@ -1057,13 +1061,19 @@ class ShopView(View):
                 if i == self.selected_buy_item_category:
                     category = f'*{category}*'
                     selected_category = self.buy_item_categories[i]
-                categories+=f'{category}{chr(div)}'
+                categories+=f' {category} {chr(div)}'
 
             fg = dim_rgb(self.fg, 180)
             bg = self.bg
 
             so = ScreenString(categories, fg=fg, bg=bg, alignment=libtcod.CENTER)
             so.render(self.con, x=cx, y=y)
+
+            y += 1
+
+            # Draw a divider
+            divider.render(self.con, 0, y)
+
             y += 2
 
             filtered_list = [item for item in self.buy_list if item.category == selected_category]
@@ -1072,8 +1082,10 @@ class ShopView(View):
 
                 fg = self.fg
                 bg = self.bg
+
                 if i == self.selected_buy_item:
                     fg,bg = bg,fg
+                    self.selected_buy_item_entity = buy_item
 
                 item_value = buy_item.get_property("Value")
 
