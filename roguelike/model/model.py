@@ -473,7 +473,8 @@ class Floor():
 
         for i in range(1,self.level):
             if i % 3 == 0:
-                new_fighter.level_up()
+                pass
+                #new_fighter.level_up()
 
         new_entity.fighter = new_fighter
 
@@ -745,7 +746,7 @@ class Floor():
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_SUCCEEDED,
-                          description=f"{attacker.description.capitalize()} deals {dmg} damage with {weapon.name}"))
+                          description=f"{attacker.description.capitalize()} deals {dmg} damage with {weapon.description}"))
 
                 # If the target died...
                 if target.fighter.is_dead:
@@ -1304,25 +1305,39 @@ class Model():
                                         description=f"There are no levels above this one!"))
 
     def next_floor(self):
+            """
+            Process the Floor that the Player has just completed and move to tteh next floor
+            """
 
             # Print the stats for the Floor that you just completed
             if self.current_floor is not None:
+
+
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.GAME_FLOOR_COMPLETED,
                                             description=f"{self.current_floor.name} completed:"))
 
+                # Report how well the Player did on this Floor
                 stats = self.current_floor.get_stats()
                 for stat in stats:
                     self.events.add_event(Event(type=Event.GAME,
                                                 name=Event.GAME_FLOOR_COMPLETED,
                                                 description=f"  * {stat}"))
 
+                # Reward the player with some XP
                 xp = self.current_floor.get_XP_reward()
                 self.player.fighter.add_XP(self.current_floor.get_XP_reward())
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_GAIN_XP,
                                             description=f"{xp} XP awarded"))
 
+                # Heal the player
+                self.player.heal(10)
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You rest from your adventuring and heal your wounds"))
+
+            # Increase the dungeon level
             self.dungeon_level += 1
 
             # Update the game parameters based on the new level
@@ -1331,7 +1346,7 @@ class Model():
             # If the new level doesn't exist yet then create it...
             if self.dungeon_level > len(self.floors):
 
-                # Create a new floor and initialise
+                # Create a new floor and initialise it
                 self.current_floor = Floor(f'The Floor {self.dungeon_level}',
                                            50, 50,
                                            level=self.dungeon_level,
@@ -1350,11 +1365,7 @@ class Model():
                                         name=Event.GAME_NEW_FLOOR,
                                         description=f"{self.name}: Dungeon Level {self.dungeon_level} Ready!"))
 
-            self.player.heal(10)
-            self.events.add_event(Event(type=Event.GAME,
-                                        name=Event.ACTION_SUCCEEDED,
-                                        description=f"You rest from your adventuring and heal your wounds"))
-
+            # Let the Player know if they can level up now!
             player_level = game_parameters["Game"]["Player"]["Level"]
             if player_level > self.player.get_property("Level"):
                 self.events.add_event(Event(type=Event.GAME,
@@ -1364,7 +1375,11 @@ class Model():
 
 
     def equip_item(self, new_item : Entity)->bool:
-
+        """
+        Attempt to equipe the specified item
+        :param new_item: the new item that you want the Player to equip
+        :return: True if we succeeded in equipping the item else False
+        """
         success = False
 
         if new_item.get_property("IsEquippable") == True:

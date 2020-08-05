@@ -81,7 +81,7 @@ class ScreenString:
             alignment = self.alignment
         libtcod.console_set_default_foreground(con, self.fg)
         libtcod.console_set_default_background(con, self.bg)
-        libtcod.console_print_ex(con, x, y, flag=libtcod.BKGND_OVERLAY, alignment=alignment, fmt = self.text)
+        libtcod.console_print_ex(con, x, y, flag=libtcod.BKGND_SET, alignment=alignment, fmt = self.text)
 
 
 class ScreenStringRect:

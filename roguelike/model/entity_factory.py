@@ -192,7 +192,9 @@ class Player(Entity):
         return self.inventory.add_item(new_item)
 
     def drop_item(self, old_item: Entity) -> bool:
-        return self.inventory.remove_item(old_item)
+        success = self.inventory.remove_item(old_item)
+        self.fighter.unequip_item(old_item=old_item)
+        return success
 
     def level_up(self, stat_name: str = None):
         success = self.fighter.level_up(stat_name)
@@ -391,8 +393,6 @@ class Fighter():
         :return: the item that was replaced in the equipment slot
         """
 
-
-
         # If no slot specified use the default slot for this type of equipment
         if slot is None:
             new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)
@@ -410,7 +410,24 @@ class Fighter():
 
         return existing_item
 
+    def unequip_item(self, old_item: Entity):
+
+        del_keys = []
+        for k, v in self.equipment.items():
+            if v == old_item:
+                del_keys.append(k)
+
+        for k in del_keys:
+            del self.equipment[k]
+
+        return len(del_keys)>0
+
     def get_equipment_stat_totals(self, stat_names: list = ["AC", "INT", "Weight", "Value"]):
+        """
+
+        :param stat_names:
+        :return:
+        """
         totals = {}
 
         for stat in stat_names:
@@ -469,6 +486,7 @@ class EntityFactory:
         # Read in the csv file
         EntityFactory.entities = pd.read_csv(file_to_open)
         EntityFactory.entities.set_index("Name", drop=True, inplace=True)
+        EntityFactory.entities["IsTradable"] = EntityFactory.entities["Value"] > 0
         # self.entities.set_index(self.entities.columns[0], drop=True, inplace=True)
 
     @staticmethod
@@ -536,7 +554,6 @@ class EntityFactory:
         e.add_properties(row.iloc[4:].to_dict())
 
         return e
-
 
 
 class Inventory:

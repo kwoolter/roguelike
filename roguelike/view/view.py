@@ -38,9 +38,11 @@ class MainFrame(View):
     MODE_PLAYING = "playing"
     MODE_INVENTORY_SCREEN = "inventory"
     MODE_CHARACTER_SCREEN = "character"
+    MODE_SHOP_SCREEN = "shop"
     MODE_CHARACTER_CREATION_SCREEN = "character creation"
     MODE_PAUSED = "paused"
     MODE_GAME_OVER = "game over"
+
 
     CONSOLE_MESSAGE_PANEL_HEIGHT = 12
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
@@ -57,7 +59,9 @@ class MainFrame(View):
         self.game = None
         self.game_name = "Game"
         self.con = None
+
         self.floor_view = FloorView(self.width, self.height, bg=libtcod.black)
+
         self.message_panel = MessagePanel(MainFrame.CONSOLE_MESSAGE_PANEL_WIDTH,
                                           MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
                                           fg=libtcod.white,
@@ -67,17 +71,18 @@ class MainFrame(View):
 
         self.inventory_view = InventoryView(width=int(self.width - 2),
                                             height=50,
-                                            fg=libtcod.white,
-                                            bg=libtcod.black,
-                                            border_bg=libtcod.black,
-                                            border_fg=libtcod.green)
+                                            #fg=libtcod.lightest_yellow,
+                                            fg=libtcod.dark_flame,
+                                            bg=libtcod.lighter_sepia,
+                                            border_bg=libtcod.sepia,
+                                            border_fg=libtcod.dark_sepia)
 
         self.character_view = CharacterView(width=int(self.width - 2),
                                             height=50,
-                                            fg=libtcod.white,
-                                            bg=libtcod.black,
-                                            border_bg=libtcod.black,
-                                            border_fg=libtcod.green)
+                                            fg=libtcod.dark_sepia,
+                                            bg=libtcod.lightest_sepia,
+                                            border_bg=libtcod.sepia,
+                                            border_fg=libtcod.gold)
 
         self.character_creation_view = CreateCharacterView(width=int(self.width - 2),
                                                            height=32,
@@ -85,6 +90,13 @@ class MainFrame(View):
                                                            bg=libtcod.black,
                                                            border_bg=libtcod.dark_grey,
                                                            border_fg=libtcod.green)
+
+        self.shop_view = ShopView(width=int(self.width - 2),
+                                            height=50,
+                                            fg=libtcod.lightest_yellow,
+                                            bg=libtcod.lighter_sepia,
+                                            border_bg=libtcod.sepia,
+                                            border_fg=libtcod.dark_sepia)
 
         self.text_entry = TextEntryBox()
 
@@ -154,6 +166,8 @@ class MainFrame(View):
 
         self.inventory_view.initialise(self.game)
 
+        self.shop_view.initialise(self.game)
+
         self.character_view.initialise(self.game)
         self.character_view.change_selection(0)
 
@@ -184,8 +198,10 @@ class MainFrame(View):
         elif self.mode == MainFrame.MODE_PLAYING:
             self.floor_view.process_event(new_event)
 
-
     def draw(self):
+        """
+        Draw the MainFrame and depending on the UI state different views
+        """
 
         # Clear the root console
         self.con.default_bg = libtcod.black
@@ -229,6 +245,21 @@ class MainFrame(View):
                                  0, 0,
                                  self.character_view.width,
                                  self.character_view.height,
+                                 0,
+                                 bx, by,
+                                 ffade=1, bfade=1)
+
+        # If we are in SHOP mode then draw the inventory screen
+        elif self.mode == MainFrame.MODE_SHOP_SCREEN:
+            self.shop_view.draw()
+            bx = int((self.width - self.shop_view.width) / 2)
+            by = int((self.height - self.shop_view.height) / 2)
+            by = 1
+            # Blit the inventory panel
+            libtcod.console_blit(self.shop_view.con,
+                                 0, 0,
+                                 self.shop_view.width,
+                                 self.shop_view.height,
                                  0,
                                  bx, by,
                                  ffade=1, bfade=1)
@@ -503,7 +534,7 @@ class MessagePanel(View):
                 libtcod.console_set_default_background(self.con, bg)
                 libtcod.console_print_ex(self.con,
                                          x, y,
-                                         flag=libtcod.BKGND_OVERLAY,
+                                         flag=libtcod.BKGND_SET,
                                          alignment=libtcod.LEFT,
                                          fmt=message_piece)
                 y += 1
@@ -537,6 +568,7 @@ class InventoryView(View):
         self.border_fg = border_fg
         self.border_bg = border_bg
         self.border_type = InventoryView.BORDER_TYPE2
+        self.equipped_item_fg = libtcod.desaturated_chartreuse
 
         # Components
         self.con = None
@@ -551,8 +583,8 @@ class InventoryView(View):
                                           height=InventoryView.MESSAGE_PANEL_HEIGHT,
                                           fg=libtcod.white,
                                           bg=libtcod.black,
-                                          border_bg=libtcod.black,
-                                          border_fg=libtcod.green)
+                                          border_fg=border_fg,
+                                          border_bg=border_bg,)
 
     def initialise(self, game: model.Model):
 
@@ -638,16 +670,12 @@ class InventoryView(View):
 
         so.render(self.con, cx, y)
 
-        # Draw a divider
-        # y += 2
-        # divider.render(self.con, 0, y)
-
         # Print what is currently equipped
         # Start with the header
         y += 2
-        text = f'Equipment:AC={equipment_totals["AC"]},' \
-               f'INT={equipment_totals["INT"]},' \
-               f'DEX={equipment_totals["DEX"]},' \
+        text = f'Equipment:AC={equipment_totals["AC"]} ' \
+               f'INT={equipment_totals["INT"]} ' \
+               f'DEX={equipment_totals["DEX"]} ' \
                f'Weight={equipment_totals["Weight"]}'
         so = ScreenStringRect(text,
                               width=self.width - 2,
@@ -667,15 +695,16 @@ class InventoryView(View):
             so = ScreenStringRect(text,
                                   width=self.width - 2,
                                   height=self.height - 2,
-                                  fg=self.fg,
+                                  fg=libtcod.light_yellow,
                                   bg=self.bg,
                                   alignment=libtcod.CENTER)
 
             so.render(self.con, cx, y)
+            y += 1
 
         # Else loop through the equipment...
         else:
-            fg = libtcod.light_sepia
+            fg = self.equipped_item_fg
             for slot, item in equipment.items():
                 # Print each item that is equipped and in which slot
                 text = f'{slot}: {item.description}'
@@ -736,21 +765,21 @@ class InventoryView(View):
 
                 # If this item is equipped..
                 if equipped is True:
-                    fg = libtcod.dark_sea
-                    bg = libtcod.black
+                    fg = self.equipped_item_fg
+                    bg = self.bg
 
                 # Otherwise default colours
                 else:
-                    bg = libtcod.black
+                    bg = self.bg
                     fg = libtcod.yellow
 
                 # If this is the currently selected item the swap bg and fg...
                 if i == self.selected_item:
                     fg, bg = bg, fg
-                    fg = libtcod.black
+                    fg = libtcod.dark_sepia
                     self.selected_item_entity = item
 
-                so = ScreenString(text,
+                so = ScreenString(f'{text:^40}',
                                   fg=fg,
                                   bg=bg,
                                   alignment=libtcod.CENTER)
@@ -785,20 +814,21 @@ class InventoryView(View):
 
                 # if this item is equipped...
                 if equipped is True:
-                    fg = libtcod.dark_sea
-                    bg = libtcod.black
+                    fg = libtcod.sea
+                    bg = self.bg
 
                 # Otherwise use default colours
                 else:
-                    bg = libtcod.black
+                    bg = self.bg
                     fg = libtcod.yellow
 
                 # If this is the currently selected item swap fg and bg
                 if i == (self.selected_item - len(inventory)):
                     fg, bg = bg, fg
+                    fg = libtcod.dark_sepia
                     self.selected_item_entity = item
 
-                so = ScreenString(text,
+                so = ScreenString(f'{text:^40}',
                                   fg=fg,
                                   bg=bg,
                                   alignment=libtcod.CENTER)
@@ -828,7 +858,7 @@ class InventoryView(View):
             if combat_eq is not None:
 
                 # Draw a divider and section title
-                y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT - 3
+                y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT - 4
                 divider.render(self.con, 0, y)
                 properties = f"Stats:"
 
@@ -857,6 +887,216 @@ class InventoryView(View):
         divider.render(self.con, 0, y)
 
 
+
+class ShopView(View):
+
+    BORDER_TYPE1 = "type1"
+    BORDER_TYPE2 = "type2"
+
+    MODE_BUY = "buy"
+    MODE_SELL = "sell"
+
+    def __init__(self, width: int, height: int,
+                 fg=libtcod.white, bg=libtcod.black,
+                 border_fg=libtcod.white, border_bg=libtcod.black):
+
+        super().__init__(width=width, height=height)
+
+        # Properties
+        self.fg = fg
+        self.bg = bg
+        self.border_fg = border_fg
+        self.border_bg = border_bg
+        self.border_type = InventoryView.BORDER_TYPE2
+        self.equipped_item_fg = libtcod.desaturated_chartreuse
+        self.mode = ShopView.MODE_SELL
+
+        # Components
+        self.con = None
+        self.game = None
+        self.character = None
+
+        self.selected_sell_item = -1
+        self.selected_sell_item_entity = None
+        self.selected_buy_item_category = -1
+        self.selected_buy_item = -1
+        self.selected_buy_item_entity = None
+        self.selected_buy_item_by_category = {}
+
+        self.border = None
+
+    def initialise(self, game: model.Model):
+
+        self.game = game
+        self.character = self.game.player
+
+        self.con = libtcod.console_new(self.width, self.height)
+        self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+        self.sell_list = []
+
+        self.buy_list = model.EntityFactory.get_entities_by_property("IsTradable")
+        self.category_to_entity = {}
+
+        for item in self.buy_list:
+            key = item.category
+            if key not in self.category_to_entity:
+                self.category_to_entity[key] = []
+            self.category_to_entity[key].append(item)
+
+        self.buy_item_categories = sorted(self.category_to_entity.keys())
+        for k in self.category_to_entity.keys():
+            self.selected_buy_item_by_category[k] = -1
+
+    def process_event(self, new_event: model.Event):
+        print(f'{__class__}: Event {new_event}')
+
+    def change_selection(self, dy: int, dx: int = 0):
+
+        if self.mode == ShopView.MODE_BUY:
+            category = self.buy_item_categories[self.selected_buy_item_category]
+            self.selected_buy_item_by_category[category] += dy
+            self.selected_buy_item = min(max(0,self.selected_buy_item_by_category[category]), len(self.category_to_entity[category]) - 1)
+
+            self.selected_buy_item_category += dx
+            self.selected_buy_item_category = min(max(0, self.selected_buy_item_category),
+                                                  len(self.buy_item_categories) - 1)
+
+        elif self.mode == ShopView.MODE_SELL:
+            self.selected_sell_item += dy
+            self.selected_sell_item = min(max(0, self.selected_sell_item), len(self.sell_list) - 1)
+
+
+    def get_selected_item(self):
+        return self.selected_item_entity
+
+    def draw(self):
+
+        # Get some short cuts to the data that we are going to display
+        self.character = self.game.player
+        equipment = self.character.fighter.equipment
+
+        inv = self.character.inventory
+
+        self.sell_list = self.character.inventory.get_other_items()
+        #elf.sell_list.extend(list(self.character.inventory.stackable_items.keys()))
+
+
+        
+        self.change_selection(0, 0)
+
+        cx, cy = self.center
+
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+
+        # Draw the border
+        bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
+        bo.render(self.con, 0, 0)
+
+        # Create a box divider
+        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
+        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
+
+        y = 2
+
+        # Print the box header
+        text = f"Welcome to the shop {self.character.name}!"
+        so = ScreenStringRect(text,
+                              width=self.width - 2,
+                              height=self.height - 2,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=2
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        div_start = y
+
+        y+=2
+
+        so = ScreenString("Sell", fg=self.fg, bg=self.bg,alignment=libtcod.CENTER)
+        so.render(self.con, int(x=cx/2), y=y)
+
+        so = ScreenString("Buy",fg=self.fg, bg=self.bg,alignment=libtcod.CENTER)
+        so.render(self.con, x=int(cx*3/2), y=y)
+
+        y+=2
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y+=2
+
+        # We are in SELL item mode
+        if self.mode == ShopView.MODE_SELL:
+
+            for i, sell_item in enumerate(self.sell_list):
+                fg = self.fg
+                bg = self.bg
+                if i == self.selected_sell_item:
+                    fg,bg = bg,fg
+
+                so = ScreenString(f'{sell_item.description}', fg=fg, bg=bg, alignment=libtcod.CENTER)
+                so.render(self.con, x=cx, y=y)
+                y += 1
+
+        # We are in BUY item mode
+        elif self.mode == ShopView.MODE_BUY:
+
+            div = Boxes.BORDER_CHAR_MAPS[self.border_type][Boxes.BORDER_V]
+
+            categories = f'{chr(div)}'
+            for i,category in enumerate(self.buy_item_categories):
+                if i == self.selected_buy_item_category:
+                    category = f'*{category}*'
+                    selected_category = self.buy_item_categories[i]
+                categories+=f'{category}{chr(div)}'
+
+            fg = dim_rgb(self.fg, 180)
+            bg = self.bg
+
+            so = ScreenString(categories, fg=fg, bg=bg, alignment=libtcod.CENTER)
+            so.render(self.con, x=cx, y=y)
+            y += 2
+
+            filtered_list = [item for item in self.buy_list if item.category == selected_category]
+
+            for i, buy_item in enumerate(filtered_list):
+
+                fg = self.fg
+                bg = self.bg
+                if i == self.selected_buy_item:
+                    fg,bg = bg,fg
+
+                item_value = buy_item.get_property("Value")
+
+                so = ScreenString(f'{buy_item.description} ({item_value})', fg=fg, bg=bg, alignment=libtcod.CENTER)
+                so.render(self.con, x=cx, y=y)
+                y += 1
+
+        y+=22
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+
+        # Create a vertical divider
+        l = 5
+        v_divider_box = Boxes.get_box_divider(length=l,
+                                              border_type=self.border_type,
+                                              orient=Boxes.DIVIDER_VERTICAL)
+        v_divider = ScreenObject2DArray(v_divider_box, fg=self.border_fg, bg=self.border_bg)
+        v_divider.render(self.con, cx, div_start)
+
+
+
+
 class CharacterView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
@@ -874,6 +1114,7 @@ class CharacterView(View):
         self.bg = bg
         self.border_fg = border_fg
         self.border_bg = border_bg
+        self.heading_fg = libtcod.dark_orange
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
@@ -890,8 +1131,8 @@ class CharacterView(View):
                                           height=CharacterView.MESSAGE_PANEL_HEIGHT,
                                           fg=libtcod.white,
                                           bg=libtcod.black,
-                                          border_bg=libtcod.black,
-                                          border_fg=libtcod.green)
+                                          border_bg=self.border_bg,
+                                          border_fg=self.border_fg)
 
     def initialise(self, game: model.Model):
 
@@ -948,7 +1189,7 @@ class CharacterView(View):
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
-        text = f"Character Sheet for {self.character.name} the {cc.name}"
+        text = f"Character Sheet: {self.character.name} the {cc.name}"
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -967,7 +1208,7 @@ class CharacterView(View):
         y += 2
         text = "Abilities:"
         so = ScreenString(text,
-                          fg=libtcod.amber,
+                          fg=self.heading_fg,
                           bg=self.bg,
                           alignment=libtcod.CENTER)
 
@@ -988,7 +1229,7 @@ class CharacterView(View):
                 if i == self.selected_item:
                     fg, bg = bg, fg
 
-                so = ScreenString(text,
+                so = ScreenString(f'{text:^19}',
                                   fg=fg,
                                   bg=bg,
                                   alignment=libtcod.CENTER)
@@ -1006,7 +1247,7 @@ class CharacterView(View):
 
         text = "Other Stats:"
         so = ScreenString(text,
-                          fg=libtcod.amber,
+                          fg=self.heading_fg,
                           bg=self.bg,
                           alignment=libtcod.CENTER)
 
@@ -1385,18 +1626,18 @@ class ItemPickerView(View):
 
 class EventView(View):
     # Type to colour map
-    EVENT_TYPE_TO_COLOUR = {model.Event.STATE: (libtcod.red, None),
+    EVENT_TYPE_TO_COLOUR = {model.Event.STATE: (libtcod.light_sepia, None),
                             model.Event.GAME: (libtcod.lightest_blue, None),
                             model.Event.CONTROL: (libtcod.grey, None),
                             model.Event.DEBUG: (libtcod.grey, None)}
 
     EVENT_NAME_TO_COLOUR = {model.Event.ACTION_SUCCEEDED: (libtcod.lighter_green, None),
-                            model.Event.ACTION_FAILED: (libtcod.yellow, libtcod.darkest_red),
+                            model.Event.ACTION_FAILED: (libtcod.yellow, None),
                             model.Event.ACTION_ATTACK: (libtcod.light_red, libtcod.darkest_yellow),
-                            model.Event.ACTION_FOUND_ITEM: (libtcod.light_azure, libtcod.darkest_yellow),
-                            model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, libtcod.darkest_yellow),
-                            model.Event.ACTION_EQUIP: (libtcod.light_sky, libtcod.darkest_yellow),
-                            model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_yellow),
+                            model.Event.ACTION_FOUND_ITEM: (libtcod.light_azure, None),
+                            model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),
+                            model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
+                            model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.LEVEL_UP_AVAILABLE: (libtcod.gold, libtcod.red)
                             }
 

@@ -1,29 +1,29 @@
-﻿Name,Description,Slot,HANDS,ATK,DEF,AC,DMG,INT,DEX,Weight,Value,Range
-Leather Armour,a leather tunic,Body,,,,2,0,0,0,2,1,0
-Plate Armour,plate chest armour,Body,,,,3,0,0,0,3,5,0
-Robe,a ragged cloth robe,Body,,,,0,0,0,0,1,0,0
-Scale Armour,scale chest armour,Body,,,,4,0,0,0,4,8,0
-Leather Boots,a pair of old leather boots,Feet,,,,1,0,0,0,1,1,0
-Plate Boots,plate armour boots,Feet,,,,2,0,0,0,2,2,0
-Sandals,a pair of leather sandals,Feet,,,,0,0,0,0,1,0,0
-Scale Boots,scale boots,Feet,,,,3,0,0,0,3,4,0
-Bronze Ring,a plain bronze ring,Finger,,,,0,0,1,1,0,3,0
-Gold Ring,a gold ring,Finger,,,,1,0,0,0,0,4,0
-Gold Crown,a golden crown,Head,,,,0,0,2,2,0,10,0
-Helmet,a helmet,Head,,,,1,0,0,0,1,1,0
-Iron Crown,a iron crown,Head,,,,1,0,1,1,0,8,0
-Fireball Scroll,a magic fireball scroll,Item Slot,,INT,DEX,0,2d6+2,0,0,0,5,3
-Lightning Scroll,a magic lightning scroll,Item Slot,,INT,DEX,0,1d8+5,0,0,0,5,2
-Poison Scroll,a magic poison scroll,Item Slot,,INT,DEX,0,3d4+1,0,0,0,5,2
-Axe,an axe,Main Hand,1H,STR,AC,0,1d5,0,0,2,1,1
-Dagger,a small dagger,Main Hand,1H,STR,AC,0,1d3,0,0,1,1,1
-Hands,bare hands,Main Hand,1H,STR,AC,0,1d1,0,0,0,1,1
-Spear,a wooden spear,Main Hand,2H,STR,AC,0,1d4,0,0,2,1,2
-Sword,a sword,Main Hand,1H,STR,AC,0,1d4,0,0,1,1,1
-War Hammer,a mighty War Hammer,Main Hand,2H,STR,AC,1,2d4+1,0,0,4,4,2
-Shield,a wooden shield,Off Hand,1H,,,2,0,0,0,3,1,0
-Buckler,a small buckler,Off Hand,1H,,,2,0,0,0,2,2,0
-Metal Shield,a metal shield,Off Hand,1H,,,3,0,0,0,3,5,0
-Robe of Learning,a glittering robe,Body,,,,1,0,2,0,2,5,0
-Tunic of Dexterity,a shiny smooth tunic,Body,,,,2,0,0,2,3,5,0
-Default Weapon,Default Weapon,Main Hand,1H,STR,AC,1,1d1,0,0,1,1,1
+﻿Name,Description,Slot,HANDS,ATK,DEF,AC,DMG,INT,DEX,Weight,Range
+Leather Armour,a leather tunic,Body,,,,2,0,0,0,2,0
+Plate Armour,plate chest armour,Body,,,,3,0,0,0,3,0
+Robe,a ragged cloth robe,Body,,,,0,0,0,0,1,0
+Scale Armour,scale chest armour,Body,,,,4,0,0,0,4,0
+Leather Boots,a pair of old leather boots,Feet,,,,1,0,0,0,1,0
+Plate Boots,plate armour boots,Feet,,,,2,0,0,0,2,0
+Sandals,a pair of leather sandals,Feet,,,,0,0,0,0,1,0
+Scale Boots,scale boots,Feet,,,,3,0,0,0,3,0
+Bronze Ring,a plain bronze ring,Finger,,,,0,0,1,1,0,0
+Gold Ring,a gold ring,Finger,,,,1,0,0,0,0,0
+Gold Crown,a golden crown,Head,,,,0,0,2,2,0,0
+Helmet,a helmet,Head,,,,1,0,0,0,1,0
+Iron Crown,a iron crown,Head,,,,1,0,1,1,0,0
+Fireball Scroll,a magic fireball scroll,Item Slot,,INT,DEX,0,2d6+2,0,0,0,3
+Lightning Scroll,a magic lightning scroll,Item Slot,,INT,DEX,0,1d8+5,0,0,0,2
+Poison Scroll,a magic poison scroll,Item Slot,,INT,DEX,0,3d4+1,0,0,0,2
+Axe,an axe,Main Hand,1H,STR,AC,0,1d5,0,0,2,1
+Dagger,a small dagger,Main Hand,1H,STR,AC,0,1d3,0,0,1,1
+Hands,bare hands,Main Hand,1H,STR,AC,0,1d1,0,0,0,1
+Spear,a wooden spear,Main Hand,2H,STR,AC,0,1d4,0,0,2,2
+Sword,a sword,Main Hand,1H,STR,AC,0,1d4,0,0,1,1
+War Hammer,a mighty War Hammer,Main Hand,2H,STR,AC,1,2d4+1,0,0,4,2
+Shield,a wooden shield,Off Hand,1H,,,2,0,0,0,3,0
+Buckler,a small buckler,Off Hand,1H,,,2,0,0,0,2,0
+Metal Shield,a metal shield,Off Hand,1H,,,3,0,0,0,3,0
+Robe of Learning,a glittering robe,Body,,,,1,0,2,0,2,0
+Tunic of Dexterity,a shiny smooth tunic,Body,,,,2,0,0,2,3,0
+Default Weapon,Default Weapon,Main Hand,1H,STR,AC,1,1d1,0,0,1,1

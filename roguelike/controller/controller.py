@@ -12,6 +12,7 @@ class Controller():
     GAME_MODE_PLAYING = "playing"
     GAME_MODE_PAUSED = "paused"
     GAME_MODE_GAME_OVER = "game over"
+    GAME_MODE_SHOP = "shop"
 
     def __init__(self, name:str):
         #Properties
@@ -56,6 +57,10 @@ class Controller():
                 self.view.set_mode(view.MainFrame.MODE_CHARACTER_SCREEN)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
+            elif new_mode == Controller.GAME_MODE_SHOP:
+                self.view.set_mode(view.MainFrame.MODE_SHOP_SCREEN)
+                self.model.set_mode(model.Model.GAME_STATE_PAUSED)
+
             elif new_mode == Controller.GAME_MODE_CHARACTER_CREATION:
                 self.view.set_mode(view.MainFrame.MODE_CHARACTER_CREATION_SCREEN)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
@@ -68,7 +73,7 @@ class Controller():
                 self.view.set_mode(view.MainFrame.MODE_PAUSED)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
-            if new_mode == Controller.GAME_MODE_GAME_OVER:
+            elif new_mode == Controller.GAME_MODE_GAME_OVER:
                 self.view.set_mode(view.MainFrame.MODE_GAME_OVER)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
@@ -125,6 +130,7 @@ class Controller():
                 pickup = action.get('pickup')
                 inventory = action.get('show_inventory')
                 character = action.get('show_character')
+                shop = action.get('enter_shop')
                 pause = action.get('pause')
 
                 if move:
@@ -140,6 +146,8 @@ class Controller():
                     self.model.use_item()
                 elif inventory:
                     self.set_mode(Controller.GAME_MODE_INVENTORY)
+                elif shop:
+                    self.set_mode(Controller.GAME_MODE_SHOP)
                 elif character:
                     self.set_mode(Controller.GAME_MODE_CHARACTER)
                 elif pause:
@@ -199,7 +207,6 @@ class Controller():
                         self.view.character_creation_view.initialise(self.model)
                         self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
 
-
                 # else:
                 #     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
 
@@ -216,16 +223,32 @@ class Controller():
                     self.view.inventory_view.change_selection(dy)
                 else:
 
-                    if e is None:
-                        self.events.add_event(model.Event(type=model.Event.GAME,
-                                                    name=model.Event.ACTION_FAILED,
-                                                    description=f"No item selected!"))
-                    elif equip:
-                        self.model.equip_item(e)
-                    elif drop:
-                        self.model.drop_item(e)
-                    elif use:
-                        self.model.use_item(e)
+                    if e is not None:
+
+                        if equip:
+                            self.model.equip_item(e)
+                        elif drop:
+                            self.model.drop_item(e)
+                        elif use:
+                            self.model.use_item(e)
+
+                    else:
+                        pass
+                        # self.events.add_event(model.Event(type=model.Event.GAME,
+                        #                             name=model.Event.ACTION_FAILED,
+                        #                             description=f"No item selected!"))
+
+            # If we are in SHOP mode
+            elif self.mode == Controller.GAME_MODE_SHOP:
+                buy = action.get("buy")
+                sell = action.get("sell")
+                if move:
+                    dx, dy = move
+                    self.view.shop_view.change_selection(dy=dy, dx=dx)
+                elif buy:
+                    self.view.shop_view.mode = view.ShopView.MODE_BUY
+                elif sell:
+                    self.view.shop_view.mode = view.ShopView.MODE_SELL
 
             # If we are in GAME PAUSED mode
             elif self.mode == Controller.GAME_MODE_PAUSED:
@@ -268,6 +291,9 @@ class Controller():
 
         elif self.mode == Controller.GAME_MODE_CHARACTER:
             return self.handle_character_view_keys(key)
+
+        elif self.mode == Controller.GAME_MODE_SHOP:
+            return self.handle_shop_keys(key)
 
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
             return self.handle_create_character_view_keys(key)
@@ -317,6 +343,8 @@ class Controller():
             return {'show_character': True}
         elif key_char == 'd':
             return {'drop_inventory': True}
+        elif key_char == 's':
+            return {'enter_shop': True}
 
         if key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
@@ -354,6 +382,33 @@ class Controller():
         elif key_char == 'u':
             return {'use': True}
         elif key.vk == libtcod.KEY_ESCAPE or key_char == "i":
+            # Exit the menu
+            return {'exit': True}
+
+        return {}
+
+    def handle_shop_keys(self, key):
+        key_char = chr(key.c)
+
+        if key.vk == libtcod.KEY_ENTER and key.lalt:
+            # Alt+Enter: toggle full screen
+            return {'fullscreen': True}
+        # Movement keys
+        elif key.vk == libtcod.KEY_UP:
+            return {'move': (0, -1)}
+        elif key.vk == libtcod.KEY_DOWN:
+            return {'move': (0, 1)}
+        elif key.vk == libtcod.KEY_LEFT:
+            return {'move': (-1, 0)}
+        elif key.vk == libtcod.KEY_RIGHT:
+            return {'move': (1, 0)}
+        elif key_char == 'b':
+            return {'buy': True}
+        elif key_char == 's':
+            return {'sell': True}
+        elif key.vk == libtcod.KEY_ENTER:
+            return {'confirm': True}
+        elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}
 

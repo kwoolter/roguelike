@@ -8,7 +8,7 @@ Ogre,FALSE,0,7d10+21,0,19,8,16,5,7,7,11,450,a Greatclub,2d8+4
 Orc,FALSE,0,2d8+6,0,16,12,16,7,11,10,13,100,a Greataxe,1d12+3
 Orc War Chief,FALSE,0,11d8+44,0,18,12,18,11,11,16,16,1100,a Spear,1d6+4
 Rat,FALSE,0,1d4,0,2,11,9,2,10,4,10,10,Bite,1d1
-Scorpion,FALSE,0,1d4,0,2,11,8,1,8,2,11,10,a Sting,1d8
+Scorpion,FALSE,0,1d4,0,2,11,8,1,8,2,11,10,Sting,1d8
 Spider,FALSE,0,1d4,0,1,14,8,1,10,2,12,10,Bite,1d4
 Troll,FALSE,0,8d10+40,0,18,13,20,7,9,7,15,100,Bite,1d6+4
 Venomous Snake,FALSE,0,1d4,0,2,16,11,1,10,3,13,25,Bite,2d4
