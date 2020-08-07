@@ -94,9 +94,9 @@ class MainFrame(View):
         self.shop_view = ShopView(width=int(self.width - 2),
                                             height=50,
                                             fg=libtcod.lightest_yellow,
-                                            bg=libtcod.lighter_sepia,
-                                            border_bg=libtcod.sepia,
-                                            border_fg=libtcod.dark_sepia)
+                                            bg=libtcod.light_sepia,
+                                            border_bg=libtcod.lighter_sepia,
+                                            border_fg=libtcod.light_sepia)
 
         self.text_entry = TextEntryBox()
 
@@ -916,6 +916,8 @@ class ShopView(View):
         self.con = None
         self.game = None
         self.character = None
+        self.sell_border = None
+        self.buy_border = None
 
         self.selected_sell_item = -1
         self.selected_sell_item_entity = None
@@ -933,6 +935,21 @@ class ShopView(View):
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+        cx, cy = self.center
+        w = self.width
+        h = self.height - 4
+        th = 4
+
+        sell_border_instructions = f'U:{th}|R:{cx - 3}|D:{h-1}|L:{w-1}|U:{h-1}|r:{cx-3}|d:{th}|r:{cx+1}'
+        sell_border_template = Boxes.turtle_to_box(sell_border_instructions)
+        self.sell_border = Boxes.array_to_border(sell_border_template)
+
+
+        buy_border_instructions = f'U:{th}|L:{cx - 3}|D:{h-1}|R:{w-1}|U:{h-1}|L:{cx-3}|d:{th}|L:{cx+1}'
+        buy_border_template = Boxes.turtle_to_box(buy_border_instructions)
+        self.buy_border = Boxes.array_to_border(buy_border_template)
+
 
         self.sell_list = []
 
@@ -998,7 +1015,7 @@ class ShopView(View):
         bo.render(self.con, 0, 0)
 
         # Create a box divider
-        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
+        divider_box = Boxes.get_box_divider(length=self.width, border_type=ShopView.BORDER_TYPE1)
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
@@ -1017,22 +1034,32 @@ class ShopView(View):
         y+=2
 
         # Draw a divider
-        divider.render(self.con, 0, y)
+        #divider.render(self.con, 0, y)
 
         div_start = y
 
         y+=2
+        fg = self.sell_fg
+        bg = self.bg
+        if self.mode == ShopView.MODE_SELL:
+            fg, bg = bg, fg
 
-        so = ScreenString("SELL", fg=self.sell_fg, bg=self.bg,alignment=libtcod.CENTER)
+        side = "S E L L"
+        so = ScreenString(f"{side:^15}", fg=fg, bg=bg,alignment=libtcod.CENTER)
         so.render(self.con, int(x=cx/2), y=y)
 
-        so = ScreenString("BUY",fg=self.buy_fg, bg=self.bg,alignment=libtcod.CENTER)
+        fg = self.buy_fg
+        bg = self.bg
+        if self.mode == ShopView.MODE_BUY:
+            fg, bg = bg, fg
+        side = "B U Y"
+        so = ScreenString(f"{side:^15}",fg=fg, bg=bg,alignment=libtcod.CENTER)
         so.render(self.con, x=int(cx*3/2), y=y)
 
         y+=2
 
         # Draw a divider
-        divider.render(self.con, 0, y)
+        #divider.render(self.con, 0, y)
 
         y+=1
 
@@ -1055,10 +1082,18 @@ class ShopView(View):
                 so.render(self.con, x=cx, y=y)
                 y += 1
 
+            so = ScreenObject2DArray(self.sell_border, fg=self.border_fg, bg=self.border_bg)
+            so.render(self.con, 0, 4)
+
         # We are in BUY item mode
         elif self.mode == ShopView.MODE_BUY:
+            y+=1
+
+            divider.render(self.con, 0, y)
 
             div = Boxes.BORDER_CHAR_MAPS[self.border_type][Boxes.BORDER_V]
+
+            y+=1
 
             categories = f'{chr(div)}'
             for i,category in enumerate(self.buy_item_categories):
@@ -1099,9 +1134,12 @@ class ShopView(View):
                 so.render(self.con, x=cx, y=y)
                 y += 1
 
+            so = ScreenObject2DArray(self.buy_border, fg=self.border_fg, bg=self.border_bg)
+            so.render(self.con, 0, 4)
+
         y+=22
         # Draw a divider
-        divider.render(self.con, 0, y)
+        #divider.render(self.con, 0, y)
 
 
         # Create a vertical divider
@@ -1110,7 +1148,10 @@ class ShopView(View):
                                               border_type=self.border_type,
                                               orient=Boxes.DIVIDER_VERTICAL)
         v_divider = ScreenObject2DArray(v_divider_box, fg=self.border_fg, bg=self.border_bg)
-        v_divider.render(self.con, cx, div_start)
+        #v_divider.render(self.con, cx, div_start)
+
+
+
 
 
 
@@ -1656,7 +1697,8 @@ class EventView(View):
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
                             model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),
-                            model.Event.LEVEL_UP_AVAILABLE: (libtcod.gold, libtcod.red)
+                            model.Event.LEVEL_UP_AVAILABLE: (libtcod.gold, libtcod.red),
+                            model.Event.PLAYER_DEAD: (libtcod.red, None)
                             }
 
     def __init__(self):

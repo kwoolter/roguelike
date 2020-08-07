@@ -1,5 +1,5 @@
-import tcod as libtcod
 import textwrap
+
 import numpy as np
 import tcod as libtcod
 
@@ -260,6 +260,40 @@ class Boxes:
     BORDER_BR = 8
     BORDER_H = 9
     BORDER_V = 10
+    
+    MOVE_UP = "U"
+    MOVE_DOWN = "D"
+    MOVE_LEFT = "L"
+    MOVE_RIGHT = "R"
+    
+    MOVE_TO_VECTOR = {
+        MOVE_UP: (0,-1),
+        MOVE_DOWN: (0,1),
+        MOVE_LEFT: (-1,0),
+        MOVE_RIGHT: (1,0)
+    }
+
+
+    # Map adjacent (Top, Bottom, Left, Right) tiles to middle tile
+    MAP_ADJACENT_TO_BORDER = {
+
+        (0, 0, 0, 0): None,
+        (0, 0, 0, 1): BORDER_R,
+        (0, 0, 1, 0): BORDER_L,
+        (0, 0, 1, 1): BORDER_H,
+        (0, 1, 0, 0): BORDER_V,
+        (0, 1, 0, 1): BORDER_TL,
+        (0, 1, 1, 0): BORDER_TR,
+        (0, 1, 1, 1): BORDER_T,
+        (1, 0, 0, 0): BORDER_V,
+        (1, 0, 0, 1): BORDER_BL,
+        (1, 0, 1, 0): BORDER_BR,
+        (1, 0, 1, 1): BORDER_B,
+        (1, 1, 0, 0): BORDER_V,
+        (1, 1, 0, 1): BORDER_L,
+        (1, 1, 1, 0): BORDER_R,
+        (1, 1, 1, 1): BORDER_M
+    }
 
     BORDER_CHAR_MAPS = {
 
@@ -305,7 +339,7 @@ class Boxes:
         for x in range(w):
             for y in range(h):
                 c = box[x,y]
-                box_text+= chr(box[x,y]) if c != 0 else " "
+                box_text+= chr(c) if c != 0 else " "
             box_text+="\n"
 
         return box_text
@@ -332,7 +366,105 @@ class Boxes:
         return box
 
 
+    @staticmethod
+    def turtle_to_box(instructions:str):
+
+        vectors = []
+        instuction_list = ""
+        for i in instructions.split("|"):
+            #print(i)
+            cmd, qty = i.split(":")
+            cmd = cmd.upper()
+            steps = int(qty)
+            instuction_list += str(cmd*steps)
+            vector = Boxes.MOVE_TO_VECTOR[cmd]
+            #print(f'go {cmd} {steps} steps = {vector}')
+            vectors.append(vector)
+
+        #print(instuction_list)
+
+        current = np.array([0,0])
+        x,y = current
+        min_x = max_x = x
+        min_y = max_y = y
+        for i in instuction_list:
+
+            current += Boxes.MOVE_TO_VECTOR[i]
+            x,y = current
+            min_x = min(x,min_x)
+            min_y = min(y, min_y)
+            max_x = max(x, max_x)
+            max_y = max(y, max_y)
+            #print(f'c({x},{y}: x({min_x}, {max_x}) y({min_y}, {max_y})')
+
+        width = max_x - min_x + 1
+        height = max_y - min_y + 1
+
+        box = np.zeros((width,height), dtype=int)
+        current = np.array([0-min_x, 0-min_y])
+        x,y = current
+        box[x,y] = 1
+
+        for i in instuction_list:
+            current += Boxes.MOVE_TO_VECTOR[i]
+            x, y = current
+            box[x, y] = 1
+
+        # last_i = None
+        # for i in instuction_list:
+        #
+        #     if last_i is not None:
+        #         current += Boxes.MOVE_TO_VECTOR[i]
+        #         x, y = current
+        #         box[x, y] = 1
+        #
+        #     last_i = i
+        #     last_x = x
+        #     lasy_y = y
+
+
+        return box
+
+    @staticmethod
+    def array_to_border(template:np.array, border_type = BORDER_TYPE_1):
+
+        type_map = Boxes.BORDER_CHAR_MAPS[border_type]
+
+        adjacent_vectors = (Boxes.MOVE_UP, Boxes.MOVE_DOWN, Boxes.MOVE_LEFT, Boxes.MOVE_RIGHT)
+
+        w,h = template.shape
+
+        expanded = np.zeros((w+2, h+2), dtype=int)
+        expanded[1:-1,1:-1] = template
+        border = np.zeros((w+2,h+2), dtype=int)
+
+        for x in range(1,w+1):
+            for y in range(1,h+1):
+                if expanded[x,y] == 0:
+                    continue
+                current_pos = np.array([x,y])
+                key = []
+                for vector_name in adjacent_vectors:
+                    vector = Boxes.MOVE_TO_VECTOR[vector_name]
+                    adj = np.add(current_pos, vector)
+                    ax,ay = adj
+                    adj_value = expanded[ax,ay]
+                    key.append(adj_value)
+                border_segment = Boxes.MAP_ADJACENT_TO_BORDER[tuple(key)]
+                if border_segment is not None:
+                    border[x,y] = type_map[border_segment]
+
+        return border[1:-1,1:-1]
+
 if __name__ == "__main__":
+
+    i = "U:2|r:5|D:3|L:1|U:7"
+    r = Boxes.turtle_to_box(i)
+    b = Boxes.array_to_border(r)
+
+    print(b)
+
+    assert False
 
     # Test out the Boxes.get_box() static method
     box = Boxes.get_box(10,6, border_type=Boxes.BORDER_DEFAULT)
