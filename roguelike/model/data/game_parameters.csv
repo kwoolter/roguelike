@@ -96,3 +96,7 @@ Troll,Count,Room,Level,0.25,-1,25,-15,0,3
 Troll,Probability,Room,Level,2,-10,4,2,0,50
 Venomous Snake,Count,Room,Level,0.5,0,15,-20,1,4
 Venomous Snake,Probability,Room,Level,3,10,20,0,20,50
+Silver,Count,Floor,Level,0.3,2,10,0.5,2,8
+Silver,Probability,Floor,Level,2,6,10,2,20,50
+Copper,Count,Floor,Level,0.5,1,10,0,2,10
+Copper,Probability,Floor,Level,5,0,10,0,20,50

@@ -6,6 +6,7 @@ import tcod as libtcod
 
 from .combat import *
 from .entity_factory import Entity, Player, EntityFactory, Fighter
+from .entity_factory import Inventory
 from .entity_factory import text_to_color
 from .events import Event
 from .game_parameters import GameParameters
@@ -733,9 +734,8 @@ class Floor():
 
             else:
 
-                # Roll some damage based on the attackers weapon and deduct damage from target's HP
-                #dmg = CombatEquipmentFactory.get_damage_roll_by_name(weapon.name)
-                dmg = weapon.get_damage_roll()
+                # Roll some damage based on the attackers weapon + attack modifier and deduct damage from target's HP
+                dmg = weapon.get_damage_roll() + attacker.fighter.get_attack(attack_ability)
 
                 target.fighter.take_damage(dmg)
 
@@ -1194,11 +1194,19 @@ class Model():
             new_player.fighter.equip_item(eq)
 
         # Give the player some basic items
-        basic_items = ("Food", "Food", "Small Red Potion", "Key", "Gold", "Gold", "Gold","Silver", "Bronze")
+        basic_items = ("Food", "Food", "Small Red Potion", "Key")
         for item in basic_items:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
-            
+
+        # Give the Player some money
+        coins = {Inventory.GOLD: 0, Inventory.SILVER:1, Inventory.COPPER:7}
+        for c,v in coins.items():
+            eq = EntityFactory.get_entity_by_name(c)
+            for i in range(v):
+                new_player.take_item(eq)
+
+
         new_player.level_up()
 
         return new_player

@@ -1,9 +1,11 @@
 import math
 import random
-
+import re
 import tcod as libtcod
 
-from .combat import CombatClass, CombatEquipmentFactory, CombatEquipment
+#from . combat import CombatClass, CombatEquipmentFactory, CombatEquipment
+
+from roguelike.model.combat import *
 
 
 def text_to_color(color_text: str) -> libtcod.color.Color:
@@ -569,14 +571,15 @@ class EntityFactory:
 class Inventory:
     GOLD = "Gold"
     SILVER = "Silver"
-    BRONZE = "Bronze"
-    COINS = (GOLD, SILVER, BRONZE)
+    COPPER = "Copper"
+    COINS = {GOLD:100, SILVER:10, COPPER:1}
 
     def __init__(self, max_items: int = 15):
         self.max_items = max_items
         self.stackable_items = {}
         self.other_items = []
-        self.coins = {c_name: 0 for c_name in Inventory.COINS}
+        self.coins = {c_name: 0 for c_name in Inventory.COINS}#
+        self.money = 0
 
     @property
     def items(self) -> int:
@@ -607,17 +610,22 @@ class Inventory:
     def get_other_items(self) -> list:
         return list(self.other_items)
 
+    def get_money(self)->int:
+        return self.money
+
+    def get_coins(self)->dict:
+        return Inventory.value_to_gsb_coin_text(self.money)
+
     def buy_item(self, new_item: Entity)->bool:
         success = False
 
         cost = new_item.get_property("Value")
 
-        coin = Inventory.GOLD
-
-        if self.coins[coin] >= cost:
+        # Have we got enough money to buy the item?
+        if self.money >= cost:
             success = self.add_item(new_item)
             if success is True:
-                self.coins[coin] -= cost
+                self.money -= cost
 
         return success
 
@@ -630,8 +638,7 @@ class Inventory:
             if self.remove_item(old_item) is True:
 
                 cost = old_item.get_property("Value")
-                coin = Inventory.GOLD
-                self.coins[coin] += cost
+                self.money += cost
                 success = True
 
         return success
@@ -640,9 +647,10 @@ class Inventory:
 
         success = False
 
-        # If the new item is a coin then add to our coin collection
+        # If the new item is a coin then add value to our money
         if new_item.name in self.coins:
-            self.coins[new_item.name] += 1
+            value = Inventory.COINS[new_item.name]
+            self.money += value
             success = True
 
         # Have we got room in the inventory?
@@ -667,9 +675,10 @@ class Inventory:
 
         success = False
 
-        # If the old item is a coin then add to our coin collection
+        # If the old item is a coin then remove from our total money
         if old_item.name in self.coins:
-            self.coins[old_item.name] -= 1
+            value = old_item.get_property("Value")
+            self.money -= value
             success = True
 
         else:
@@ -693,8 +702,67 @@ class Inventory:
 
         return success
 
+    @staticmethod
+    def gsb_coin_text_to_value(coin_text:str):
+
+        result = 0
+
+        # Define regex for parsing the text
+        gold = re.compile(r'^\d+(?=g)')
+        silver = re.compile(r'\d+(?=s)')
+        bronze = re.compile(r'\d+(?=b)')
+
+        # Use regex to extract the dice info from the text
+        gs = gold.search(coin_text)
+        ss = silver.search(coin_text)
+        bs= bronze.search(coin_text)
+
+        g = 0 if gs is None else int(gs[0])
+        s = 0 if ss is None else int(ss[0])
+        b = 0 if bs is None else int(bs[0])
+
+        result = (g * Inventory.COINS[Inventory.GOLD]) + \
+                 (s * Inventory.COINS[Inventory.SILVER]) + \
+                 (b * Inventory.COINS[Inventory.COPPER])
+
+        print(f'g{g}:s{s}:b{b}={result}')
+
+        return result
+
+
+    @staticmethod
+    def value_to_gsb_coin_text(value : int)->dict:
+
+        coins = {c:0 for c in Inventory.COINS.keys()}
+
+        for c,v in Inventory.COINS.items():
+            coin_count = value // v
+            coins[c] = coin_count
+            value -= coin_count * v
+
+        return coins
 
 if __name__ == "__main__":
+
+    text = "1g2s3b"
+    r = Inventory.gsb_coin_text_to_value(text)
+    print(f'{text}={r}')
+
+    text = "3b"
+    r = Inventory.gsb_coin_text_to_value(text)
+    print(f'{text}={r}')
+
+    text = "2s"
+    r = Inventory.gsb_coin_text_to_value(text)
+    print(f'{text}={r}')
+
+    v = 28
+    r = Inventory.value_to_gsb_coin_text(v)
+    print(f'{v}={r}')
+
+    assert False
+
+
     EntityFactory.load("entities.csv")
 
     entities = []

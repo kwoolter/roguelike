@@ -715,13 +715,13 @@ class InventoryView(View):
                 y += 1
 
 
-        # Print what coins you are holding
         y += 1
         x = cx - 6
 
-        for coin in model.Inventory.COINS:
+        # Print what coins you are holding
+        coins = self.game.player.inventory.get_coins()
+        for coin, coin_value in coins.items():
             e = model.EntityFactory.get_entity_by_name(coin)
-            coin_value = self.game.player.inventory.coins.get(coin)
 
             # Draw the coin icon and current value held
             try:
@@ -1234,9 +1234,10 @@ class ShopView(View):
 
         x+= 7
 
-        for coin in model.Inventory.COINS:
+        # Print what coins you are holding
+        coins = self.game.player.inventory.get_coins()
+        for coin, coin_value in coins.items():
             e = model.EntityFactory.get_entity_by_name(coin)
-            coin_value = self.game.player.inventory.coins.get(coin)
 
             # Draw the coin icon and current value held
             try:
