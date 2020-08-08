@@ -37,7 +37,7 @@ Chest,a wooden chest,C,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FA
 Corpse,a rotting corpse,%,Object,red,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Down Stairs,some stairs leading down,v,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,0
 Food,a simple meal,+,Object,light_red,lighter_grey,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,5
-Gold,some gold,$,Object,black,yellow,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,1
+Gold,some gold,$,Object,yellow,gold,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,1
 Key,a small key,?,Object,copper,,4,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,15
 Locked Chest,a locked wooden chest,X,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,0
 Locked Down Stairs,a locked entrance,v,Object,red,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,0

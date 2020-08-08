@@ -1,6 +1,7 @@
-import roguelike.model as model
-from pathlib import Path
 import math
+from pathlib import Path
+
+import roguelike.model as model
 from .view_utils import *
 
 
@@ -92,11 +93,11 @@ class MainFrame(View):
                                                            border_fg=libtcod.green)
 
         self.shop_view = ShopView(width=int(self.width - 2),
-                                            height=50,
-                                            fg=libtcod.lightest_yellow,
-                                            bg=libtcod.light_sepia,
-                                            border_bg=libtcod.lighter_sepia,
-                                            border_fg=libtcod.light_sepia)
+                                  height=50,
+                                  fg=libtcod.dark_sepia,
+                                  bg=libtcod.lightest_sepia,
+                                  border_bg=libtcod.light_sepia,
+                                  border_fg=libtcod.gold)
 
         self.text_entry = TextEntryBox()
 
@@ -910,12 +911,18 @@ class ShopView(View):
         self.border_type = InventoryView.BORDER_TYPE2
         self.sell_fg = libtcod.dark_red
         self.buy_fg = libtcod.darker_green
+        #self.title_bg = libtcod.lightest_grey
+        self.title_bg = dim_rgb(self.bg, -20)
+        #self.tab_off_bg = libtcod.lighter_grey
+        self.tab_off_bg = dim_rgb(self.bg,40)
+
         self.mode = ShopView.MODE_SELL
 
         # Components
         self.con = None
         self.game = None
         self.character = None
+        self.gold = None
         self.sell_border = None
         self.buy_border = None
 
@@ -932,6 +939,7 @@ class ShopView(View):
 
         self.game = game
         self.character = self.game.player
+        self.gold = model.EntityFactory.get_entity_by_name("Gold")
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
@@ -943,25 +951,25 @@ class ShopView(View):
 
         sell_border_instructions = f'U:{th}|R:{cx - 3}|D:{h-1}|L:{w-1}|U:{h-1}|r:{cx-3}|d:{th}|r:{cx+1}'
         sell_border_template = Boxes.turtle_to_box(sell_border_instructions)
-        self.sell_border = Boxes.array_to_border(sell_border_template)
-
+        self.sell_border = Boxes.array_to_border(sell_border_template, border_type=ShopView.BORDER_TYPE2)
 
         buy_border_instructions = f'U:{th}|L:{cx - 3}|D:{h-1}|R:{w-1}|U:{h-1}|L:{cx-3}|d:{th}|L:{cx+1}'
         buy_border_template = Boxes.turtle_to_box(buy_border_instructions)
-        self.buy_border = Boxes.array_to_border(buy_border_template)
-
+        self.buy_border = Boxes.array_to_border(buy_border_template, border_type=ShopView.BORDER_TYPE2)
 
         self.sell_list = []
-
         self.buy_list = model.EntityFactory.get_entities_by_property("IsTradable")
         self.category_to_entity = {}
 
+
+        # Build a map of Entity category to list of matching Entities
         for item in self.buy_list:
             key = item.category
             if key not in self.category_to_entity:
                 self.category_to_entity[key] = []
             self.category_to_entity[key].append(item)
 
+        # Create the map of currently selected items for each category of Entity in the buy list
         self.buy_item_categories = sorted(self.category_to_entity.keys())
         for k in self.category_to_entity.keys():
             self.selected_buy_item_by_category[k] = -1
@@ -1005,18 +1013,19 @@ class ShopView(View):
         self.change_selection(0, 0)
 
         cx, cy = self.center
+        padding = 4
 
         # Clear the screen with the background colour
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
+        # Colour the title area background
+        self.con.default_bg = self.title_bg
+        self.con.rect(0, 0, self.width, 9, False, libtcod.BKGND_SET)
+
         # Draw the border
         bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
         bo.render(self.con, 0, 0)
-
-        # Create a box divider
-        divider_box = Boxes.get_box_divider(length=self.width, border_type=ShopView.BORDER_TYPE1)
-        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
 
@@ -1026,60 +1035,104 @@ class ShopView(View):
                               width=self.width - 2,
                               height=self.height - 2,
                               fg=self.fg,
-                              bg=self.bg,
+                              bg=self.title_bg,
                               alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
 
-        y+=2
+        y+=4
 
-        # Draw a divider
-        #divider.render(self.con, 0, y)
+        # Draw the BUY and SELL tabs based on current mode
 
-        div_start = y
-
-        y+=2
         fg = self.sell_fg
         bg = self.bg
         if self.mode == ShopView.MODE_SELL:
-            fg, bg = bg, fg
 
+            # Colour the SELL tab background
+            self.con.default_bg = self.bg
+            self.con.rect(0, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+
+            # Colour the buy tab background
+            self.con.default_bg = self.tab_off_bg
+            self.con.rect(cx+2, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+        else:
+            fg = dim_rgb(fg, 30)
+            bg = self.tab_off_bg
+
+        # Print the sell tab label
         side = "S E L L"
-        so = ScreenString(f"{side:^15}", fg=fg, bg=bg,alignment=libtcod.CENTER)
-        so.render(self.con, int(x=cx/2), y=y)
+        so = ScreenString(f"{side:^16}", fg=fg, bg=bg,alignment=libtcod.CENTER)
+        so.render(self.con, int(x=cx/2)-1, y=y)
 
+        # BUY mode processing
         fg = self.buy_fg
         bg = self.bg
         if self.mode == ShopView.MODE_BUY:
-            fg, bg = bg, fg
+
+            # draw the Buy tab in bright colours
+            self.con.default_bg = self.bg
+            self.con.rect(cx+2, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+
+            # draw the Sell tab in darker colours
+            self.con.default_bg = self.tab_off_bg
+            self.con.rect(0, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+
+        else:
+            fg = dim_rgb(fg, 30)
+            bg = self.tab_off_bg
+
+
         side = "B U Y"
-        so = ScreenString(f"{side:^15}",fg=fg, bg=bg,alignment=libtcod.CENTER)
-        so.render(self.con, x=int(cx*3/2), y=y)
+        so = ScreenString(f"{side:^16}",fg=fg, bg=bg,alignment=libtcod.CENTER)
+        so.render(self.con, x=int(cx*3/2)+1, y=y)
 
-        y+=2
+        y+=3
 
-        # Draw a divider
-        #divider.render(self.con, 0, y)
-
-        y+=1
-
-        # We are in SELL item mode
+        # If we are in SELL item mode
         if self.mode == ShopView.MODE_SELL:
 
             y += 1
 
+            # Draw the items that are in your inventory that can be sold...
             for i, sell_item in enumerate(self.sell_list):
 
-                item_value = sell_item.get_property("Value")
+                e=sell_item
 
-                fg = self.sell_fg
+                fg = self.fg
                 bg = self.bg
                 if i == self.selected_sell_item:
                     fg,bg = bg,fg
                     self.selected_sell_item_entity = sell_item
 
-                so = ScreenString(f'{sell_item.description} ({item_value})', fg=fg, bg=bg, alignment=libtcod.CENTER)
-                so.render(self.con, x=cx, y=y)
+                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^34}',
+                                   fg=fg,
+                                   bg=bg,
+                                   alignment=libtcod.CENTER)
+
+                # Draw the coloured character of the item
+                bg = e.bg
+                fg = e.fg
+                x=padding
+                try:
+                    libtcod.console_set_default_foreground(self.con, fg)
+                    libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
+                    if bg is not None:
+                        libtcod.console_set_char_background(self.con, x, y, bg)
+                    else:
+                        libtcod.console_set_char_background(self.con, x, y, libtcod.light_grey)
+                except Exception:
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+
+                # Draw the Gold item icon and the selected item's value
+                try:
+                    item_value = e.get_property("Value")
+                    e=self.gold
+                    x = self.width - padding - 2
+                    libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
+                    self.con.print(x+1, y, f'{item_value:>2}', fg=self.fg, bg=None)
+                except Exception:
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+
                 y += 1
 
             so = ScreenObject2DArray(self.sell_border, fg=self.border_fg, bg=self.border_bg)
@@ -1087,72 +1140,80 @@ class ShopView(View):
 
         # We are in BUY item mode
         elif self.mode == ShopView.MODE_BUY:
-            y+=1
-
-            divider.render(self.con, 0, y)
-
-            div = Boxes.BORDER_CHAR_MAPS[self.border_type][Boxes.BORDER_V]
 
             y+=1
 
-            categories = f'{chr(div)}'
+            # Draw the category selection buttons
+            category_count = len(self.buy_item_categories)
+            button_width = int(self.width/category_count) - 2
+
             for i,category in enumerate(self.buy_item_categories):
                 if i == self.selected_buy_item_category:
-                    category = f'<*{category}*>'
                     selected_category = self.buy_item_categories[i]
+                    fg = self.fg
+                    bg = self.border_bg
                 else:
-                    category = f'  {category}  '
-                categories+=f'{category}{chr(div)}'
+                    fg = dim_rgb(self.fg, 30)
+                    bg = dim_rgb(self.border_bg, 30)
 
-            fg = self.border_bg
-            bg = self.bg
+                if i == self.selected_buy_item_category:
+                    self.con.draw_frame(2 + i * (button_width + 1), y, button_width, 3, fg=fg, bg=bg)
+                else:
+                    self.con.draw_rect(2+i*(button_width+1), y, button_width, 3, ch=0, fg=fg, bg=bg)
 
-            so = ScreenString(categories, fg=fg, bg=bg, alignment=libtcod.CENTER)
-            so.render(self.con, x=cx, y=y)
+                self.con.print_box(2 + i * (button_width + 1), y + 1, button_width, 3, f'{category}',
+                                   alignment=libtcod.CENTER)
 
-            y += 1
+            y += 4
 
-            # Draw a divider
-            divider.render(self.con, 0, y)
-
-            y += 2
-
+            # Get the list of items that you can BUY for the current selected category
             filtered_list = [item for item in self.buy_list if item.category == selected_category]
 
+            # Display the list of items that you can BUY
             for i, buy_item in enumerate(filtered_list):
 
-                fg = self.buy_fg
+                e = buy_item
+
+                fg = self.fg
                 bg = self.bg
 
                 if i == self.selected_buy_item:
                     fg,bg = bg,fg
                     self.selected_buy_item_entity = buy_item
 
-                item_value = buy_item.get_property("Value")
+                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^34}',
+                                   fg=fg,
+                                   bg=bg,
+                                   alignment=libtcod.CENTER)
 
-                so = ScreenString(f'{buy_item.description} ({item_value})', fg=fg, bg=bg, alignment=libtcod.CENTER)
-                so.render(self.con, x=cx, y=y)
+                # Draw the coloured icon of the item
+                bg = e.bg
+                fg = e.fg
+                x=padding
+                try:
+                    libtcod.console_set_default_foreground(self.con, fg)
+                    libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
+                    if bg is not None:
+                        libtcod.console_set_char_background(self.con, x, y, bg)
+                    else:
+                        libtcod.console_set_char_background(self.con, x, y, libtcod.light_grey)
+                except Exception:
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+
+                # Draw the Gold item icon and item value
+                try:
+                    item_value = e.get_property("Value")
+                    e = self.gold
+                    x = self.width - padding - 2
+                    libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
+                    self.con.print(x+1, y, f'{item_value:>2}', fg=self.fg, bg=None)
+                except Exception:
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+
                 y += 1
 
             so = ScreenObject2DArray(self.buy_border, fg=self.border_fg, bg=self.border_bg)
             so.render(self.con, 0, 4)
-
-        y+=22
-        # Draw a divider
-        #divider.render(self.con, 0, y)
-
-
-        # Create a vertical divider
-        l = 5
-        v_divider_box = Boxes.get_box_divider(length=l,
-                                              border_type=self.border_type,
-                                              orient=Boxes.DIVIDER_VERTICAL)
-        v_divider = ScreenObject2DArray(v_divider_box, fg=self.border_fg, bg=self.border_bg)
-        #v_divider.render(self.con, cx, div_start)
-
-
-
-
 
 
 
