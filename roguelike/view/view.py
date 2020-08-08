@@ -1115,7 +1115,7 @@ class ShopView(View):
                     fg,bg = bg,fg
                     self.selected_sell_item_entity = sell_item
 
-                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^34}',
+                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^30}',
                                    fg=fg,
                                    bg=bg,
                                    alignment=libtcod.CENTER)
@@ -1134,13 +1134,18 @@ class ShopView(View):
                 except Exception:
                     print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
-                # Draw the Gold item icon and the selected item's value
+                # Draw the selected item's value as coins
                 try:
+                    x = self.width - padding - 3
                     item_value = e.get_property("Value")
-                    e=self.gold
-                    x = self.width - padding - 2
-                    libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
-                    self.con.print(x+1, y, f'{item_value:>2}', fg=self.fg, bg=None)
+                    coins = model.Inventory.value_to_gsb_coin_text(item_value)
+                    for coin, count in coins.items():
+                        if count > 0:
+                            e=model.EntityFactory.get_entity_by_name(coin)
+                            libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
+                            self.con.print(x+1, y, f'{count}', fg=self.fg, bg=None)
+                            x += 1 + len(str(count))
+
                 except Exception:
                     print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
@@ -1192,7 +1197,7 @@ class ShopView(View):
                     fg,bg = bg,fg
                     self.selected_buy_item_entity = buy_item
 
-                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^34}',
+                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^30}',
                                    fg=fg,
                                    bg=bg,
                                    alignment=libtcod.CENTER)
@@ -1211,13 +1216,18 @@ class ShopView(View):
                 except Exception:
                     print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
-                # Draw the Gold item icon and item value
+                # Draw the selected item's value as coins
                 try:
+                    x = self.width - padding - 3
                     item_value = e.get_property("Value")
-                    e = self.gold
-                    x = self.width - padding - 2
-                    libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
-                    self.con.print(x+1, y, f'{item_value:>2}', fg=self.fg, bg=None)
+                    coins = model.Inventory.value_to_gsb_coin_text(item_value)
+                    for coin, count in coins.items():
+                        if count > 0:
+                            e=model.EntityFactory.get_entity_by_name(coin)
+                            libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
+                            self.con.print(x+1, y, f'{count}', fg=self.fg, bg=None)
+                            x += 1 + len(str(count))
+
                 except Exception:
                     print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 

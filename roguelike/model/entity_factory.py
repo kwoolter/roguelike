@@ -1,6 +1,7 @@
 import math
 import random
 import re
+import numpy as np
 import tcod as libtcod
 
 #from . combat import CombatClass, CombatEquipmentFactory, CombatEquipment
@@ -733,9 +734,12 @@ class Inventory:
     @staticmethod
     def value_to_gsb_coin_text(value : int)->dict:
 
+        coins_by_value = np.array(sorted(Inventory.COINS.items(), key=lambda x: x[1], reverse = True))
+
         coins = {c:0 for c in Inventory.COINS.keys()}
 
-        for c,v in Inventory.COINS.items():
+        for c in coins_by_value[:,0]:
+            v = Inventory.COINS[c]
             coin_count = value // v
             coins[c] = coin_count
             value -= coin_count * v
@@ -756,7 +760,7 @@ if __name__ == "__main__":
     r = Inventory.gsb_coin_text_to_value(text)
     print(f'{text}={r}')
 
-    v = 28
+    v = 15
     r = Inventory.value_to_gsb_coin_text(v)
     print(f'{v}={r}')
 
