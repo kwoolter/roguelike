@@ -73,8 +73,8 @@ class MainFrame(View):
         self.inventory_view = InventoryView(width=int(self.width - 2),
                                             height=50,
                                             #fg=libtcod.lightest_yellow,
-                                            fg=libtcod.dark_flame,
-                                            bg=libtcod.lighter_sepia,
+                                            fg=libtcod.dark_sepia,
+                                            bg=libtcod.lightest_sepia,
                                             border_bg=libtcod.sepia,
                                             border_fg=libtcod.dark_sepia)
 
@@ -570,6 +570,8 @@ class InventoryView(View):
         self.border_bg = border_bg
         self.border_type = InventoryView.BORDER_TYPE2
         self.equipped_item_fg = libtcod.desaturated_chartreuse
+        self.carryied_item_fg = libtcod.red
+        self.carryied_item_fg = self.fg
 
         # Components
         self.con = None
@@ -637,12 +639,7 @@ class InventoryView(View):
         inventory = self.character.inventory.get_other_items()
         inventory_stackable = self.character.inventory.get_stackable_items()
 
-        # Determine which item should be the  current highlighted item in the inventory list
-        if inv.items > 0:
-            self.selected_item = min(max(0, self.selected_item), inv.items - 1)
-        else:
-            self.selected_item = -1
-            self.selected_item_entity = None
+        self.change_selection(0)
 
         cx, cy = self.center
 
@@ -717,7 +714,25 @@ class InventoryView(View):
                 so.render(self.con, cx, y)
                 y += 1
 
+
+        # Print what coins you are holding
         y += 1
+        x = cx - 6
+
+        for coin in model.Inventory.COINS:
+            e = model.EntityFactory.get_entity_by_name(coin)
+            coin_value = self.game.player.inventory.coins.get(coin)
+
+            # Draw the coin icon and current value held
+            try:
+                libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
+                self.con.print(x+1, y, f'{coin_value:<2}', fg=self.fg, bg=None)
+            except Exception:
+                print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+
+            x+= 4
+
+        y+=2
 
         # Draw a divider
         divider.render(self.con, 0, y)
@@ -744,7 +759,7 @@ class InventoryView(View):
             so = ScreenStringRect(text,
                                   width=self.width - 2,
                                   height=self.height - 2,
-                                  fg=libtcod.light_yellow,
+                                  fg=self.carryied_item_fg,
                                   bg=self.bg,
                                   alignment=libtcod.CENTER)
 
@@ -772,12 +787,11 @@ class InventoryView(View):
                 # Otherwise default colours
                 else:
                     bg = self.bg
-                    fg = libtcod.yellow
+                    fg = self.carryied_item_fg
 
                 # If this is the currently selected item the swap bg and fg...
                 if i == self.selected_item:
                     fg, bg = bg, fg
-                    fg = libtcod.dark_sepia
                     self.selected_item_entity = item
 
                 so = ScreenString(f'{text:^40}',
@@ -815,18 +829,17 @@ class InventoryView(View):
 
                 # if this item is equipped...
                 if equipped is True:
-                    fg = libtcod.sea
+                    fg = self.equipped_item_fg
                     bg = self.bg
 
                 # Otherwise use default colours
                 else:
                     bg = self.bg
-                    fg = libtcod.yellow
+                    fg = self.carryied_item_fg
 
                 # If this is the currently selected item swap fg and bg
                 if i == (self.selected_item - len(inventory)):
                     fg, bg = bg, fg
-                    fg = libtcod.dark_sepia
                     self.selected_item_entity = item
 
                 so = ScreenString(f'{text:^40}',
@@ -911,9 +924,7 @@ class ShopView(View):
         self.border_type = InventoryView.BORDER_TYPE2
         self.sell_fg = libtcod.dark_red
         self.buy_fg = libtcod.darker_green
-        #self.title_bg = libtcod.lightest_grey
         self.title_bg = dim_rgb(self.bg, -20)
-        #self.tab_off_bg = libtcod.lighter_grey
         self.tab_off_bg = dim_rgb(self.bg,40)
 
         self.mode = ShopView.MODE_SELL
@@ -1214,6 +1225,28 @@ class ShopView(View):
 
             so = ScreenObject2DArray(self.buy_border, fg=self.border_fg, bg=self.border_bg)
             so.render(self.con, 0, 4)
+
+
+        x = 2
+        y = self.height - 3
+
+        self.con.print(x, y, 'Coins:', fg=self.fg, bg=None)
+
+        x+= 7
+
+        for coin in model.Inventory.COINS:
+            e = model.EntityFactory.get_entity_by_name(coin)
+            coin_value = self.game.player.inventory.coins.get(coin)
+
+            # Draw the coin icon and current value held
+            try:
+                libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
+                self.con.print(x+1, y, f'{coin_value:<2}', fg=self.fg, bg=None)
+            except Exception:
+                print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+
+            x+= 4
+
 
 
 

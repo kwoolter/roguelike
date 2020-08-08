@@ -1194,7 +1194,7 @@ class Model():
             new_player.fighter.equip_item(eq)
 
         # Give the player some basic items
-        basic_items = ("Food", "Food", "Small Red Potion", "Key")
+        basic_items = ("Food", "Food", "Small Red Potion", "Key", "Gold", "Gold", "Gold","Silver", "Bronze")
         for item in basic_items:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
@@ -1502,6 +1502,39 @@ class Model():
 
         return success
 
+
+    def buy_item(self, new_item : Entity)->bool:
+        success = self.player.inventory.buy_item(new_item)
+
+        if success is False:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You failed to buy {new_item.description}!"))
+
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_SUCCEEDED,
+                                        description=f"You bought {new_item.description}"))
+
+
+        return success
+
+    def sell_item(self, old_item : Entity)->bool:
+        success = self.player.inventory.sell_item(old_item)
+
+        if success is False:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You failed to sell {old_item.description}!"))
+
+        else:
+            self.player.fighter.unequip_item(old_item=old_item)
+
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_SUCCEEDED,
+                                        description=f"You sold {old_item.description}"))
+
+        return success
 
 class ItemUser():
     def __init__(self):

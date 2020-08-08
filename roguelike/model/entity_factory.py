@@ -1,6 +1,8 @@
-import tcod as libtcod
 import math
 import random
+
+import tcod as libtcod
+
 from .combat import CombatClass, CombatEquipmentFactory, CombatEquipment
 
 
@@ -13,7 +15,7 @@ def text_to_color(color_text: str) -> libtcod.color.Color:
             print("We didn't end up with a colour!")
             c = None
     except AttributeError:
-        #print(f"{color_text} is not a valid attribute")
+        # print(f"{color_text} is not a valid attribute")
         c = None
 
     return c
@@ -108,7 +110,7 @@ class Entity():
         self.y += dy
 
     def distance_to_target(self, other_entity) -> float:
-        return math.sqrt((self.x - other_entity.x)**2 + (self.y - other_entity.y)**2)
+        return math.sqrt((self.x - other_entity.x) ** 2 + (self.y - other_entity.y) ** 2)
 
 
 class Player(Entity):
@@ -124,7 +126,7 @@ class Player(Entity):
 
     def __init__(self, name: str,
                  description: str,
-                 category:str,
+                 category: str,
                  char: str,
                  fg,
                  x: int = 0, y: int = 0):
@@ -141,7 +143,7 @@ class Player(Entity):
                          description=description,
                          category=category,
                          char=char,
-                         fg = fg,
+                         fg=fg,
                          x=x, y=y)
 
         # Components
@@ -162,7 +164,7 @@ class Player(Entity):
         if self.fighter is not None:
             self.fighter.heal(heal_amount=heal_amount)
 
-    def equip_item(self, new_item: Entity, slot = None) -> bool:
+    def equip_item(self, new_item: Entity, slot=None) -> bool:
 
         assert self.fighter is not None, "Trying to equip an item when you don't have a fighter set-up"
 
@@ -173,10 +175,10 @@ class Player(Entity):
             success = True
 
         elif new_item.get_property("IsEquippable") == True or \
-            (new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True):
+                (new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True):
 
             old_item = self.fighter.equip_item(new_item, slot)
-            #self.inventory.remove_item(new_item)
+            # self.inventory.remove_item(new_item)
 
             # if old_item is not None:
             #     success = self.inventory.add_item(old_item)
@@ -203,12 +205,22 @@ class Player(Entity):
         return success
 
     def get_stat_total(self, stat_name: str) -> int:
+        """
+        Get the total stat value for the specified stat name based on your equipment and combat class
+
+        :param stat_name: the name of the stat that you want the total for
+        :return: the total value that your equipment and combat class provides for the specified stat
+        """
+
+        # Get ALL of the stat totals from your equipment
         totals = self.fighter.get_equipment_stat_totals([stat_name])
-        print(totals)
+
+        # Get the value of that your equipment provides
         total = totals.get(stat_name)
-        print(f'Equipment {stat_name} total = {total}')
         if total is None:
             total = 0
+
+        # Get thevalue of that stat that your combat class provides and add it to the total
         v = self.fighter.combat_class.get_property(stat_name)
         if v is not None:
             total += v
@@ -223,13 +235,12 @@ class Fighter():
     ITEM_SLOT = "Item Slot"
 
     def __init__(self, combat_class: CombatClass):
-        self.last_target=None
+        self.last_target = None
         self.combat_class = combat_class
         self.equipment = {}
         Fighter.DEFAULT_WEAPON = EntityFactory.get_entity_by_name(Fighter.DEFAULT_WEAPON_NAME)
         self.set_property("Level", 0)
         self.set_property("HP", self.get_max_HP())
-
 
     @property
     def is_dead(self) -> bool:
@@ -262,14 +273,14 @@ class Fighter():
 
         return ce
 
-    def get_property(self, property_name:str):
+    def get_property(self, property_name: str):
         property_value = self.combat_class.get_property(property_name)
         return property_value
 
-    def set_property(self, property_name: str, new_value: int, increment:bool = False):
+    def set_property(self, property_name: str, new_value: int, increment: bool = False):
         self.combat_class.update_property(property_name, new_value, increment)
 
-    def get_property_modifier(self, property_name:str):
+    def get_property_modifier(self, property_name: str):
         """
 
         :param property_name:
@@ -278,10 +289,10 @@ class Fighter():
         modifier = 0
         property_value = self.combat_class.properties.get(property_name)
         if property_value is not None:
-            modifier = math.floor((property_value - 10)/2)
+            modifier = math.floor((property_value - 10) / 2)
         return modifier
 
-    def get_max_HP(self)->int:
+    def get_max_HP(self) -> int:
 
         # If this is a playable character then use their Constitution
         if self.combat_class.get_property("Playable") == True:
@@ -290,11 +301,11 @@ class Fighter():
         else:
             con = 0
 
-        level  = self.get_property("Level")
+        level = self.get_property("Level")
         level_1_HP = self.get_property("Level1HP")
         HP_per_level = self.get_property("HPPerLevel")
 
-        return con + level_1_HP + ((level-1) * HP_per_level)
+        return con + level_1_HP + ((level - 1) * HP_per_level)
 
     def get_stat_total(self, stat_name: str) -> int:
 
@@ -309,11 +320,11 @@ class Fighter():
         if v is not None:
             total += v
 
-        #print(f'\tEquipment {stat_name} total = {total}')
+        # print(f'\tEquipment {stat_name} total = {total}')
 
         return total
 
-    def get_attack(self, ability:str = "STR"):
+    def get_attack(self, ability: str = "STR"):
         """
         Get the fighter's attack power for the specified ability.  Default = STR
         :param ability: the nme of the ability that you will be using to attack
@@ -321,11 +332,11 @@ class Fighter():
         """
         ability_modifier = self.get_property_modifier(ability)
         attacker_level = self.get_property("Level")
-        attack = ability_modifier + math.floor(attacker_level/2)
+        attack = ability_modifier + math.floor(attacker_level / 2)
 
         return attack
 
-    def get_defence(self, ability:str = "AC"):
+    def get_defence(self, ability: str = "AC"):
         """
         Get the fighter's defence that uses the specified ability
         :param ability: the nme of the ability that you will be using to attack
@@ -341,7 +352,7 @@ class Fighter():
 
         defence = self.get_stat_total(ability)
         level = self.get_property("Level")
-        return bonus + defence + math.floor(level/2)
+        return bonus + defence + math.floor(level / 2)
 
     def take_damage(self, damage_amount: int):
         self.combat_class.update_property("HP", damage_amount * -1, increment=True)
@@ -356,7 +367,7 @@ class Fighter():
     def add_kills(self, kill_count: int = 1):
         self.combat_class.update_property("KILLS", kill_count, increment=True)
 
-    def level_up(self, stat_name = None):
+    def level_up(self, stat_name=None):
         """
         Level up a Fighter and increase the specified stat.
         :param stat_name: the stat that you want to increase. Default is None.
@@ -377,15 +388,15 @@ class Fighter():
             if value is None:
                 value = 1
             else:
-                value +=1
+                value += 1
 
-            self.combat_class.update_property(property_name = stat_name, new_value=value)
+            self.combat_class.update_property(property_name=stat_name, new_value=value)
 
         self.set_property("MaxHP", self.get_max_HP())
 
         return success
 
-    def equip_item(self, new_item: Entity, slot:str = None) -> Entity:
+    def equip_item(self, new_item: Entity, slot: str = None) -> Entity:
         """
         Equip an item in the specified equipment slot.
         :param new_item: the new item that we are equipping.  If None you are un-eqipping back to inventory
@@ -420,7 +431,7 @@ class Fighter():
         for k in del_keys:
             del self.equipment[k]
 
-        return len(del_keys)>0
+        return len(del_keys) > 0
 
     def get_equipment_stat_totals(self, stat_names: list = ["AC", "INT", "Weight", "Value"]):
         """
@@ -531,7 +542,6 @@ class EntityFactory:
         matched = df.query(q)
 
         for index, row in matched.iterrows():
-
             e = EntityFactory.entity_from_row(index, row)
 
             matches.append(e)
@@ -539,7 +549,7 @@ class EntityFactory:
         return matches
 
     @staticmethod
-    def entity_from_row(index, row)->Entity:
+    def entity_from_row(index, row) -> Entity:
 
         name = index
         fg = text_to_color(row["FG"])
@@ -557,10 +567,16 @@ class EntityFactory:
 
 
 class Inventory:
+    GOLD = "Gold"
+    SILVER = "Silver"
+    BRONZE = "Bronze"
+    COINS = (GOLD, SILVER, BRONZE)
+
     def __init__(self, max_items: int = 15):
         self.max_items = max_items
         self.stackable_items = {}
         self.other_items = []
+        self.coins = {c_name: 0 for c_name in Inventory.COINS}
 
     @property
     def items(self) -> int:
@@ -569,6 +585,17 @@ class Inventory:
     @property
     def full(self):
         return self.items >= self.max_items
+
+    def is_held(self, item : Entity)->bool:
+        success = False
+
+        if item in self.other_items:
+            success = True
+        elif item.name in self.stackable_items:
+            success = True
+
+        return success
+
 
     def get_stackable_items(self) -> dict:
         items = {}
@@ -580,15 +607,47 @@ class Inventory:
     def get_other_items(self) -> list:
         return list(self.other_items)
 
+    def buy_item(self, new_item: Entity)->bool:
+        success = False
+
+        cost = new_item.get_property("Value")
+
+        coin = Inventory.GOLD
+
+        if self.coins[coin] >= cost:
+            success = self.add_item(new_item)
+            if success is True:
+                self.coins[coin] -= cost
+
+        return success
+
+    def sell_item(self, old_item : Entity)-> bool:
+
+        success = False
+
+        if self.is_held(old_item) is True:
+
+            if self.remove_item(old_item) is True:
+
+                cost = old_item.get_property("Value")
+                coin = Inventory.GOLD
+                self.coins[coin] += cost
+                success = True
+
+        return success
+
     def add_item(self, new_item: Entity) -> bool:
 
         success = False
 
-        if self.full:
-            print(f'proccess full logic for {new_item.name}')
+        # If the new item is a coin then add to our coin collection
+        if new_item.name in self.coins:
+            self.coins[new_item.name] += 1
+            success = True
 
         # Have we got room in the inventory?
-        if self.full is False or (new_item.get_property("IsStackable") == True and new_item.name in self.stackable_items.keys()):
+        elif self.full is False or (
+                new_item.get_property("IsStackable") == True and new_item.name in self.stackable_items.keys()):
 
             # If the item is stackable then increase the number you are holding
             if new_item.get_property("IsStackable") == True:
@@ -608,25 +667,31 @@ class Inventory:
 
         success = False
 
-        # If the item is stackable then decrease the number you are holding
-        if old_item.get_property("IsStackable") == True:
-            # If you don't have any of these set inventory count to 1
-            if old_item.name not in self.stackable_items.keys() or self.stackable_items[old_item.name] == 0:
-                self.stackable_items[old_item.name] = 1
-
-            self.stackable_items[old_item.name] -= 1
-
-            if self.stackable_items[old_item.name] == 0:
-                del self.stackable_items[old_item.name]
-
+        # If the old item is a coin then add to our coin collection
+        if old_item.name in self.coins:
+            self.coins[old_item.name] -= 1
             success = True
+
         else:
-            if old_item in self.other_items:
-                self.other_items.remove(old_item)
-            success = True
+
+            # If the item is stackable then decrease the number you are holding
+            if old_item.get_property("IsStackable") == True:
+                # If you don't have any of these set inventory count to 1
+                if old_item.name not in self.stackable_items.keys() or self.stackable_items[old_item.name] == 0:
+                    self.stackable_items[old_item.name] = 1
+
+                self.stackable_items[old_item.name] -= 1
+
+                if self.stackable_items[old_item.name] == 0:
+                    del self.stackable_items[old_item.name]
+
+                success = True
+            else:
+                if old_item in self.other_items:
+                    self.other_items.remove(old_item)
+                success = True
 
         return success
-
 
 
 if __name__ == "__main__":
@@ -637,12 +702,11 @@ if __name__ == "__main__":
     names = {"Player", "Corpse", "Stairs Up", "Orc", "Dagger"}
 
     for name in names:
-        for c in range(random.randint(1,3)):
+        for c in range(random.randint(1, 3)):
             new_enity = EntityFactory.get_entity_by_name(name)
             entities.append(new_enity)
 
     print(entities)
-
 
     e = EntityFactory.get_entity_by_name("rubbish")
     e = EntityFactory.get_entity_by_name("Gold")

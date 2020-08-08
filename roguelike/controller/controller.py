@@ -252,10 +252,14 @@ class Controller():
                     self.view.shop_view.mode = view.ShopView.MODE_SELL
                 elif confirm:
                     if self.view.shop_view.mode == view.ShopView.MODE_BUY:
-                        print(f'Buying {self.view.shop_view.get_selected_buy_item().description}')
+                        new_item = self.view.shop_view.get_selected_buy_item()
+                        success = self.model.buy_item(new_item)
+                        print(f'Buying {self.view.shop_view.get_selected_buy_item().description}: success={success}')
 
                     elif self.view.shop_view.mode == view.ShopView.MODE_SELL:
-                        print(f'Selling {self.view.shop_view.get_selected_sell_item().description}')
+                        old_item = self.view.shop_view.get_selected_sell_item()
+                        success = self.model.sell_item(old_item)
+                        print(f'Selling {self.view.shop_view.get_selected_sell_item().description}: success={success}')
 
 
             # If we are in GAME PAUSED mode
