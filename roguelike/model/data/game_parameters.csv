@@ -17,8 +17,8 @@ Healing Scroll,Count,Floor,Level,0.2,1,10,0.1,2,7
 Healing Scroll,Probability,Floor,Level,2,0,10,3,15,40
 Helmet,Count,Floor,Level,0.1,1,10,0,0,3
 Helmet,Probability,Floor,Level,2,0,10,3,15,40
-Iron Crown,Count,Floor,Level,2,1,10,0.1,0,2
-Iron Crown,Probability,Floor,Level,1,0,1,0,20,50
+Iron Crown,Count,Floor,Level,0.3,-0.5,10,0.1,0,2
+Iron Crown,Probability,Floor,Level,0.5,10,10,1,10,40
 Key,Count,Floor,Level,2,1,10,0.1,1,2
 Key,Probability,Floor,Level,1,0,1,0,20,50
 Lightning Scroll,Count,Floor,Level,2,1,10,0.1,0,2
@@ -69,7 +69,7 @@ War Hammer,Count,Floor,Level,2,1,10,0.1,0,1
 War Hammer,Probability,Floor,Level,1.5,-5,10,-2,0,50
 Player,Level,Game,XP,0.004,1,400,-0.5,1,100
 Giant Centipede,Count,Room,Level,0.5,0,15,-20,1,4
-Giant Centipede,Probability,Room,Level,2,-16,5,0.5,0,50
+Giant Centipede,Probability,Room,Level,3,-16,5,0.5,10,50
 Giant Rat,Count,Room,Level,0.5,0,15,-20,1,4
 Giant Rat,Probability,Room,Level,2,-16,5,0.5,0,50
 Giant Spider,Count,Room,Level,0.5,0,15,-20,1,4
@@ -100,5 +100,19 @@ Silver,Count,Floor,Level,0.3,2,10,0.5,2,8
 Silver,Probability,Floor,Level,2,6,10,2,20,50
 Copper,Count,Floor,Level,0.5,1,10,0,2,10
 Copper,Probability,Floor,Level,5,0,10,0,20,50
-Shop,Count,Floor,Level,-1,1,5,5,1,1
+Shop,Count,Floor,Level,-1,1,5,5,0,1
 Shop,Probability,Floor,Level,0,0,1,0,100,100
+Club,Count,Floor,Level,0.5,1,10,0,2,10
+Mace,Count,Floor,Level,0.5,1,10,0,2,10
+Battleaxe,Count,Floor,Level,0.5,1,10,0,2,10
+Quarterstaff,Count,Floor,Level,0.5,1,10,0,2,10
+Longsword,Count,Floor,Level,0.5,1,10,0,2,10
+Scimitar,Count,Floor,Level,0.5,1,10,0,2,10
+Greataxe,Count,Floor,Level,0.5,1,10,0,2,10
+Club,Probability,Floor,Level,5,0,10,0,20,50
+Mace,Probability,Floor,Level,-1,1,5,5,0,1
+Battleaxe,Probability,Floor,Level,5,0,10,0,20,50
+Quarterstaff,Probability,Floor,Level,5,0,10,0,20,50
+Longsword,Probability,Floor,Level,5,0,10,0,20,50
+Scimitar,Probability,Floor,Level,5,0,10,0,20,50
+Greataxe,Probability,Floor,Level,5,0,10,0,20,50

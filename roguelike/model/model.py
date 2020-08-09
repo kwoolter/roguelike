@@ -1041,6 +1041,9 @@ class Shop():
         self.buy_list = [e for e in self.floor.entities if e.get_property("IsTradable") == True]
         self.buy_list.sort(key=operator.attrgetter('description'))
 
+        self.build_items_by_category()
+
+    def build_items_by_category(self):
         # Build a map of Entity category to list of matching Entities
         for item in self.buy_list:
             key = item.category
@@ -1048,10 +1051,18 @@ class Shop():
                 self.category_to_entity[key] = []
             self.category_to_entity[key].append(item)
 
-
     def get_buy_list(self):
-
         return self.buy_list
+    
+    def buy_item(self, item: Entity):
+        self.buy_list.remove(item)
+        self.build_items_by_category()
+
+    def sell_item(self, item: Entity):
+        self.buy_list.append(item)
+        self.buy_list.sort(key=operator.attrgetter('description'))
+        self.build_items_by_category()
+        
 
 
 class Model():
@@ -1235,7 +1246,7 @@ class Model():
             new_player.fighter.equip_item(eq)
 
         # Give the player some basic items
-        basic_items = ("Food", "Food", "Small Red Potion", "Key")
+        basic_items = ("Food", "Food", "Small Red Potion", "Key", "Weapon Upgrade", "Weapon Upgrade")
         for item in basic_items:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
@@ -1257,7 +1268,7 @@ class Model():
 
         self.events.add_event(Event(type=Event.GAME,
                                     name=Event.GAME_NEW_PLAYER,
-                                    description=f"{self.player.name} the {self.player.combat_class} joined {self.name}!"))
+                                    description=f"{self.player.combat_class} {self.player.name} joined {self.name}!"))
 
         if self.current_floor is not None:
             self.current_floor.add_player(self.player)
@@ -1592,6 +1603,8 @@ class Model():
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_SUCCEEDED,
                                         description=f"You bought {new_item.description}"))
+            
+            self.shop.buy_item(new_item)
 
 
         return success
@@ -1606,6 +1619,7 @@ class Model():
 
         else:
             self.player.fighter.unequip_item(old_item=old_item)
+            self.shop.sell_item(old_item)
 
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_SUCCEEDED,
@@ -1773,6 +1787,26 @@ class ItemUser():
             else:
                 success=False
                 effect=f"Can't use {item.description} right now"
+
+        # Reveal where the exit is
+        elif item.name == "Weapon Upgrade":
+            
+            cw = player.fighter.current_weapon
+
+            upgraded_weapon_name = f'{cw.name}+1'
+
+            e = EntityFactory.get_entity_by_name(upgraded_weapon_name)
+
+            if e is not None:
+                if player.take_item(e) is True and player.equip_item(e) is True:
+                    effect = f"You upgraded your weapon to {e.description}"
+                    player.drop_item(cw)
+                else:
+                    effect = "upgrade didn't work???"
+                    success = False
+            else:
+                effect = f"You can't upgrade {cw.description}!"
+                success = False
 
         else:
             success = False

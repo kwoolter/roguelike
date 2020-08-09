@@ -182,10 +182,6 @@ class Player(Entity):
                 (new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True):
 
             old_item = self.fighter.equip_item(new_item, slot)
-            # self.inventory.remove_item(new_item)
-
-            # if old_item is not None:
-            #     success = self.inventory.add_item(old_item)
 
             success = True
 
@@ -436,6 +432,9 @@ class Fighter():
             del self.equipment[k]
 
         return len(del_keys) > 0
+
+    def is_equipped(self, item: Entity):
+        return item in self.equipment.values()
 
     def get_equipment_stat_totals(self, stat_names: list = ["AC", "INT", "Weight", "Value"]):
         """

@@ -69,3 +69,13 @@ Giant Spider,a giant spider,*,Enemy,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 Goblin Boss,a goblin boss,G,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Orc War Chief,an orc war chief,O,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Ogre,an ogre,O,Enemy,dark_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Club,a wooden club,|,Combat,light_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,100
+Mace,a mace,!,Combat,lightest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,500
+Battleaxe,a battleaxe,!,Combat,copper,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,1500
+Quarterstaff,a quarterstaff,|,Combat,light_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,500
+Longsword,a longsword,\,Combat,lightest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,1500
+Scimitar,a scimitar,{,Combat,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,1000
+Greataxe,a great axe,!,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,3000
+Dagger+1,a small dagger +1,(,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,500
+Dagger+1+1,a small dagger +2,(,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,2000
+Weapon Upgrade,a weapon upgrade,+,Object,light_amber,flame,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,2000
