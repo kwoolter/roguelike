@@ -88,11 +88,16 @@ class Controller():
 
             # Loop to process game events
             event = self.model.get_next_event()
+
             while event is not None:
-                self.view.process_event(event)
 
                 if event.type == model.Event.STATE and event.name == model.Event.STATE_GAME_OVER:
                     self.set_mode(Controller.GAME_MODE_GAME_OVER)
+
+                elif event.name == model.Event.GAME_ENTER_SHOP:
+                    self.set_mode(Controller.GAME_MODE_SHOP)
+
+                self.view.process_event(event)
 
                 event = self.model.get_next_event()
 

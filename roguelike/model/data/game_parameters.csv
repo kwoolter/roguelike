@@ -100,3 +100,5 @@ Silver,Count,Floor,Level,0.3,2,10,0.5,2,8
 Silver,Probability,Floor,Level,2,6,10,2,20,50
 Copper,Count,Floor,Level,0.5,1,10,0,2,10
 Copper,Probability,Floor,Level,5,0,10,0,20,50
+Shop,Count,Floor,Level,-1,1,5,5,1,1
+Shop,Probability,Floor,Level,0,0,1,0,100,100

@@ -196,6 +196,8 @@ class MainFrame(View):
             self.inventory_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_CHARACTER_SCREEN:
             self.character_view.process_event(new_event)
+        elif self.mode == MainFrame.MODE_SHOP_SCREEN:
+            self.shop_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_PLAYING:
             self.floor_view.process_event(new_event)
 
@@ -555,7 +557,7 @@ class MessagePanel(View):
 class InventoryView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
-    MESSAGE_PANEL_HEIGHT = 8
+    MESSAGE_PANEL_HEIGHT = 1
 
     def __init__(self, width: int, height: int,
                  fg=libtcod.white, bg=libtcod.black,
@@ -713,7 +715,6 @@ class InventoryView(View):
 
                 so.render(self.con, cx, y)
                 y += 1
-
 
         y += 1
         x = cx - 6
@@ -933,7 +934,6 @@ class ShopView(View):
         self.con = None
         self.game = None
         self.character = None
-        self.gold = None
         self.sell_border = None
         self.buy_border = None
 
@@ -949,8 +949,8 @@ class ShopView(View):
     def initialise(self, game: model.Model):
 
         self.game = game
+        self.shop = self.game.shop
         self.character = self.game.player
-        self.gold = model.EntityFactory.get_entity_by_name("Gold")
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
@@ -969,16 +969,9 @@ class ShopView(View):
         self.buy_border = Boxes.array_to_border(buy_border_template, border_type=ShopView.BORDER_TYPE2)
 
         self.sell_list = []
-        self.buy_list = model.EntityFactory.get_entities_by_property("IsTradable")
-        self.category_to_entity = {}
 
-
-        # Build a map of Entity category to list of matching Entities
-        for item in self.buy_list:
-            key = item.category
-            if key not in self.category_to_entity:
-                self.category_to_entity[key] = []
-            self.category_to_entity[key].append(item)
+        self.buy_list = self.shop.get_buy_list()
+        self.category_to_entity = self.shop.category_to_entity
 
         # Create the map of currently selected items for each category of Entity in the buy list
         self.buy_item_categories = sorted(self.category_to_entity.keys())
@@ -987,6 +980,15 @@ class ShopView(View):
 
     def process_event(self, new_event: model.Event):
         print(f'{__class__}: Event {new_event}')
+
+        if new_event.name == model.Event.GAME_ENTER_SHOP:
+            self.buy_list = self.shop.get_buy_list()
+            self.category_to_entity = self.shop.category_to_entity
+
+            # Create the map of currently selected items for each category of Entity in the buy list
+            self.buy_item_categories = sorted(self.category_to_entity.keys())
+            for k in self.category_to_entity.keys():
+                self.selected_buy_item_by_category[k] = -1
 
     def change_selection(self, dy: int, dx: int = 0):
 
@@ -1041,7 +1043,7 @@ class ShopView(View):
         y = 2
 
         # Print the box header
-        text = f"Welcome to the shop {self.character.name}!"
+        text = f"Welcome to {self.shop.name}, {self.character.name}!"
         so = ScreenStringRect(text,
                               width=self.width - 2,
                               height=self.height - 2,
@@ -1161,7 +1163,7 @@ class ShopView(View):
 
             # Draw the category selection buttons
             category_count = len(self.buy_item_categories)
-            button_width = int(self.width/category_count) - 2
+            button_width = int((self.width-padding)/category_count) - 1
 
             for i,category in enumerate(self.buy_item_categories):
                 if i == self.selected_buy_item_category:
@@ -1175,7 +1177,7 @@ class ShopView(View):
                 if i == self.selected_buy_item_category:
                     self.con.draw_frame(2 + i * (button_width + 1), y, button_width, 3, fg=fg, bg=bg)
                 else:
-                    self.con.draw_rect(2+i*(button_width+1), y, button_width, 3, ch=0, fg=fg, bg=bg)
+                    self.con.draw_rect(2 + i * (button_width + 1), y, button_width, 3, ch=0, fg=fg, bg=bg)
 
                 self.con.print_box(2 + i * (button_width + 1), y + 1, button_width, 3, f'{category}',
                                    alignment=libtcod.CENTER)
@@ -1236,13 +1238,8 @@ class ShopView(View):
             so = ScreenObject2DArray(self.buy_border, fg=self.border_fg, bg=self.border_bg)
             so.render(self.con, 0, 4)
 
-
-        x = 2
-        y = self.height - 3
-
-        self.con.print(x, y, 'Coins:', fg=self.fg, bg=None)
-
-        x+= 7
+        x=cx-1
+        y=4
 
         # Print what coins you are holding
         coins = self.game.player.inventory.get_coins()
@@ -1256,7 +1253,7 @@ class ShopView(View):
             except Exception:
                 print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
-            x+= 4
+            y+=1
 
 
 

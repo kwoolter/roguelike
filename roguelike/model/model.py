@@ -1,5 +1,5 @@
 import collections
-
+import operator
 import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
@@ -170,6 +170,8 @@ class Floor():
         self.level = level
         self.rect = rect.Rect(0, 0, width, height)
 
+        self._debug = False
+
         # Floor generation parameters
         self.room_parameters = params["Room"]
         self.floor_parameters = params["Floor"]
@@ -280,12 +282,9 @@ class Floor():
         # List of floor tile colours that can be randomly assigned to a Tunnel
         valid_tunnel_colours = []
         for i in range(80,100,5):
-            #valid_tunnel_colours.append(libtcod.Color(i,i,0))
             valid_tunnel_colours.append(libtcod.Color(i,i,i))
 
-        print(valid_room_colours)
-
-        # Define initial values for teh first and last room
+        # Define initial values for the first and last room
         self.last_room = None
         self.first_room = None
         self.last_enemy=None
@@ -508,33 +507,37 @@ class Floor():
             else:
                 margin = 0
 
-                # Attempt to add a random number of entities up to the max count per floor
-                #for i in range(random.randint(1,emax)):
-                for i in range(emax):
+            # Attempt to add a random number of entities up to the max count per floor
+            #for i in range(random.randint(1,emax)):
+            for i in range(emax):
 
-                    # If random number less than our probability of creating this entity...
-                    if random.randint(1, 100) < eprob:
+                # If random number less than our probability of creating this entity...
+                if random.randint(1, 100) < eprob:
 
-                        # pick a random room and a random position in the room
-                        room=random.choice(available_rooms)
-                        rx, ry = room.get_random_pos(margin=margin)
+                    # pick a random room and a random position in the room
+                    room=random.choice(available_rooms)
 
-                        # If there is nothing already there...
-                        if self.get_entity_at_pos((rx, ry)) is None:
+                    if e.name == "Shop":
+                        room = self.first_room
 
-                            # Add a new entity to the floor at this location
-                            new_entity = EntityFactory.get_entity_by_name(ename)
-                            if new_entity is None:
-                                print(f"Couldn't create entity by name of {ename}")
-                                continue
-                            new_entity.xy = rx,ry
-                            self.entities.append(new_entity)
+                    rx, ry = room.get_random_pos(margin=margin)
 
-                            print(f'\t++ Added {new_entity.name} to room {room.name}')
+                    # If there is nothing already there...
+                    if self.get_entity_at_pos((rx, ry)) is None:
 
-                            # Don't use this room again
-                            # Can't delete while iterating!!!!!
-                            #available_rooms.remove(room)
+                        # Add a new entity to the floor at this location
+                        new_entity = EntityFactory.get_entity_by_name(ename)
+                        if new_entity is None:
+                            print(f"Couldn't create entity by name of {ename}")
+                            continue
+                        new_entity.xy = rx,ry
+                        self.entities.append(new_entity)
+
+                        print(f'\t++ Added {new_entity.name} to room {room.name}')
+
+                        # Don't use this room again
+                        # Can't delete while iterating!!!!!
+                        #available_rooms.remove(room)
 
         # If we are not at the top level add stairs back up to the previous level in the centre of the first room
         if self.level > 1:
@@ -545,7 +548,10 @@ class Floor():
             # Replace anything that is already there!
             if e is not None:
                 self.remove_entity(e)
-            #self.entities.append(new_entity)
+
+            # Not allowing to go back up a level at the moment unless in debug mode
+            if self._debug is True:
+                self.entities.append(new_entity)
 
         # In the last room add some stairs to the next level down
         ename = "Down Stairs"
@@ -1015,6 +1021,37 @@ class Floor():
             print(f'Bot {bot} is dead')
             self.bots.remove(bot)
 
+class Shop():
+
+    def __init__(self, name: str = "default shop"):
+        # Properties
+        self.name = name
+
+        # Components
+        self.floor = None
+        self.category_to_entity = {}
+
+    def initialise(self, floor: Floor):
+
+        # Store the new shop floor and update name of the shop
+        self.floor = floor
+        self.name = f'The Shop on Level {self.floor.level}'
+
+        # Get the list of tradable entities and sort them alphabetically
+        self.buy_list = [e for e in self.floor.entities if e.get_property("IsTradable") == True]
+        self.buy_list.sort(key=operator.attrgetter('description'))
+
+        # Build a map of Entity category to list of matching Entities
+        for item in self.buy_list:
+            key = item.category
+            if key not in self.category_to_entity:
+                self.category_to_entity[key] = []
+            self.category_to_entity[key].append(item)
+
+
+    def get_buy_list(self):
+
+        return self.buy_list
 
 
 class Model():
@@ -1043,6 +1080,7 @@ class Model():
         self.entities = None
         self.floors=[]
         self.current_floor = None
+        self.shop = None
         self.events = EventQueue()
         self.item_user = None
 
@@ -1074,8 +1112,11 @@ class Model():
 
         self.item_user.randomise()
 
+        self.shop = Shop(f'{self.name} Shop')
+        self.shop.initialise(self.current_floor)
 
-    def load_game_parameters(self)->dict:
+
+    def load_game_parameters(self, level=1, XP=0)->dict:
         """
 
         :return:
@@ -1278,15 +1319,43 @@ class Model():
         elif e.name == "Down Stairs":
             self.next_floor()
 
-        # If we found up stairs go to teh previous floor
+        # If we found up stairs go to the previous floor
         elif e.name == "Up Stairs":
             self.previous_floor()
+
+        # If we found a shop then enter it
+        elif e.name == "Shop":
+            self.enter_shop()
 
         # Else the entity at this space is not stairs!
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"There are no stairs here!"))
+
+    def enter_shop(self):
+        """
+        Process entering a Shop
+        """
+        self.events.add_event(Event(type=Event.GAME,
+                                    name=Event.GAME_ENTER_SHOP,
+                                    description=f"You enter the shop!"))
+
+        # Update the game parameters based on the current level
+        game_parameters = self.load_game_parameters()
+
+        # Create a new floor and initialise it
+        # This will hold a random selection of items that can be sold in the shop
+        shop_floor = Floor(f'The Shop on Level {self.dungeon_level}',
+                                   50, 50,
+                                   level=self.dungeon_level,
+                                   params=game_parameters)
+
+        shop_floor.initialise(self.events)
+
+        # Add the new shop floor to the shop
+        self.shop.initialise(shop_floor)
+
 
     def previous_floor(self):
         self.dungeon_level -= 1

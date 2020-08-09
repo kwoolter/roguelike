@@ -1,6 +1,7 @@
 import math
 import random
 import re
+import operator
 import numpy as np
 import tcod as libtcod
 
@@ -354,8 +355,8 @@ class Fighter():
             bonus = 0
 
         defence = self.get_stat_total(ability)
-        level = self.get_property("Level")
-        return bonus + defence + math.floor(level / 2)
+
+        return bonus + defence
 
     def take_damage(self, damage_amount: int):
         self.combat_class.update_property("HP", damage_amount * -1, increment=True)
@@ -668,6 +669,7 @@ class Inventory:
                 success = True
             else:
                 self.other_items.append(new_item)
+                self.other_items.sort(key=operator.attrgetter('description'))
                 success = True
 
         return success
