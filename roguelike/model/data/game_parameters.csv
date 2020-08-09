@@ -7,8 +7,8 @@ Buckler,Count,Floor,Level,2,1,10,0.1,0,2
 Buckler,Probability,Floor,Level,1,0,1,0,20,50
 Fireball Scroll,Count,Floor,Level,2,1,10,0.1,2,2
 Fireball Scroll,Probability,Floor,Level,1,0,1,0,20,50
-Gold,Count,Floor,Level,0.2,1,10,0.25,1,6
-Gold,Probability,Floor,Level,2,5,10,2,15,50
+Gold,Count,Floor,Level,0.2,-2,10,0.5,0,5
+Gold,Probability,Floor,Level,1,0,10,5,10,50
 Gold Crown,Count,Floor,Level,2,1,10,0.1,0,2
 Gold Crown,Probability,Floor,Level,1,0,1,0,20,50
 Gold Ring,Count,Floor,Level,2,1,10,0.1,0,2
@@ -61,8 +61,8 @@ Small Purple Potion,Count,Floor,Level,0.25,0,10,0,0,2
 Small Purple Potion,Probability,Floor,Level,1,0,1,0,20,50
 Small Red Potion,Count,Floor,Level,0.25,0,10,0,0,2
 Small Red Potion,Probability,Floor,Level,1,0,1,0,20,50
-Sword,Count,Floor,Level,0.15,1,10,1,0,5
-Sword,Probability,Floor,Level,1,5,10,3,20,50
+Sword,Count,Floor,Level,0.2,0,20,-10,0,5
+Sword,Probability,Floor,Level,2,10,10,3,10,50
 Tunic of Dexterity,Count,Floor,Level,0.15,1,10,1,0,5
 Tunic of Dexterity,Probability,Floor,Level,1,0,1,0,20,50
 War Hammer,Count,Floor,Level,2,1,10,0.1,0,1

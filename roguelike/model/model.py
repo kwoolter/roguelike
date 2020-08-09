@@ -741,7 +741,7 @@ class Floor():
             else:
 
                 # Roll some damage based on the attackers weapon + attack modifier and deduct damage from target's HP
-                dmg = weapon.get_damage_roll() + attacker.fighter.get_attack(attack_ability)
+                dmg = weapon.get_damage_roll() + max(0,attacker.fighter.get_attack(attack_ability))
 
                 target.fighter.take_damage(dmg)
 

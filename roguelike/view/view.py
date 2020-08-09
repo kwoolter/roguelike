@@ -44,7 +44,6 @@ class MainFrame(View):
     MODE_PAUSED = "paused"
     MODE_GAME_OVER = "game over"
 
-
     CONSOLE_MESSAGE_PANEL_HEIGHT = 12
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
 
@@ -132,10 +131,10 @@ class MainFrame(View):
             "terminal8x12_gs_ro.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW
         }
 
-        font_file = "polyducks_12x12.png"
-        # font_file = "dejavu_wide16x16_gs_tc.png"
-        # font_file = "dundalk12x12_gs_tc.png"
-        # font_file = "terminal8x12_gs_ro.png"
+        #font_file = "polyducks_12x12.png"
+        font_file = "dejavu_wide16x16_gs_tc.png"
+        #font_file = "dundalk12x12_gs_tc.png"
+        #font_file = "terminal8x12_gs_ro.png"
 
         # Create path for the file that we are going to load
         data_folder = Path(__file__).resolve().parent
@@ -289,14 +288,17 @@ class MainFrame(View):
             bw = int(self.width / 2)
             bh = 7
             bx = int((self.width - bw) / 2)
-            by = int((self.height - bh) / 2)
+            by = int((self.height - bh) / 2) - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT
 
             # Draw the border
             border = Boxes.get_box(width=bw, height=bh, border_type=Boxes.BORDER_TYPE_1)
             bo = ScreenObject2DArray(border, fg=libtcod.dark_orange, bg=libtcod.darker_red)
             bo.render(0, bx, by)
 
-            panel_text = self.mode.upper()
+            panel_text = ""
+            for c in self.mode.upper():
+                panel_text += f'{c} '
+
             so = ScreenString(panel_text,
                               fg=libtcod.yellow,
                               bg=libtcod.darkest_gray)
