@@ -1,6 +1,7 @@
 import math
 import random
 import re
+import copy
 import operator
 import numpy as np
 import tcod as libtcod
@@ -164,6 +165,22 @@ class Player(Entity):
             value = self.fighter.get_property(property_name)
         return value
 
+    def add_entity(self, new_entity: Entity):
+
+        # Properties
+        self.name = new_entity.name
+        self.description = new_entity.description
+        self.char = new_entity.char
+        self.category = new_entity.category
+        self._state = new_entity.state
+        self.x = new_entity.x
+        self.y = new_entity.y
+        self.fg = new_entity.fg
+        self.bg = new_entity.bg
+        self.properties = copy.deepcopy(new_entity.properties)
+
+
+
     def heal(self, heal_amount: int):
         if self.fighter is not None:
             self.fighter.heal(heal_amount=heal_amount)
@@ -262,12 +279,18 @@ class Fighter():
     def current_weapon_details(self) -> CombatEquipment:
         eq = self.equipment.get(Fighter.WEAPON_SLOT)
 
+        # Forge a default attack for the Fighter if no weapon equipped
         if eq is None:
+            # Get a basic weapon
             ce = CombatEquipmentFactory.get_equipment_by_name("Default Weapon")
+
+            # Specialise it using default attack properties of this Combat Class
             ce.name = self.get_property("DefaultATK")
             ce.description = self.get_property("DefaultATK")
+            ce.set_property("Range", self.get_property("DefaultATKRange"))
             ce.set_property("DMG", self.get_property("DefaultATKDice"))
 
+        # Otherwise get the details of the equipped weapon
         else:
             ce = CombatEquipmentFactory.get_equipment_by_name(eq.name)
 
@@ -499,8 +522,13 @@ class EntityFactory:
 
         # Read in the csv file
         EntityFactory.entities = pd.read_csv(file_to_open)
-        EntityFactory.entities.set_index("Name", drop=True, inplace=True)
-        EntityFactory.entities["IsTradable"] = EntityFactory.entities["Value"] > 0
+        df = EntityFactory.entities
+        df.set_index("Name", drop=True, inplace=True)
+        df["IsTradable"] = EntityFactory.entities["Value"] > 0
+
+        print(df.head())
+        print(df.dtypes)
+
         # self.entities.set_index(self.entities.columns[0], drop=True, inplace=True)
 
     @staticmethod
@@ -564,7 +592,7 @@ class EntityFactory:
                    fg=fg,
                    bg=bg)
 
-        e.add_properties(row.iloc[4:].to_dict())
+        e.add_properties(row.iloc[5:].to_dict())
 
         return e
 

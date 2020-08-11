@@ -1,5 +1,6 @@
 import collections
 import operator
+import copy
 import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
@@ -325,7 +326,7 @@ class Floor():
         # redefine first and last rooms
         self.last_room = self.map_rooms[-1]
         self.first_room = self.map_rooms[0]
-        self.last_room.name = "Exit to next floor"
+        self.last_room.name = "The Exit"
         self.first_room.name = "The Entrance"
 
         # Add random entities to the whole floor
@@ -388,6 +389,7 @@ class Floor():
         self.player = new_player
         self.player.xy = (x, y)
         self.move_player(0, 0)
+        #self.entities.append(self.player)
 
         # Point all bots at the player!!!!
         for bot in self.bots:
@@ -412,6 +414,14 @@ class Floor():
 
             # Get a sample of the entity that we are trying deploy
             e=EntityFactory.get_entity_by_name(ename)
+
+            if e is not None:
+                template = e.get_property("Template")
+                if template is not None:
+                    print(f'Using entity template {template} for {e.description}')
+                    # TBC to lookup template tprob and tcount !!!!
+            else:
+                continue
 
             # If the entity is an enemy and we have already hit the XP cap then loop to next entity
             if e.get_property("IsEnemy") == True and enemy_xp_total >= self.room_xp_cap:
@@ -457,25 +467,12 @@ class Floor():
 
     def generate_new_enemy(self, new_entity : Entity):
         """
-        Add random Fighter characteristics to an Entity
+        Add Fighter characteristics to an Entity
         :param new_entity: the entity that we want to turn into a Fighter
         """
 
-        class_name = new_entity.name
-        equipment = random.choices(("Hands", "Dagger", "Spear"), weights =[5,4,3], k=2)[0]
-
-        cc = CombatClassFactory.get_combat_class_by_name(class_name)
-        eq = EntityFactory.get_entity_by_name(equipment)
-
+        cc = CombatClassFactory.get_combat_class_by_name(new_entity.name)
         new_fighter = Fighter(combat_class=cc)
-        #new_fighter.level_up()
-        #new_fighter.equip_item(eq)
-
-        for i in range(1,self.level):
-            if i % 3 == 0:
-                pass
-                #new_fighter.level_up()
-
         new_entity.fighter = new_fighter
 
     def add_entities_to_floor(self, entities: dict):
@@ -627,7 +624,9 @@ class Floor():
 
         return moved
 
-    def move_entity(self, entity: Entity, dx: int, dy: int, relative:bool = True) -> bool:
+    def move_entity(self, entity: Entity, dx: int, dy: int,
+                    relative:bool = True,
+                    include_player:bool = False) -> bool:
         """
         Attempt to move a specified Entity across the Floor
         :param entity: the Entity object that you want to move
@@ -640,14 +639,20 @@ class Floor():
         if relative is False:
             entity.xy = [0,0]
 
+        newx = entity.x + dx
+        newy = entity.y + dy
+
         # If the destination is a valid path on the map...
-        if self.walkable[entity.x + dx, entity.y + dy] > 0:
+        if self.walkable[newx,newy] > 0:
 
             # And no solid entity is blocking the way...
-            e = self.get_entity_at_pos((entity.x + dx, entity.y+dy))
+            e = self.get_entity_at_pos((newx,newy))
             if e is None or e.get_property("IsWalkable") == True:
-                # Move the specified entity
-                entity.move(dx, dy)
+
+                # ..or the player is not blocking
+                if include_player is False or (newx,newy) != self.player.xy:
+                    # Move the specified entity
+                    entity.move(dx, dy)
 
             # Something is blocking the way so fail
             else:
@@ -659,14 +664,14 @@ class Floor():
 
         return success
 
-    def get_entity_at_pos(self, pos : tuple)->Entity:
+    def get_entity_at_pos(self, pos : tuple, include_player = False)->Entity:
         """
         See if there is an Entity object occupying a specified xy position on the Floor
         :param pos: the xy position that you want to check
         :return: the Entity at the specified position if one was found otherwise None
         """
         for e in self.entities:
-            if e.xy == pos:
+            if e.xy == pos and (include_player is True or e is not self.player):
                 return e
         return None
 
@@ -1001,7 +1006,6 @@ class Floor():
         return ((px-ox)**2 + (py-oy)**2) * factor/ self.fov_radius2
 
     def get_revealed_entities(self):
-
         return self.revealed_entities
 
 
@@ -1233,6 +1237,8 @@ class Model():
                             description=player_entity.description,
                             category=player_entity.category,
                             fg = player_entity.fg)
+
+        new_player.properties = copy.deepcopy(player_entity.properties)
 
         # Assign them a combat class
         cc = CombatClassFactory.get_combat_class_by_name(class_name)
@@ -1915,15 +1921,13 @@ class AIBotTracker(AIBot):
         target_in_sight = d <= self.sight_range
 
         # If we can attack it....
-
-        #if d < self.bot_entity.fighter.current_weapon_details.get_property("Range"):
-        if d < 2:
-
-            print(f'{self.bot_entity.name}: "I can attack you {self.target_entity.name}"')
+        attack_range = self.bot_entity.fighter.current_weapon_details.get_property("Range")
+        if d <= attack_range:
+            print(f'{self.bot_entity.name}: "I can attack you {self.target_entity.name} as range {d}<={attack_range}"')
             self.floor.attack_entity(self.bot_entity, self.target_entity)
 
-        # if we can see it...
-        elif target_in_sight:
+        # if we can see it move closer...
+        if target_in_sight:
 
             bx, by = self.bot_entity.xy
             tx, ty = self.target_entity.xy
@@ -1931,22 +1935,21 @@ class AIBotTracker(AIBot):
             # Try and track the target's X position
             if tx != bx:
                 if tx < bx:
-                    self.floor.move_entity(self.bot_entity, -1,0)
+                    self.floor.move_entity(self.bot_entity, -1,0, include_player=True)
                 elif tx > bx:
-                    self.floor.move_entity(self.bot_entity, 1, 0)
+                    self.floor.move_entity(self.bot_entity, 1, 0, include_player=True)
 
             # Try and track the target's Y position
             if ty != by:
                 if ty < by:
-                    self.floor.move_entity(self.bot_entity, 0, -1)
+                    self.floor.move_entity(self.bot_entity, 0, -1, include_player=True)
                 elif ty > by:
-                    self.floor.move_entity(self.bot_entity, 0, 1)
+                    self.floor.move_entity(self.bot_entity, 0, 1, include_player=True)
 
             # If we moved and are still in sight of the target then all good
             success = (bx,by) != self.bot_entity.xy or target_in_sight
 
             print(f'{self.bot_entity.name}: "I can see you {self.target_entity.name}"')
-
 
         if self._debug is True and self.failed_ticks >0:
             print("Failed {0} vs. limit {1}".format(self.failed_ticks, self.failed_ticks_limit   ))

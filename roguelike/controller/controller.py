@@ -33,10 +33,9 @@ class Controller():
         self.view.initialise(self.model)
         self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
+        self.help()
 
-        self.events.add_event(model.Event(type=model.Event.CONTROL,
-                                    name=model.Event.STATE_LOADED,
-                                    description="Hit 'N' to create a new character"))
+
 
     def set_mode(self, new_mode):
 
@@ -120,12 +119,16 @@ class Controller():
             move = action.get('move')
             use = action.get('use')
             debug = action.get('debug')
+            help = action.get('help')
 
             if debug is True:
                 self.model.print()
 
+            if help is True:
+                self.help()
+
             # If we are in PLAYING mode
-            if self.mode == Controller.GAME_MODE_PLAYING:
+            elif self.mode == Controller.GAME_MODE_PLAYING:
                 player_turn = True
 
                 # Game playing actions
@@ -291,10 +294,49 @@ class Controller():
                 libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
 
+    def help(self):
+
+        text = f'Game controls for {self.mode.upper()} mode:'
+        self.events.add_event(model.Event(type=model.Event.CONTROL,
+                                          name=self.mode,
+                                          description=text))
+
+        if self.mode == Controller.GAME_MODE_START:
+            keys_help = 'N=Create New Character|ENTER=Start'
+        elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
+            keys_help = 'N=Change name|C=change class|Esc=Exit'
+        elif self.mode == Controller.GAME_MODE_PLAYING:
+            keys_help = '^v<>=Move/attack|G=Get item|U=use equipped item|Z=wait|I=show inventory|C=show character sheet|ENTER=take stairs|Esc=Pause'
+        elif self.mode == Controller.GAME_MODE_PAUSED:
+            keys_help = 'Esc=continue|q=quit the game'
+        elif self.mode == Controller.GAME_MODE_INVENTORY:
+            keys_help = '^v<>=Change selected item|E=equip selected item|D=drop selected item|U=use equipped item|Esc=Exit'
+        elif self.mode == Controller.GAME_MODE_CHARACTER:
+            keys_help = '^v=Change selected ability|L=level-up selected ability|Esc=Exit'
+        elif self.mode == Controller.GAME_MODE_SHOP:
+            keys_help = '^v=Change selected item|B=change to BUY tab|S=change to SELL tab|' \
+                        '<>=change selected buy item category|Enter=Buy or sell selected item|Esc=Exit'
+        elif self.mode == Controller.GAME_MODE_GAME_OVER:
+            keys_help = 'SPACE=continue'
+        else:
+            keys_help = 'F1=Help|Esc=Exit'
+
+        for key_help in keys_help.split('|'):
+            key_, help_text = key_help.split('=')
+            text = f' * {key_:<5}: {help_text.capitalize()}'
+
+            self.events.add_event(model.Event(type=model.Event.CONTROL,
+                                              name=self.mode,
+                                              description=text))
+
 
     def handle_keys(self, key):
 
-        if self.mode == Controller.GAME_MODE_START:
+        # Common Keys for all modes
+        if key.vk == libtcod.KEY_F1:
+            return {'help': True}
+
+        elif self.mode == Controller.GAME_MODE_START:
             return self.handle_start_menu_keys(key)
 
         elif self.mode == Controller.GAME_MODE_PLAYING:
@@ -319,12 +361,13 @@ class Controller():
             return self.handle_game_over_keys(key)
 
 
+
         # No key was pressed
         return {}
 
     def handle_start_menu_keys(self, key):
         key_char = chr(key.c)
-        if key_char == 'a' or key.vk == libtcod.KEY_SPACE:
+        if key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
             return {'new_game': True}
         elif key_char == 'n':
             return {'new_character': True}
@@ -368,11 +411,6 @@ class Controller():
             return {'fullscreen': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             return {'pause': True}
-        elif key.vk == libtcod.KEY_F12:
-            te = TextEntry()
-            text = te.get_text()
-            print(text)
-            self.view.add_message(text)
         elif key.vk == libtcod.KEY_F11:
             return {'debug': True}
         elif key.vk == libtcod.KEY_F10:
@@ -398,7 +436,7 @@ class Controller():
             return {'drop': True}
         elif key_char == 'u':
             return {'use': True}
-        elif key.vk == libtcod.KEY_ESCAPE or key_char == "i":
+        elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}
 
@@ -445,7 +483,7 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN:
             return {'move': (0, 1)}
-        elif key.vk == libtcod.KEY_ESCAPE or key_char == "c":
+        elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}
 
@@ -467,7 +505,7 @@ class Controller():
             return {'move': (0, 1)}
         elif key.vk == libtcod.KEY_ENTER:
             return {'select': True}
-        elif key.vk == libtcod.KEY_ESCAPE or key_char == "c":
+        elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}
 
@@ -496,9 +534,9 @@ class Controller():
             return {'fullscreen': True}
         elif key.vk in (libtcod.KEY_ENTER, libtcod.KEY_SPACE):
             return {'start': True}
-        elif key.vk == libtcod.KEY_ESCAPE or key_char == "c":
+        elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
-            return {'exit': True}
+            return {'exit': False}
 
         return {}
 

@@ -188,6 +188,8 @@ class MainFrame(View):
 
         super().process_event(new_event)
 
+        #print(str(new_event))
+
         if new_event.type == model.Event.GAME:
             if new_event.name == model.Event.GAME_NEW_FLOOR:
                 self.floor_view.initialise(floor=self.game.current_floor)
@@ -1780,7 +1782,7 @@ class EventView(View):
     # Type to colour map
     EVENT_TYPE_TO_COLOUR = {model.Event.STATE: (libtcod.light_sepia, None),
                             model.Event.GAME: (libtcod.lightest_blue, None),
-                            model.Event.CONTROL: (libtcod.grey, None),
+                            model.Event.CONTROL: (libtcod.dark_chartreuse, None),
                             model.Event.DEBUG: (libtcod.grey, None)}
 
     EVENT_NAME_TO_COLOUR = {model.Event.ACTION_SUCCEEDED: (libtcod.lighter_green, None),

@@ -1,9 +1,13 @@
 # Python Rogue-like Game using TCOD lib
+kwoolter :monkey: :copyright: 2020
 ## Overview
 This game is a rogue-like game that uses the `libtcod` library and is loosely based on the python rogue-like tutorial.
 
 ### Controls
-Game Ready
+
+* `F1` help on controls available from current screen
+
+Game Ready Screen
 * `N` create a new character
 * `SPACE` to start the game
 * `Esc` quit the game
@@ -13,7 +17,7 @@ Create New Character Screen
 * `C` change player's class
 * `Esc` exit screen
 
-Game Playing
+Game Playing Screen
 * Arrow keys - move and attack enemy
 * `G` get an item
 * `U` use item currently equipped in Item slot
@@ -21,6 +25,10 @@ Game Playing
 * `C` character screen
 * `I` inventory screen
 * `Esc` pause game
+
+Game Paused Screen
+* `Q` quit the game
+* `Esc` continue playing game
 
 Inventory Screen
 * `E` equip an item
@@ -32,6 +40,17 @@ Character Screen
 * Arrow keys - change selected ability
 * `L` level-up and increase selected ability
 * `Esc` exit screen
+
+Shop Screen
+* `B` switch to Buy tab
+* `S` switch to Sell tab
+* Up and down arrow keys - change selected item 
+* `ENTER` buy/sell the selected item
+* Left and Right arrow keys - change item category in Buy tab
+* `Esc` exit screen
+
+Game Over Screen
+* `ENTER` - continue to Game Ready Screen 
 
 ### What is a rogue-like game?
 
@@ -51,11 +70,14 @@ Character Screen
 ### What is this game again?????
 Features:
 * Random dungeon floor generation with more rooms per floor as you get deeper
-* "Fog of War" unexplored map and Field of View lighting
+* Field of View (FoV) lighting
+* "Fog of War" unexplored map 
 * Random enemies in each room that scale as you go deeper
 * Random items scattered across the floor with probability governed by game rules
 * Potions and Scrolls have randomised effects
-* DnD 4e-like classes, abilities and combat rules
+* DnD-like classes, abilities, monsters and combat rules
+* DnD-like armour, weapons and other items
+* Inventory and Shop features
 * Perma-death
 * No game save feature (as yet)
 
@@ -65,7 +87,7 @@ Overview:
     * `model` - modules containing the classes for the game, floors, entities, etc.
     * `view` - modules containing the classes for all of the views
     * `controller` - main control loop
-* `tutorial` directory - how I started out following thr python tutorial    
+* `tutorial` directory - how I started out following the python tutorial    
 
 ### `model` package
 * `model.py` - main module that contains `Model`, `Floor`, `Room`, `Tunnel` classes 
@@ -121,13 +143,13 @@ Overview:
 ## `libtcod` Documentation
 * https://libtcod.github.io/docs/index2.html?c=false&cpp=false&cs=false&py=true&lua=false
 
-## Tutorial on writing a game using libtcod
+## Tutorial on writing a game using `libtcod`
 * http://rogueliketutorials.com/tutorials/tcod/
 
-## Fonts that you can load into libtcod
+## Fonts that you can load into `libtcod`
 * https://docs.rs/crate/tcod/0.10.0/source/fonts/README.txt
 * https://www.gridsagegames.com/rexpaint/resources.html#Fonts
 
-## Libtcod pre-defined colours
+## `libtcod` pre-defined colours
 * https://libtcod.github.io/docs/html2/color.html?c=false&cpp=false&cs=false&py=true&lua=false
 * https://i.imgur.com/taWlWoW.png

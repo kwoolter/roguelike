@@ -79,3 +79,27 @@ Greataxe,a great axe,!,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,3000
 Dagger+1,a small dagger +1,(,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,500
 Dagger+1+1,a small dagger +2,(,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,2000
 Weapon Upgrade,a weapon upgrade,+,Object,light_amber,flame,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,2000
+Bugbear,a bugbear,b,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Bugbear Chief,a bugbear chief,B,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Carrion Crawler,a carrion crawler,~,Enemy,red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Cyclops,a cyclops,o,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Gargoyle,a gargoyle,V,Enemy,lightest_grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Ghoul,a ghoul,{,Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Ghast,a ghast,},Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Stone Giant,a stone giant,G,Enemy,dark_grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Gnoll,a gnoll,g,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Gnoll Pack Lord,a gnoll pack lord,g,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Gnome,a gnome,g,Enemy,white,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Harpy,a harpy,V,Enemy,copper,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Hogoblin,a hogoblin,h,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Hogoblin Captain,a hogoblin captain,H,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Kobold,a kobold,k,Enemy,orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Lich,a lich,L,Enemy,blue,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Torgolodyte,a torgolodyte,t,Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Manticore,a manticore,m,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Medusa,a medusa,M,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Mimic,a mimic,X,Enemy,red,dark_red,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Guardian Naga,a guardian naga,S,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Salamander,a salamander,s,Enemy,crimson,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Skeleton,a skeleton,@,Enemy,white,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Wraith,a wraith,W,Enemy,grey,black,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0

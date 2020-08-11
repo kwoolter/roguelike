@@ -18,10 +18,24 @@ class GameParameters:
 
         # Read in the csv file
         GameParameters.parameters = pd.read_csv(file_to_open)
-        GameParameters.parameters.dropna(inplace=True)
-        GameParameters.parameters.set_index(["Entity", "Metric"], drop=True, inplace=True)
+
+        df = GameParameters.parameters
+        #GameParameters.parameters.dropna(inplace=True)
+        df.set_index(["Entity", "Metric"], drop=True, inplace=True)
+        mask = df["Template"].isna()
 
         print(GameParameters.parameters)
+
+        for index,row in df.loc[mask == False].iterrows():
+            template_name = row["Template"]
+            ename, metric = index
+            df.loc[(ename, metric), :] = df.loc[(template_name, metric)].values
+
+
+        print(df.head())
+
+        #assert False
+
 
     @staticmethod
     def get_parameter(yname : str, ymetric : str, xvalue : float) -> float:

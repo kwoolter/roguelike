@@ -1,118 +1,148 @@
-Entity,Metric,Scope,x,a,b,d,ad,min,max
-Axe,Count,Floor,Level,0.5,-1,15,-20,0,3
-Axe,Probability,Floor,Level,3,-5,10,3,0,50
-Bronze Ring,Count,Floor,Level,2,1,10,0.1,0,2
-Bronze Ring,Probability,Floor,Level,1,0,1,0,20,50
-Buckler,Count,Floor,Level,2,1,10,0.1,0,2
-Buckler,Probability,Floor,Level,1,0,1,0,20,50
-Fireball Scroll,Count,Floor,Level,2,1,10,0.1,2,2
-Fireball Scroll,Probability,Floor,Level,1,0,1,0,20,50
-Gold,Count,Floor,Level,0.2,-2,10,0.5,0,5
-Gold,Probability,Floor,Level,1,0,10,5,10,50
-Gold Crown,Count,Floor,Level,2,1,10,0.1,0,2
-Gold Crown,Probability,Floor,Level,1,0,1,0,20,50
-Gold Ring,Count,Floor,Level,2,1,10,0.1,0,2
-Gold Ring,Probability,Floor,Level,1,0,1,0,20,50
-Healing Scroll,Count,Floor,Level,0.2,1,10,0.1,2,7
-Healing Scroll,Probability,Floor,Level,2,0,10,3,15,40
-Helmet,Count,Floor,Level,0.1,1,10,0,0,3
-Helmet,Probability,Floor,Level,2,0,10,3,15,40
-Iron Crown,Count,Floor,Level,0.3,-0.5,10,0.1,0,2
-Iron Crown,Probability,Floor,Level,0.5,10,10,1,10,40
-Key,Count,Floor,Level,2,1,10,0.1,1,2
-Key,Probability,Floor,Level,1,0,1,0,20,50
-Lightning Scroll,Count,Floor,Level,2,1,10,0.1,0,2
-Lightning Scroll,Probability,Floor,Level,1,0,1,0,20,50
-Locked Chest,Count,Floor,Level,2,1,10,0.1,2,4
-Locked Chest,Probability,Floor,Level,1,0,1,0,20,50
-Map,Count,Floor,Level,1,-10,10,0,0,1
-Map,Probability,Floor,Level,1,0,1,0,20,50
-Metal Shield,Count,Floor,Level,0.75,-5,20,-50,0,2
-Metal Shield,Probability,Floor,Level,2,0,30,-100,10,40
-Plate Armour,Count,Floor,Level,0.75,-5,20,-20,0,2
-Plate Armour,Probability,Floor,Level,2,0,20,-100,10,40
-Plate Boots,Count,Floor,Level,1,-8,10,0,0,3
-Plate Boots,Probability,Floor,Level,1,0,1,0,10,50
-Poison Scroll,Count,Floor,Level,2,1,10,0.1,0,2
-Poison Scroll,Probability,Floor,Level,1,0,1,0,20,50
-Robe of Learning,Count,Floor,Level,2,1,10,0.1,1,1
-Robe of Learning,Probability,Floor,Level,1,0,1,0,20,50
-Room,Count,Floor,Level,0.25,5,8,2,6,20
-Room,Probability,Floor,Level,0,0,1,0,0,0
-Scale Armour,Count,Floor,Level,0.2,-2,10,-0.01,0,3
-Scale Armour,Probability,Floor,Level,1.5,-10,5,-2,0,50
-Scale Boots,Count,Floor,Level,0.2,-2,10,-0.01,0,3
-Scale Boots,Probability,Floor,Level,1.5,-10,5,-2,0,50
-Scroll of Greed,Count,Floor,Level,2,1,10,0.1,0,2
-Scroll of Greed,Probability,Floor,Level,1,0,1,0,20,50
-Scroll of Revelation,Count,Floor,Level,2,1,10,0.1,0,2
-Scroll of Revelation,Probability,Floor,Level,1,0,1,0,20,50
-Scroll of Secrets,Count,Floor,Level,0.2,1,10,0.1,0,2
-Scroll of Secrets,Probability,Floor,Level,1,0,1,0,20,50
-Scroll of Teleportation,Count,Floor,Level,0.2,1,10,0.1,0,2
-Scroll of Teleportation,Probability,Floor,Level,1,0,1,0,20,50
-Small Blue Potion,Count,Floor,Level,0.25,0,10,0,0,2
-Small Blue Potion,Probability,Floor,Level,1,0,1,0,20,50
-Small Bubbling Potion,Count,Floor,Level,0.25,0,10,0,0,2
-Small Bubbling Potion,Probability,Floor,Level,1,0,1,0,20,50
-Small Green Potion,Count,Floor,Level,0.25,0,10,0,0,2
-Small Green Potion,Probability,Floor,Level,1,0,1,0,20,50
-Small Purple Potion,Count,Floor,Level,0.25,0,10,0,0,2
-Small Purple Potion,Probability,Floor,Level,1,0,1,0,20,50
-Small Red Potion,Count,Floor,Level,0.25,0,10,0,0,2
-Small Red Potion,Probability,Floor,Level,1,0,1,0,20,50
-Sword,Count,Floor,Level,0.2,0,20,-10,0,5
-Sword,Probability,Floor,Level,2,10,10,3,10,50
-Tunic of Dexterity,Count,Floor,Level,0.15,1,10,1,0,5
-Tunic of Dexterity,Probability,Floor,Level,1,0,1,0,20,50
-War Hammer,Count,Floor,Level,2,1,10,0.1,0,1
-War Hammer,Probability,Floor,Level,1.5,-5,10,-2,0,50
-Player,Level,Game,XP,0.004,1,400,-0.5,1,100
-Giant Centipede,Count,Room,Level,0.5,0,15,-20,1,4
-Giant Centipede,Probability,Room,Level,3,-16,5,0.5,10,50
-Giant Rat,Count,Room,Level,0.5,0,15,-20,1,4
-Giant Rat,Probability,Room,Level,2,-16,5,0.5,0,50
-Giant Spider,Count,Room,Level,0.5,0,15,-20,1,4
-Giant Spider,Probability,Room,Level,2,-16,5,0.5,0,50
-Goblin,Count,Room,Level,0.5,0,15,-20,1,4
-Goblin,Probability,Room,Level,2,-16,5,0.5,0,50
-Goblin Boss,Count,Room,Level,0.5,0,15,-20,1,4
-Goblin Boss,Probability,Room,Level,2,-16,5,0.5,0,50
-MaxXP,Count,Room,Level,20,50,10,50,0,1000
-MaxXP,Probability,Room,Level,0,0,1,0,0,0
-Ogre,Count,Room,Level,0.5,0,15,-20,1,4
-Ogre,Probability,Room,Level,0.5,0,15,-20,1,4
-Orc,Count,Room,Level,0.7,-8,25,-30,0,4
-Orc,Probability,Room,Level,3,-20,20,0,0,45
-Orc War Chief,Count,Room,Level,0.5,0,15,-20,1,4
-Orc War Chief,Probability,Room,Level,0.5,0,15,-20,1,4
-Rat,Count,Room,Level,0.5,0,15,-20,1,4
-Rat,Probability,Room,Level,3,10,20,0,20,50
-Scorpion,Count,Room,Level,0.5,0,15,-20,1,4
-Scorpion,Probability,Room,Level,3,10,20,0,20,50
-Spider,Count,Room,Level,0.5,0,15,-20,1,4
-Spider,Probability,Room,Level,3,10,20,0,20,50
-Troll,Count,Room,Level,0.25,-1,25,-15,0,3
-Troll,Probability,Room,Level,2,-10,4,2,0,50
-Venomous Snake,Count,Room,Level,0.5,0,15,-20,1,4
-Venomous Snake,Probability,Room,Level,3,10,20,0,20,50
-Silver,Count,Floor,Level,0.3,2,10,0.5,2,8
-Silver,Probability,Floor,Level,2,6,10,2,20,50
-Copper,Count,Floor,Level,0.5,1,10,0,2,10
-Copper,Probability,Floor,Level,5,0,10,0,20,50
-Shop,Count,Floor,Level,-1,1,5,5,0,1
-Shop,Probability,Floor,Level,0,0,1,0,100,100
-Club,Count,Floor,Level,0.5,1,10,0,2,10
-Mace,Count,Floor,Level,0.5,1,10,0,2,10
-Battleaxe,Count,Floor,Level,0.5,1,10,0,2,10
-Quarterstaff,Count,Floor,Level,0.5,1,10,0,2,10
-Longsword,Count,Floor,Level,0.5,1,10,0,2,10
-Scimitar,Count,Floor,Level,0.5,1,10,0,2,10
-Greataxe,Count,Floor,Level,0.5,1,10,0,2,10
-Club,Probability,Floor,Level,5,0,10,0,20,50
-Mace,Probability,Floor,Level,-1,1,5,5,0,1
-Battleaxe,Probability,Floor,Level,5,0,10,0,20,50
-Quarterstaff,Probability,Floor,Level,5,0,10,0,20,50
-Longsword,Probability,Floor,Level,5,0,10,0,20,50
-Scimitar,Probability,Floor,Level,5,0,10,0,20,50
-Greataxe,Probability,Floor,Level,5,0,10,0,20,50
+Entity,Metric,Scope,x,a,b,d,ad,min,max,Template
+Axe,Count,Floor,Level,0.5,-1,15,-20,0,3,
+Axe,Probability,Floor,Level,3,-5,10,3,0,50,
+Battleaxe,Count,Floor,Level,0.5,1,10,0,2,10,
+Battleaxe,Probability,Floor,Level,5,0,10,0,20,50,
+Bronze Ring,Count,Floor,Level,2,1,10,0.1,0,2,
+Bronze Ring,Probability,Floor,Level,1,0,1,0,20,50,
+Buckler,Count,Floor,Level,2,1,10,0.1,0,2,
+Buckler,Probability,Floor,Level,1,0,1,0,20,50,
+Club,Count,Floor,Level,0.5,1,10,0,2,10,
+Club,Probability,Floor,Level,5,0,10,0,20,50,
+Copper,Count,Floor,Level,0.5,1,10,0,2,10,
+Copper,Probability,Floor,Level,5,0,10,0,20,50,
+Fireball Scroll,Count,Floor,Level,2,1,10,0.1,2,2,
+Fireball Scroll,Probability,Floor,Level,1,0,1,0,20,50,
+Gold,Count,Floor,Level,0.2,-2,10,0.5,0,5,
+Gold,Probability,Floor,Level,1,0,10,5,10,50,
+Gold Crown,Count,Floor,Level,2,1,10,0.1,0,2,
+Gold Crown,Probability,Floor,Level,1,0,1,0,20,50,
+Gold Ring,Count,Floor,Level,2,1,10,0.1,0,2,
+Gold Ring,Probability,Floor,Level,1,0,1,0,20,50,
+Greataxe,Count,Floor,Level,0.5,1,10,0,2,10,
+Greataxe,Probability,Floor,Level,5,0,10,0,20,50,
+Healing Scroll,Count,Floor,Level,0.2,1,10,0.1,2,7,
+Healing Scroll,Probability,Floor,Level,2,0,10,3,15,40,
+Helmet,Count,Floor,Level,0.1,1,10,0,0,3,
+Helmet,Probability,Floor,Level,2,0,10,3,15,40,
+Iron Crown,Count,Floor,Level,0.3,-0.5,10,0.1,0,2,
+Iron Crown,Probability,Floor,Level,0.5,10,10,1,10,40,
+Key,Count,Floor,Level,2,1,10,0.1,1,2,
+Key,Probability,Floor,Level,1,0,1,0,20,50,
+Lightning Scroll,Count,Floor,Level,2,1,10,0.1,0,2,
+Lightning Scroll,Probability,Floor,Level,1,0,1,0,20,50,
+Locked Chest,Count,Floor,Level,2,1,10,0.1,2,4,
+Locked Chest,Probability,Floor,Level,1,0,1,0,20,50,
+Longsword,Count,Floor,Level,0.5,1,10,0,2,10,
+Longsword,Probability,Floor,Level,5,0,10,0,20,50,
+Mace,Count,Floor,Level,0.5,1,10,0,2,10,
+Mace,Probability,Floor,Level,-1,1,5,5,0,1,
+Map,Count,Floor,Level,1,-10,10,0,0,1,
+Map,Probability,Floor,Level,1,0,1,0,20,50,
+Metal Shield,Count,Floor,Level,0.75,-5,20,-50,0,2,
+Metal Shield,Probability,Floor,Level,2,0,30,-100,10,40,
+Plate Armour,Count,Floor,Level,0.75,-5,20,-20,0,2,
+Plate Armour,Probability,Floor,Level,2,0,20,-100,10,40,
+Plate Boots,Count,Floor,Level,1,-8,10,0,0,3,
+Plate Boots,Probability,Floor,Level,1,0,1,0,10,50,
+Poison Scroll,Count,Floor,Level,2,1,10,0.1,0,2,
+Poison Scroll,Probability,Floor,Level,1,0,1,0,20,50,
+Quarterstaff,Count,Floor,Level,0.5,1,10,0,2,10,
+Quarterstaff,Probability,Floor,Level,5,0,10,0,20,50,
+Robe of Learning,Count,Floor,Level,2,1,10,0.1,1,1,
+Robe of Learning,Probability,Floor,Level,1,0,1,0,20,50,
+Room,Count,Floor,Level,0.25,5,8,2,6,20,
+Room,Probability,Floor,Level,0,0,1,0,0,0,
+Scale Armour,Count,Floor,Level,0.2,-2,10,-0.01,0,3,
+Scale Armour,Probability,Floor,Level,1.5,-10,5,-2,0,50,
+Scale Boots,Count,Floor,Level,0.2,-2,10,-0.01,0,3,
+Scale Boots,Probability,Floor,Level,1.5,-10,5,-2,0,50,
+Scimitar,Count,Floor,Level,0.5,1,10,0,2,10,
+Scimitar,Probability,Floor,Level,5,0,10,0,20,50,
+Scroll of Greed,Count,Floor,Level,2,1,10,0.1,0,2,
+Scroll of Greed,Probability,Floor,Level,1,0,1,0,20,50,
+Scroll of Revelation,Count,Floor,Level,2,1,10,0.1,0,2,
+Scroll of Revelation,Probability,Floor,Level,1,0,1,0,20,50,
+Scroll of Secrets,Count,Floor,Level,0.2,1,10,0.1,0,2,
+Scroll of Secrets,Probability,Floor,Level,1,0,1,0,20,50,
+Scroll of Teleportation,Count,Floor,Level,0.2,1,10,0.1,0,2,
+Scroll of Teleportation,Probability,Floor,Level,1,0,1,0,20,50,
+Shop,Count,Floor,Level,-1,1,5,5,0,1,
+Shop,Probability,Floor,Level,0,0,1,0,100,100,
+Silver,Count,Floor,Level,0.3,2,10,0.5,2,8,
+Silver,Probability,Floor,Level,2,6,10,2,20,50,
+Small Blue Potion,Count,Floor,Level,0.25,0,10,0,0,2,
+Small Blue Potion,Probability,Floor,Level,1,0,1,0,20,50,
+Small Bubbling Potion,Count,Floor,Level,0.25,0,10,0,0,2,
+Small Bubbling Potion,Probability,Floor,Level,1,0,1,0,20,50,
+Small Green Potion,Count,Floor,Level,0.25,0,10,0,0,2,
+Small Green Potion,Probability,Floor,Level,1,0,1,0,20,50,
+Small Purple Potion,Count,Floor,Level,0.25,0,10,0,0,2,
+Small Purple Potion,Probability,Floor,Level,1,0,1,0,20,50,
+Small Red Potion,Count,Floor,Level,0.25,0,10,0,0,2,
+Small Red Potion,Probability,Floor,Level,1,0,1,0,20,50,
+Sword,Count,Floor,Level,0.2,0,20,-10,0,5,
+Sword,Probability,Floor,Level,2,10,10,3,10,50,
+Tunic of Dexterity,Count,Floor,Level,0.15,1,10,1,0,5,
+Tunic of Dexterity,Probability,Floor,Level,1,0,1,0,20,50,
+War Hammer,Count,Floor,Level,2,1,10,0.1,0,1,
+War Hammer,Probability,Floor,Level,1.5,-5,10,-2,0,50,
+Player,Level,Game,XP,0.004,1,400,-0.5,1,100,
+Giant Centipede,Count,Room,Level,,,,,,,L10-easy-common
+Giant Centipede,Probability,Room,Level,,,,,,,L10-easy-common
+Giant Rat,Count,Room,Level,,,,,,,L5-medium-common
+Giant Rat,Probability,Room,Level,,,,,,,L5-medium-common
+Giant Spider,Count,Room,Level,0.5,0,15,-20,1,4,
+Giant Spider,Probability,Room,Level,2,-16,5,0.5,0,50,
+Gnoll,Count,Room,Level,,,,,,,L10-easy-uncommon
+Gnoll,Probability,Room,Level,,,,,,,L10-easy-uncommon
+Gnome,Count,Room,Level,,,,,,,L10-easy-uncommon
+Gnome,Probability,Room,Level,,,,,,,L10-easy-uncommon
+Goblin,Count,Room,Level,,,,,,,L10-easy-common
+Goblin,Probability,Room,Level,,,,,,,L10-easy-common
+Goblin Boss,Count,Room,Level,0.5,0,15,-20,1,4,
+Goblin Boss,Probability,Room,Level,2,-16,5,0.5,0,50,
+Hogoblin,Count,Room,Level,,,,,,,L10-easy-uncommon
+Hogoblin,Probability,Room,Level,,,,,,,L10-easy-uncommon
+Kobold,Count,Room,Level,,,,,,,L5-medium-common
+Kobold,Probability,Room,Level,,,,,,,L5-medium-common
+L10-easy-common,Count,Room,Level,1.5,-5,11,-30,0,4,
+L10-easy-common,Probability,Room,Level,6,-50,5,10,0,60,
+L10-easy-rare,Count,Room,Level,1.5,-6,11,-30,0,1,
+L10-easy-rare,Probability,Room,Level,3,-30,8,2,0,35,
+L10-easy-uncommon,Count,Room,Level,1.5,-5,11,-30,0,2,
+L10-easy-uncommon,Probability,Room,Level,5,-50,5,5,0,50,
+L5-easy-common,Count,Room,Level,1,1,6,-15,0,4,
+L5-easy-common,Probability,Room,Level,15,5,1,0,20,60,
+L5-easy-rare,Count,Room,Level,1,-1,6,-15,0,1,
+L5-easy-rare,Probability,Room,Level,5,0,1,0,10,35,
+L5-easy-uncommon,Count,Room,Level,1,0,6,-15,0,2,
+L5-easy-uncommon,Probability,Room,Level,10,5,1,0,15,50,
+L5-medium-common,Count,Room,Level,1,0,6,-15,0,2,
+L5-medium-common,Probability,Room,Level,15,5,1,0,20,60,
+L5-medium-rare,Count,Room,Level,0.5,-0.5,6,-15,0,1,
+L5-medium-rare,Probability,Room,Level,5,0,1,0,10,35,
+L5-medium-uncommon,Count,Room,Level,0.5,0,6,-15,0,2,
+L5-medium-uncommon,Probability,Room,Level,10,5,1,0,15,50,
+MaxXP,Count,Room,Level,20,50,10,50,0,1000,
+MaxXP,Probability,Room,Level,0,0,1,0,0,0,
+Ogre,Count,Room,Level,0.5,0,15,-20,1,4,
+Ogre,Probability,Room,Level,0.5,0,15,-20,1,4,
+Orc,Count,Room,Level,,,,,,,L10-easy-uncommon
+Orc,Probability,Room,Level,,,,,,,L10-easy-uncommon
+Orc War Chief,Count,Room,Level,0.5,0,15,-20,1,4,
+Orc War Chief,Probability,Room,Level,0.5,0,15,-20,1,4,
+Rat,Count,Room,Level,,,,,,,L5-easy-common
+Rat,Probability,Room,Level,,,,,,,L5-easy-common
+Scorpion,Count,Room,Level,,,,,,,L5-easy-common
+Scorpion,Probability,Room,Level,,,,,,,L5-easy-common
+Skeleton,Count,Room,Level,,,,,,,L10-easy-common
+Skeleton,Probability,Room,Level,,,,,,,L10-easy-common
+Spider,Count,Room,Level,,,,,,,L5-easy-common
+Spider,Probability,Room,Level,,,,,,,L5-easy-common
+Torgolodyte,Count,Room,Level,,,,,,,L10-easy-common
+Torgolodyte,Probability,Room,Level,,,,,,,L10-easy-common
+Troll,Count,Room,Level,,,,,,,L10-easy-uncommon
+Troll,Probability,Room,Level,,,,,,,L10-easy-uncommon
+Venomous Snake,Count,Room,Level,,,,,,,L5-medium-common
+Venomous Snake,Probability,Room,Level,,,,,,,L5-medium-common
