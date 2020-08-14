@@ -88,30 +88,46 @@ Tunic of Dexterity,Probability,Floor,Level,1,0,1,0,20,50,
 War Hammer,Count,Floor,Level,2,1,10,0.1,0,1,
 War Hammer,Probability,Floor,Level,1.5,-5,10,-2,0,50,
 Player,Level,Game,XP,0.004,1,400,-0.5,1,100,
+Bugbear,Count,Room,Level,,,,,,,L10-easy-rare
+Bugbear,Probability,Room,Level,,,,,,,L10-easy-rare
+Carrion Crawler,Count,Room,Level,,,,,,,L10-easy-rare
+Carrion Crawler,Probability,Room,Level,,,,,,,L10-easy-rare
+Gargoyle,Count,Room,Level,,,,,,,L10-easy-rare
+Gargoyle,Probability,Room,Level,,,,,,,L10-easy-rare
+Ghast,Count,Room,Level,,,,,,,L10-easy-rare
+Ghast,Probability,Room,Level,,,,,,,L10-easy-rare
+Ghoul,Count,Room,Level,,,,,,,L10-easy-rare
+Ghoul,Probability,Room,Level,,,,,,,L10-easy-rare
 Giant Centipede,Count,Room,Level,,,,,,,L10-easy-common
 Giant Centipede,Probability,Room,Level,,,,,,,L10-easy-common
 Giant Rat,Count,Room,Level,,,,,,,L5-medium-common
 Giant Rat,Probability,Room,Level,,,,,,,L5-medium-common
-Giant Spider,Count,Room,Level,0.5,0,15,-20,1,4,
-Giant Spider,Probability,Room,Level,2,-16,5,0.5,0,50,
+Giant Spider,Count,Room,Level,,,,,,,L10-easy-rare
+Giant Spider,Probability,Room,Level,,,,,,,L10-easy-rare
 Gnoll,Count,Room,Level,,,,,,,L10-easy-uncommon
 Gnoll,Probability,Room,Level,,,,,,,L10-easy-uncommon
+Gnoll Pack Lord,Count,Room,Level,,,,,,,L10-easy-rare
+Gnoll Pack Lord,Probability,Room,Level,,,,,,,L10-easy-rare
 Gnome,Count,Room,Level,,,,,,,L10-easy-uncommon
 Gnome,Probability,Room,Level,,,,,,,L10-easy-uncommon
 Goblin,Count,Room,Level,,,,,,,L10-easy-common
 Goblin,Probability,Room,Level,,,,,,,L10-easy-common
-Goblin Boss,Count,Room,Level,0.5,0,15,-20,1,4,
-Goblin Boss,Probability,Room,Level,2,-16,5,0.5,0,50,
+Goblin Boss,Count,Room,Level,,,,,,,L10-easy-rare
+Goblin Boss,Probability,Room,Level,,,,,,,L10-easy-rare
+Harpy,Count,Room,Level,,,,,,,L10-easy-rare
+Harpy,Probability,Room,Level,,,,,,,L10-easy-rare
 Hogoblin,Count,Room,Level,,,,,,,L10-easy-uncommon
 Hogoblin,Probability,Room,Level,,,,,,,L10-easy-uncommon
 Kobold,Count,Room,Level,,,,,,,L5-medium-common
 Kobold,Probability,Room,Level,,,,,,,L5-medium-common
+L10-medium-common,Count,Room,Level,1.2,-5,11,-30,0,3,
+L10-medium-common,Probability,Room,Level,3,-14,5,20,0,35,
 L10-easy-common,Count,Room,Level,1.5,-5,11,-30,0,4,
-L10-easy-common,Probability,Room,Level,6,-50,5,10,0,60,
+L10-easy-common,Probability,Room,Level,5,-15,5,20,0,60,
 L10-easy-rare,Count,Room,Level,1.5,-6,11,-30,0,1,
-L10-easy-rare,Probability,Room,Level,3,-30,8,2,0,35,
+L10-easy-rare,Probability,Room,Level,3,-16,5,9,0,25,
 L10-easy-uncommon,Count,Room,Level,1.5,-5,11,-30,0,2,
-L10-easy-uncommon,Probability,Room,Level,5,-50,5,5,0,50,
+L10-easy-uncommon,Probability,Room,Level,5,-16,5,10,0,35,
 L5-easy-common,Count,Room,Level,1,1,6,-15,0,4,
 L5-easy-common,Probability,Room,Level,15,5,1,0,20,60,
 L5-easy-rare,Count,Room,Level,1,-1,6,-15,0,1,
@@ -124,18 +140,26 @@ L5-medium-rare,Count,Room,Level,0.5,-0.5,6,-15,0,1,
 L5-medium-rare,Probability,Room,Level,5,0,1,0,10,35,
 L5-medium-uncommon,Count,Room,Level,0.5,0,6,-15,0,2,
 L5-medium-uncommon,Probability,Room,Level,10,5,1,0,15,50,
+L15-easy-common,Count,Room,Level,1.5,-5,11,-30,0,4,
+L15-easy-common,Probability,Room,Level,6,-50,5,10,0,60,
+L15-easy-rare,Count,Room,Level,1.5,-6,11,-30,0,1,
+L15-easy-rare,Probability,Room,Level,3,-30,8,2,0,35,
+L15-easy-uncommon,Count,Room,Level,1.5,-5,11,-30,0,2,
+L15-easy-uncommon,Probability,Room,Level,5,-50,5,5,0,50,
 MaxXP,Count,Room,Level,20,50,10,50,0,1000,
 MaxXP,Probability,Room,Level,0,0,1,0,0,0,
-Ogre,Count,Room,Level,0.5,0,15,-20,1,4,
-Ogre,Probability,Room,Level,0.5,0,15,-20,1,4,
-Orc,Count,Room,Level,,,,,,,L10-easy-uncommon
-Orc,Probability,Room,Level,,,,,,,L10-easy-uncommon
+Mimic,Count,Room,Level,,,,,,,L10-easy-rare
+Mimic,Probability,Room,Level,,,,,,,L10-easy-rare
+Ogre,Count,Room,Level,,,,,,,L10-easy-rare
+Ogre,Probability,Room,Level,,,,,,,L10-easy-rare
+Orc,Count,Room,Level,,,,,,,L10-medium-common
+Orc,Probability,Room,Level,,,,,,,L10-medium-common
 Orc War Chief,Count,Room,Level,0.5,0,15,-20,1,4,
 Orc War Chief,Probability,Room,Level,0.5,0,15,-20,1,4,
 Rat,Count,Room,Level,,,,,,,L5-easy-common
 Rat,Probability,Room,Level,,,,,,,L5-easy-common
-Scorpion,Count,Room,Level,,,,,,,L5-easy-common
-Scorpion,Probability,Room,Level,,,,,,,L5-easy-common
+Scorpion,Count,Room,Level,,,,,,,L5-easy-uncommon
+Scorpion,Probability,Room,Level,,,,,,,L5-easy-uncommon
 Skeleton,Count,Room,Level,,,,,,,L10-easy-common
 Skeleton,Probability,Room,Level,,,,,,,L10-easy-common
 Spider,Count,Room,Level,,,,,,,L5-easy-common
@@ -144,5 +168,5 @@ Torgolodyte,Count,Room,Level,,,,,,,L10-easy-common
 Torgolodyte,Probability,Room,Level,,,,,,,L10-easy-common
 Troll,Count,Room,Level,,,,,,,L10-easy-uncommon
 Troll,Probability,Room,Level,,,,,,,L10-easy-uncommon
-Venomous Snake,Count,Room,Level,,,,,,,L5-medium-common
-Venomous Snake,Probability,Room,Level,,,,,,,L5-medium-common
+Venomous Snake,Count,Room,Level,,,,,,,L5-medium-uncommon
+Venomous Snake,Probability,Room,Level,,,,,,,L5-medium-uncommon
