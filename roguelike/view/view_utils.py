@@ -304,8 +304,8 @@ class Boxes:
     MAP_ADJACENT_TO_BORDER = {
 
         (0, 0, 0, 0): None,
-        (0, 0, 0, 1): BORDER_R,
-        (0, 0, 1, 0): BORDER_L,
+        (0, 0, 0, 1): BORDER_L,
+        (0, 0, 1, 0): BORDER_R,
         (0, 0, 1, 1): BORDER_H,
         (0, 1, 0, 0): BORDER_V,
         (0, 1, 0, 1): BORDER_TL,

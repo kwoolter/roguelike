@@ -41,7 +41,7 @@ class MainFrame(View):
     MODE_CHARACTER_SCREEN = "character"
     MODE_SHOP_SCREEN = "shop"
     MODE_CHARACTER_CREATION_SCREEN = "character creation"
-    MODE_PAUSED = "paused"
+    MODE_PAUSED = "game paused"
     MODE_GAME_OVER = "game over"
 
     CONSOLE_MESSAGE_PANEL_HEIGHT = 12
@@ -99,7 +99,7 @@ class MainFrame(View):
                                   border_fg=libtcod.gold)
 
         self.text_entry = TextEntryBox()
-
+        self.frame1 = None
 
 
     @property
@@ -124,7 +124,7 @@ class MainFrame(View):
         self.game_name = chr(206)+chr(205)*2 + "  "
         for c in self.game.name:
             self.game_name += f'{c} '
-        self.game_name += " " + chr(205)*2 + chr(206)
+        self.game_name += chr(205)*2 + chr(206) + " "
 
         font_file_specs = {
             "arial10x10.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
@@ -176,6 +176,16 @@ class MainFrame(View):
         self.character_view.change_selection(0)
 
         self.character_creation_view.initialise(self.game)
+
+        w = self.width
+        h=self.height
+        cx,cy = self.center
+        instructions = ("U:1|R:1|" * 4) + ("R:1|D:1|" * 3) +  f'R:{cx+4}|' + ("U:1|R:1|"*3)  + ("R:1|D:1|" * 4) + f"D:{cy-10}|"
+        instructions += ("d:1|L:1|")*4 + ("l:1|U:1|") * 3 + f"l:{cx+4}|" + ("d:1|l:1|"*3) + ("l:1|u:1|"*4) + f'U:{cy-10}'
+        print(instructions)
+        #instructions =+ 1|R:1|U:1|R:2|D:1|R:{cx}|U:1|R:2|U:1|R:1|D:1'
+        frame_template = Boxes.turtle_to_box(instructions)
+        self.frame1 = Boxes.array_to_border(frame_template, border_type=ShopView.BORDER_TYPE2)
 
     def set_mode(self, new_mode: str):
         self.mode = new_mode
@@ -292,15 +302,24 @@ class MainFrame(View):
 
         # Otherwise just display current mode in a box!!!
         else:
-            # Draw box with current game mode
-            bw = int(self.width *2/3)
-            bh = 7
-            bx = int((self.width - bw) / 2)
-            by = int((self.height - bh) / 2) - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT
+            # Draw fancy frame
+            fw, fh = self.frame1.shape
+            fg = libtcod.Color(45, 45, 45)
+            bg = libtcod.Color(25, 25, 25)
+            so = ScreenObject2DArray(self.frame1, fg=fg, bg=bg)
+            so.render(0, int((self.width - fw) / 2),
+                      int((self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - fh) / 2))
 
+            # Draw box with current game mode
+            fg = libtcod.dark_orange
+            bg = libtcod.darkest_red
+            bw = int(self.width *3/4) + 1
+            bh = 5
+            bx = int((self.width - bw) / 2)
+            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT + 11
             # Draw the border
             border = Boxes.get_box(width=bw, height=bh, border_type=Boxes.BORDER_TYPE_1)
-            bo = ScreenObject2DArray(border, fg=libtcod.dark_orange, bg=libtcod.darker_red)
+            bo = ScreenObject2DArray(border, fg=fg, bg=bg)
             bo.render(0, bx, by)
 
             panel_text = chr(206) + chr(205) * 2 + "  "
@@ -309,22 +328,24 @@ class MainFrame(View):
             panel_text += " " + chr(205) * 2 + chr(206)
 
             so = ScreenString(panel_text,
-                              fg=libtcod.yellow,
+                              fg=libtcod.dark_yellow,
                               bg=libtcod.black)
-            so.render(0, cx, by + 3, alignment=libtcod.CENTER)
+            so.render(0, cx, by + 2, alignment=libtcod.CENTER)
 
             # Add game title
             panel_text = self.game_name.upper()
-            bw = len(panel_text) + 7
+            fg = libtcod.dark_green
+            bg = libtcod.darkest_green
+            bw = len(panel_text) + 3
             bh = 5
             bx = int((self.width - bw) / 2)
-            by = 1
+            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - bh + 2
             box = Boxes.get_box(bw, bh, border_type=Boxes.BORDER_TYPE_1)
-            bo = ScreenObject2DArray(box, fg=libtcod.green, bg=libtcod.darker_green)
-            bo.render(0, bx, 1)
+            bo = ScreenObject2DArray(box, fg=fg, bg=bg)
+            bo.render(0, bx, by)
 
             so = ScreenString(panel_text,
-                              fg=libtcod.green,
+                              fg=fg,
                               bg=libtcod.black)
             so.render(0, int(self.width/2), by + 2, alignment=libtcod.CENTER)
 
@@ -348,6 +369,8 @@ class MainFrame(View):
 
         so = ScreenString(text=status, alignment=libtcod.LEFT)
         so.render(0, x=0, y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 1)
+
+
 
         libtcod.console_flush()
 
