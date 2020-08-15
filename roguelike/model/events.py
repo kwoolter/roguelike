@@ -22,6 +22,8 @@ class Event():
     GAME_NEW_FLOOR = "new floor"
     GAME_FLOOR_COMPLETED = "floor completed"
     GAME_ENTER_SHOP = "enter shop"
+    GAME_SAVED = "game saved"
+    GAME_LOADED = "game loaded"
     TICK = "Tick"
 
     # Player action events

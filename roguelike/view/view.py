@@ -156,7 +156,7 @@ class MainFrame(View):
         # Initialise the root console
         libtcod.console_init_root(self.width,
                                   self.height,
-                                  self.game.name,
+                                  title = self.game.name,
                                   fullscreen=False)
 
         # Create a console for the Mainframe
