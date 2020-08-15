@@ -7,6 +7,7 @@ Default Weapon,Default Weapon,Main Hand,1H,STR,AC,0,1d1,0,0,1,1
 Fireball Scroll,a magic fireball scroll,Item Slot,,INT,DEX,0,2d6+2,0,0,0,3
 Gold Crown,a golden crown,Head,,,,0,0,2,2,0,0
 Gold Ring,a gold ring,Finger,,,,0,0,2,0,0,0
+Protection Ring,a ring of protection,Finger,,,,1,0,2,0,0,0
 Hands,bare hands,Main Hand,1H,STR,AC,0,1d1,0,0,0,1
 Helmet,a helmet,Head,,,,1,0,0,0,1,0
 Iron Crown,a iron crown,Head,,,,0,0,1,1,0,0

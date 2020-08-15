@@ -2,6 +2,7 @@ import roguelike.model as model
 import roguelike.view as view
 import tcod as libtcod
 import numpy as np
+import pickle
 
 class Controller():
 
@@ -120,6 +121,8 @@ class Controller():
             use = action.get('use')
             debug = action.get('debug')
             help = action.get('help')
+            save = action.get('save')
+            load = action.get('load')
 
             if debug is True:
                 self.model.print()
@@ -177,6 +180,8 @@ class Controller():
                     self.set_mode(Controller.GAME_MODE_PLAYING)
                 elif new_character:
                     self.set_mode(Controller.GAME_MODE_CHARACTER_CREATION)
+                elif load:
+                    self.game_load()
                 elif exit:
                     return True
 
@@ -277,8 +282,12 @@ class Controller():
                 if exit:
                     self.set_mode(Controller.GAME_MODE_GAME_OVER)
                     continue
-                if play:
+                elif play:
                     self.set_mode(Controller.GAME_MODE_PLAYING)
+                elif save:
+                    self.game_save()
+                elif load:
+                    self.game_load()
 
             # If we are in GAME OVER mode
             elif self.mode == Controller.GAME_MODE_GAME_OVER:
@@ -293,6 +302,31 @@ class Controller():
             if fullscreen:
                 libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
+    def game_save(self):
+        file_name = f'{self.name}.sav'
+        game_file = open(file_name, "wb")
+        pickle.dump(self.model, game_file)
+        game_file.close()
+        print("%s saved" % file_name)
+
+        self.events.add_event(model.Event(type=model.Event.STATE,
+                                          name=model.Event.GAME_SAVED,
+                                          description=f'{file_name} saved'))
+
+    def game_load(self):
+        file_name = f'{self.name}.sav'
+        game_file = open(file_name, "rb")
+        self.model = pickle.load(game_file)
+        game_file.close()
+
+        self.view.initialise(self.model)
+        self.set_mode(Controller.GAME_MODE_START)
+
+        self.events.add_event(model.Event(type=model.Event.STATE,
+                                          name=model.Event.GAME_LOADED,
+                                          description=f'{file_name} loaded'))
+
+        print("%s loaded" % file_name)
 
     def help(self):
 
@@ -371,6 +405,8 @@ class Controller():
             return {'new_game': True}
         elif key_char == 'n':
             return {'new_character': True}
+        elif key.vk == libtcod.KEY_F4:
+            return {'load': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             return {'exit': True}
 
@@ -483,7 +519,7 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN:
             return {'move': (0, 1)}
-        elif key.vk == libtcod.KEY_ESCAPE:
+        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'c':
             # Exit the menu
             return {'exit': True}
 
@@ -521,6 +557,10 @@ class Controller():
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit paused mode
             return {'play': True}
+        elif key.vk == libtcod.KEY_F2:
+            return {'save': True}
+        elif key.vk == libtcod.KEY_F4:
+            return {'load': True}
         elif key_char == "q":
             return {'exit':True}
 

@@ -19,6 +19,8 @@ Gold Crown,Count,Floor,Level,2,1,10,0.1,0,2,
 Gold Crown,Probability,Floor,Level,1,0,1,0,20,50,
 Gold Ring,Count,Floor,Level,2,1,10,0.1,0,2,
 Gold Ring,Probability,Floor,Level,1,0,1,0,20,50,
+Protection Ring,Count,Floor,Level,0.3,-3,15,0,0,2,
+Protection Ring,Probability,Floor,Level,2,-10,15,10,0,50,
 Greataxe,Count,Floor,Level,0.5,1,10,0,2,10,
 Greataxe,Probability,Floor,Level,5,0,10,0,20,50,
 Healing Scroll,Count,Floor,Level,0.2,1,10,0.1,2,7,
@@ -140,12 +142,16 @@ L5-medium-rare,Count,Room,Level,0.5,-0.5,6,-15,0,1,
 L5-medium-rare,Probability,Room,Level,5,0,1,0,10,35,
 L5-medium-uncommon,Count,Room,Level,0.5,0,6,-15,0,2,
 L5-medium-uncommon,Probability,Room,Level,10,5,1,0,15,50,
-L15-easy-common,Count,Room,Level,1.5,-5,11,-30,0,4,
-L15-easy-common,Probability,Room,Level,6,-50,5,10,0,60,
+L15-easy-common,Count,Room,Level,1.5,-20,20,-50,0,4,
+L15-easy-common,Probability,Room,Level,3.5,-35,15,10,0,55,
 L15-easy-rare,Count,Room,Level,1.5,-6,11,-30,0,1,
 L15-easy-rare,Probability,Room,Level,3,-30,8,2,0,35,
 L15-easy-uncommon,Count,Room,Level,1.5,-5,11,-30,0,2,
 L15-easy-uncommon,Probability,Room,Level,5,-50,5,5,0,50,
+L15-medium-common,Count,Room,Level,1.4,-20,25,-50,0,3,
+L15-medium-common,Probability,Room,Level,3.5,-35,15,10,0,55,
+L15-medium-uncommon,Count,Room,Level,0.8,-10,25,-50,0,3,
+L15-medium-uncommon,Probability,Room,Level,3,-45,15,10,0,40,
 MaxXP,Count,Room,Level,20,50,10,50,0,1000,
 MaxXP,Probability,Room,Level,0,0,1,0,0,0,
 Mimic,Count,Room,Level,,,,,,,L10-easy-rare
@@ -154,8 +160,6 @@ Ogre,Count,Room,Level,,,,,,,L10-easy-rare
 Ogre,Probability,Room,Level,,,,,,,L10-easy-rare
 Orc,Count,Room,Level,,,,,,,L10-medium-common
 Orc,Probability,Room,Level,,,,,,,L10-medium-common
-Orc War Chief,Count,Room,Level,0.5,0,15,-20,1,4,
-Orc War Chief,Probability,Room,Level,0.5,0,15,-20,1,4,
 Rat,Count,Room,Level,,,,,,,L5-easy-common
 Rat,Probability,Room,Level,,,,,,,L5-easy-common
 Scorpion,Count,Room,Level,,,,,,,L5-easy-uncommon
@@ -170,3 +174,25 @@ Troll,Count,Room,Level,,,,,,,L10-easy-uncommon
 Troll,Probability,Room,Level,,,,,,,L10-easy-uncommon
 Venomous Snake,Count,Room,Level,,,,,,,L5-medium-uncommon
 Venomous Snake,Probability,Room,Level,,,,,,,L5-medium-uncommon
+Bugbear Chief,Probability,Room,Level,,,,,,,L15-easy-common
+Hogoblin Captain,Probability,Room,Level,,,,,,,L15-easy-common
+Manticore,Probability,Room,Level,,,,,,,L15-easy-common
+Orc War Chief,Probability,Room,Level,,,,,,,L15-medium-common
+Salamander,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Wraith,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Cyclops,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Medusa,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Stone Giant,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Guardian Naga,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Lich,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Bugbear Chief,Count,Room,Level,,,,,,,L15-medium-uncommon
+Hogoblin Captain,Count,Room,Level,,,,,,,L15-medium-uncommon
+Manticore,Count,Room,Level,,,,,,,L15-medium-uncommon
+Orc War Chief,Count,Room,Level,,,,,,,L15-medium-uncommon
+Salamander,Count,Room,Level,,,,,,,L15-medium-uncommon
+Wraith,Count,Room,Level,,,,,,,L15-medium-uncommon
+Cyclops,Count,Room,Level,,,,,,,L15-medium-uncommon
+Medusa,Count,Room,Level,,,,,,,L15-medium-uncommon
+Stone Giant,Count,Room,Level,,,,,,,L15-medium-uncommon
+Guardian Naga,Count,Room,Level,,,,,,,L15-medium-uncommon
+Lich,Count,Room,Level,,,,,,,L15-medium-uncommon
