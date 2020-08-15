@@ -121,10 +121,10 @@ class MainFrame(View):
         self.game = model
 
         # Create the Game title Banner text
-        self.game_name = chr(205)*2 + "  "
+        self.game_name = chr(206)+chr(205)*2 + "  "
         for c in self.game.name:
             self.game_name += f'{c} '
-        self.game_name += " " + chr(205)*2
+        self.game_name += " " + chr(205)*2 + chr(206)
 
         font_file_specs = {
             "arial10x10.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
@@ -303,10 +303,10 @@ class MainFrame(View):
             bo = ScreenObject2DArray(border, fg=libtcod.dark_orange, bg=libtcod.darker_red)
             bo.render(0, bx, by)
 
-            panel_text = chr(205) * 2 + "  "
+            panel_text = chr(206) + chr(205) * 2 + "  "
             for c in self.mode.upper():
                 panel_text += f'{c} '
-            panel_text += " " + chr(205) * 2
+            panel_text += " " + chr(205) * 2 + chr(206)
 
             so = ScreenString(panel_text,
                               fg=libtcod.yellow,
