@@ -1918,7 +1918,8 @@ class AIBotTracker(AIBot):
         # See if we are close enough to the target and
         # Check that there is a direct path to it
         d = self.distance_to_target(self.target_entity)
-        target_in_sight = d <= self.sight_range
+        target_in_range = d <= self.sight_range
+        target_in_sight = self.target_entity.xy in self.floor.get_fov_cells()
 
         # If we can attack it....
         attack_range = self.bot_entity.fighter.current_weapon_details.get_property("Range")
@@ -1927,7 +1928,7 @@ class AIBotTracker(AIBot):
             self.floor.attack_entity(self.bot_entity, self.target_entity)
 
         # if we can see it move closer...
-        if target_in_sight:
+        if target_in_range and target_in_sight:
 
             bx, by = self.bot_entity.xy
             tx, ty = self.target_entity.xy
@@ -1947,7 +1948,7 @@ class AIBotTracker(AIBot):
                     self.floor.move_entity(self.bot_entity, 0, 1, include_player=True)
 
             # If we moved and are still in sight of the target then all good
-            success = (bx,by) != self.bot_entity.xy or target_in_sight
+            success = (bx,by) != self.bot_entity.xy or target_in_range
 
             print(f'{self.bot_entity.name}: "I can see you {self.target_entity.name}"')
 
