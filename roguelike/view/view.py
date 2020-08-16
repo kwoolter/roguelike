@@ -890,7 +890,7 @@ class InventoryView(View):
             if combat_eq is not None:
 
                 # Draw a divider and section title
-                y = self.height
+                y = self.height - 4
                 divider.render(self.con, 0, y)
                 properties = f"Stats:"
 
