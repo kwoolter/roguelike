@@ -1,6 +1,6 @@
 import math
 from pathlib import Path
-
+import textwrap
 import roguelike.model as model
 from .view_utils import *
 
@@ -44,7 +44,7 @@ class MainFrame(View):
     MODE_PAUSED = "game paused"
     MODE_GAME_OVER = "game over"
 
-    CONSOLE_MESSAGE_PANEL_HEIGHT = 12
+    CONSOLE_MESSAGE_PANEL_HEIGHT = 13
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
 
     def __init__(self, width: int = 50, height: int = 50):
@@ -66,8 +66,8 @@ class MainFrame(View):
                                           MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
                                           fg=libtcod.white,
                                           bg=libtcod.black,
-                                          border_bg=libtcod.darker_grey,
-                                          border_fg=libtcod.green)
+                                          border_fg=libtcod.dark_green,
+                                          border_bg = libtcod.darkest_green)
 
         self.inventory_view = InventoryView(width=int(self.width - 2),
                                             height=50,
@@ -182,17 +182,13 @@ class MainFrame(View):
         cx,cy = self.center
         instructions = ("U:1|R:1|" * 4) + ("R:1|D:1|" * 3) +  f'R:{cx+4}|' + ("U:1|R:1|"*3)  + ("R:1|D:1|" * 4) + f"D:{cy-10}|"
         instructions += ("d:1|L:1|")*4 + ("l:1|U:1|") * 3 + f"l:{cx+4}|" + ("d:1|l:1|"*3) + ("l:1|u:1|"*4) + f'U:{cy-10}'
-        print(instructions)
-        #instructions =+ 1|R:1|U:1|R:2|D:1|R:{cx}|U:1|R:2|U:1|R:1|D:1'
+        instructions += f"|d:{cy-21}|l:2|R:{cx+22}"
         frame_template = Boxes.turtle_to_box(instructions)
         self.frame1 = Boxes.array_to_border(frame_template, border_type=ShopView.BORDER_TYPE2)
 
     def set_mode(self, new_mode: str):
         self.mode = new_mode
 
-        if self.has_mode_changed is True:
-            self.inventory_view.clear_messages()
-            self.character_view.clear_messages()
 
     def process_event(self, new_event: model.Event):
 
@@ -316,7 +312,7 @@ class MainFrame(View):
             bw = int(self.width *3/4) + 1
             bh = 5
             bx = int((self.width - bw) / 2)
-            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT + 11
+            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT + 10
             # Draw the border
             border = Boxes.get_box(width=bw, height=bh, border_type=Boxes.BORDER_TYPE_1)
             bo = ScreenObject2DArray(border, fg=fg, bg=bg)
@@ -339,7 +335,7 @@ class MainFrame(View):
             bw = len(panel_text) + 3
             bh = 5
             bx = int((self.width - bw) / 2)
-            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - bh + 2
+            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - bh +3
             box = Boxes.get_box(bw, bh, border_type=Boxes.BORDER_TYPE_1)
             bo = ScreenObject2DArray(box, fg=fg, bg=bg)
             bo.render(0, bx, by)
@@ -367,7 +363,7 @@ class MainFrame(View):
             stat_value = self.game.player.get_property(stat)
             status += f'{stat}={stat_value} '
 
-        so = ScreenString(text=status, alignment=libtcod.LEFT)
+        so = ScreenString(text=status, fg=libtcod.lightest_grey, alignment=libtcod.LEFT)
         so.render(0, x=0, y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 1)
 
 
@@ -545,8 +541,19 @@ class MessagePanel(View):
 
         self.add_message(new_event.description, fg=fg, bg=bg)
 
-    def clear_messages(self):
-        self.messages = []
+        # Prune the length of the messages that we are looking to display
+        self.clear_messages(self.height)
+
+    def clear_messages(self, count = None):
+        """
+        Prune the number of messages that we are looking to display
+        Args:
+            count: Number of messages to keep.  Default is clear ALL
+        """
+        if count is None:
+            self.messages = []
+        else:
+            self.messages = self.messages[0-count:]
 
     def draw(self):
 
@@ -561,37 +568,34 @@ class MessagePanel(View):
         x = 1
         y = 1
 
-        for message, fg, bg in self.messages[-1:0:-1]:
+        for message, fg, bg in self.messages[-1::-1]:
+
+            # If we have run out of space then don't look at any more messages
             if y > self.height - 2:
                 break
 
-            while y < self.height - 1 and len(message) > 0:
-                message_piece = message[0:self.width - 2]
+            # Text wrap each message and print each line in the message
+            lines = textwrap.wrap(message, self.width -2)
+            for line in lines:
+                # If we have run out of space then stop
+                if y > self.height - 2:
+                    break
                 libtcod.console_set_default_foreground(self.con, fg)
                 libtcod.console_set_default_background(self.con, bg)
                 libtcod.console_print_ex(self.con,
                                          x, y,
                                          flag=libtcod.BKGND_SET,
                                          alignment=libtcod.LEFT,
-                                         fmt=message_piece)
-                y += 1
-                message = message[self.width - 2:]
+                                         fmt=line)
 
-        panel_text = ""
-        # Print the panel text
-        # so = ScreenStringRect(panel_text,
-        #                       width=self.width - 2,
-        #                       height=self.height - 2,
-        #                       fg=self.fg,
-        #                       bg=self.bg)
-        #
-        # so.render(self.con, 1, 1)
+                # Move to the next line in the message panel
+                y += 1
+
 
 
 class InventoryView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
-    MESSAGE_PANEL_HEIGHT = 1
 
     def __init__(self, width: int, height: int,
                  fg=libtcod.white, bg=libtcod.black,
@@ -614,15 +618,7 @@ class InventoryView(View):
         self.character = None
         self.selected_item = -1
         self.selected_item_entity = None
-        self.message_event = None
         self.border = None
-
-        self.message_panel = MessagePanel(width=self.width,
-                                          height=InventoryView.MESSAGE_PANEL_HEIGHT,
-                                          fg=libtcod.white,
-                                          bg=libtcod.black,
-                                          border_fg=border_fg,
-                                          border_bg=border_bg,)
 
     def initialise(self, game: model.Model):
 
@@ -632,19 +628,10 @@ class InventoryView(View):
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
 
-        self.message_panel.border_type = self.border_type
-        self.message_panel.initialise()
-
     def process_event(self, new_event: model.Event):
-        print(f'{__class__}: Event {new_event}')
-
-        self.message_event = new_event
-
-        self.message_panel.process_event(new_event)
+        pass
 
     def change_selection(self, d: int):
-
-        self.message_event = None
 
         inventory = self.character.inventory.get_other_items()
         inventory_stackable = self.character.inventory.get_stackable_items()
@@ -654,9 +641,6 @@ class InventoryView(View):
     def get_selected_item(self):
 
         return self.selected_item_entity
-
-    def clear_messages(self):
-        self.message_panel.clear_messages()
 
     def draw(self):
 
@@ -906,7 +890,7 @@ class InventoryView(View):
             if combat_eq is not None:
 
                 # Draw a divider and section title
-                y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT - 4
+                y = self.height
                 divider.render(self.con, 0, y)
                 properties = f"Stats:"
 
@@ -923,16 +907,6 @@ class InventoryView(View):
                                       alignment=libtcod.LEFT)
                 y += 1
                 so.render(self.con, 1, y)
-
-        # Print any event messages that we have received
-        y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT
-        self.message_panel.draw()
-        libtcod.console_blit(self.message_panel.con,
-                             0, 0, self.message_panel.width, self.message_panel.height,
-                             self.con, 0, y)
-
-        # Draw a divider
-        divider.render(self.con, 0, y)
 
 
 
@@ -1335,8 +1309,6 @@ class CharacterView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
 
-    MESSAGE_PANEL_HEIGHT = 1
-
     def __init__(self, width: int, height: int,
                  fg=libtcod.white, bg=libtcod.black,
                  border_fg=libtcod.white, border_bg=libtcod.black):
@@ -1361,12 +1333,6 @@ class CharacterView(View):
         self.character = None
         self.selected_item = -1
 
-        self.message_panel = MessagePanel(width=self.width,
-                                          height=CharacterView.MESSAGE_PANEL_HEIGHT,
-                                          fg=libtcod.white,
-                                          bg=libtcod.black,
-                                          border_bg=self.border_bg,
-                                          border_fg=self.border_fg)
 
     def initialise(self, game: model.Model):
 
@@ -1375,11 +1341,9 @@ class CharacterView(View):
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
 
-        self.message_panel.border_type = self.border_type
-        self.message_panel.initialise()
 
     def process_event(self, new_event: model.Event):
-        self.message_panel.process_event(new_event)
+        pass
 
     def change_selection(self, d: int):
 
@@ -1393,9 +1357,6 @@ class CharacterView(View):
             return self.abilities[self.selected_item]
 
         return stat_name
-
-    def clear_messages(self):
-        self.message_panel.clear_messages()
 
     def draw(self):
 
@@ -1538,15 +1499,6 @@ class CharacterView(View):
 
         so.render(self.con, cx, y)
 
-        # Print any event messages that we have received
-        y = self.height - CharacterView.MESSAGE_PANEL_HEIGHT
-        self.message_panel.draw()
-        libtcod.console_blit(self.message_panel.con,
-                             0, 0, self.message_panel.width, self.message_panel.height,
-                             self.con, 0, y)
-
-        # Draw a divider
-        divider.render(self.con, 0, y)
 
 
 class CreateCharacterView(View):
@@ -1810,12 +1762,12 @@ class EventView(View):
 
     EVENT_NAME_TO_COLOUR = {model.Event.ACTION_SUCCEEDED: (libtcod.lighter_green, None),
                             model.Event.ACTION_FAILED: (libtcod.yellow, None),
-                            model.Event.ACTION_ATTACK: (libtcod.light_red, libtcod.darkest_yellow),
+                            model.Event.ACTION_ATTACK: (libtcod.light_red, None),
                             model.Event.ACTION_FOUND_ITEM: (libtcod.light_azure, None),
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
                             model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),
-                            model.Event.LEVEL_UP_AVAILABLE: (libtcod.gold, libtcod.red),
+                            model.Event.LEVEL_UP_AVAILABLE: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.PLAYER_DEAD: (libtcod.red, None)
                             }
 

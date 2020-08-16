@@ -756,7 +756,7 @@ class Floor():
 
                 self.events.add_event(
                     Event(type=Event.GAME,
-                          name=Event.ACTION_SUCCEEDED,
+                          name=Event.ACTION_ATTACK,
                           description=f"{attacker.description.capitalize()} deals {dmg} damage with {weapon.description}"))
 
                 # If the target died...

@@ -304,9 +304,8 @@ class Controller():
 
     def game_save(self):
         file_name = f'{self.name}.sav'
-        game_file = open(file_name, "wb")
-        pickle.dump(self.model, game_file)
-        game_file.close()
+        with open(file_name, "rb") as game_file:
+            pickle.dump(self.model, game_file)
         print("%s saved" % file_name)
 
         self.events.add_event(model.Event(type=model.Event.STATE,
@@ -315,11 +314,12 @@ class Controller():
 
     def game_load(self):
         file_name = f'{self.name}.sav'
-        game_file = open(file_name, "rb")
-        self.model = pickle.load(game_file)
-        game_file.close()
+        with open(file_name, "rb") as game_file:
+            self.model = pickle.load(game_file)
 
+        self.events = self.model.events
         self.view.initialise(self.model)
+        self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
 
         self.events.add_event(model.Event(type=model.Event.STATE,

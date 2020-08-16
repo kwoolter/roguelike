@@ -141,3 +141,4 @@ dmypy.json
 cython_debug/
 
 /roguelike/model/data/~$rogue_stats.xlsx
+/*.sav
