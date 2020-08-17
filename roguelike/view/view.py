@@ -769,7 +769,12 @@ class InventoryView(View):
 
         so.render(self.con, cx, y)
 
-        y += 2
+        y += 1
+
+        self.con.default_fg = self.fg
+        self.con.hline(1, y, self.width - 2)
+
+        y += 1
 
         # If carrying nothing then say so
         if inv.items == 0:
@@ -795,7 +800,7 @@ class InventoryView(View):
                 slot = equipment_to_slot.get(item)
                 equipped = slot is not None
                 if slot is not None:
-                    text = f'{item.description} ({slot})'
+                    text = f'{slot}: {item.description}'
 
                 # If this item is equipped..
                 if equipped is True:
@@ -833,6 +838,10 @@ class InventoryView(View):
                     print("Problem drawing {e.name} {e.fg} {e.bg}")
 
                 y += 1
+
+            self.con.default_fg = self.fg
+            self.con.hline(1,y,self.width-2)
+            y+=1
 
             # Then Draw all of the stackable items...
             for i, (item, count) in enumerate(inventory_stackable.items()):
@@ -987,7 +996,6 @@ class ShopView(View):
             self.selected_buy_item_by_category[k] = -1
 
     def process_event(self, new_event: model.Event):
-        print(f'{__class__}: Event {new_event}')
 
         if new_event.name == model.Event.GAME_ENTER_SHOP:
             self.buy_list = self.shop.get_buy_list()
@@ -1285,7 +1293,7 @@ class ShopView(View):
             if combat_eq is not None:
 
                 # Draw a divider and section title
-                y = self.height - InventoryView.MESSAGE_PANEL_HEIGHT - 4
+                y = self.height - 4
                 divider.render(self.con, 0, y)
                 properties = f"Stats:"
 

@@ -304,7 +304,7 @@ class Controller():
 
     def game_save(self):
         file_name = f'{self.name}.sav'
-        with open(file_name, "rb") as game_file:
+        with open(file_name, "wb") as game_file:
             pickle.dump(self.model, game_file)
         print("%s saved" % file_name)
 
@@ -439,8 +439,7 @@ class Controller():
             return {'show_character': True}
         elif key_char == 'd':
             return {'drop_inventory': True}
-        elif key_char == 's':
-            return {'enter_shop': True}
+
 
         if key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
