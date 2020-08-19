@@ -37,3 +37,5 @@ Scimitar,a scimitar,Main Hand,1H,STR,AC,0,1d8,0,0,4,1
 Greataxe,a great axe,Main Hand,2H,STR,AC,0,1d12,0,0,12,2
 Dagger+1,a small dagger +1,Main Hand,1H,STR,AC,0,1d4+1,0,0,1,1
 Dagger+1+1,a small dagger +2,Main Hand,1H,STR,AC,0,1d4+2,0,0,1,1
+Club+1,a wooden club+1,Main Hand,1H,STR,AC,0,1d6+1,0,0,3,1
+Club+1+1,a wooden club+2,Main Hand,1H,STR,AC,0,1d6+2,0,0,3,1

@@ -104,3 +104,9 @@ Salamander,a salamander,s,Enemy,crimson,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,T
 Skeleton,a skeleton,@,Enemy,white,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Wraith,a wraith,W,Enemy,grey,black,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Protection Ring,a ring of protection,o,Equipment,cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,150
+Club+1,a wooden club +1,|,Combat,lighter_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,150
+Club+1+1,a wooden club +2,|,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,200
+Sword+1,a sword +1,\,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,150
+Sword+1+1,a sword +2,\,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,200
+Crate,a wooden crate,C,Object,red,dark_red,4,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,0
+Barrel,an oak barrel,O,Object,red,dark_red,4,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,0

@@ -158,9 +158,18 @@ class Floor():
                     "grey",
                     "sepia_light"]
 
-    ROOM_NAMES = ("The Guard Room", "The Store", "A Stone Chamber", "The Armoury", "Sleeping Quarters",
-                  "The Crypt", "The Kitchen", "Torture Room", "The Wizard's Laboratory", "The Ossary",
-                  "The Wine Cellar", "Food Store" , "Dank Cell")
+    ROOM_NAMES = ("the Guard Room", "the Equipment Store", "a stone chamber", "the Armoury", "the Sleeping Quarters",
+                  "the Crypt of Hollows", "the Kitchen", "the Torture Room", "the Wizard's Laboratory", "the Ossuary",
+                  "the Wine Cellar", "The Food Store" , "a dank cell", "the Shrine to the Chaos God",
+                  "the Shrine to the Fire Goddess", "the Library", "the Room of Scrolls",
+                  "the Inner Temple", "the Merchant's Quarter", "the Spice Store", "the Blacksmith's Workshop",
+                  "the Combat Training Room", "the Chamber of the Evil Eye", "the Hall of Echoes",
+                  "the Chamber of the High Priest", "the Annex of the Dead", "the Hall of Statues", "the Crypt of Eternity",
+                  "the Throne Room", "the Altar of Shadows", "the Weaponry", "the Tomb of Lords",
+                  "the Temple of Effigies", "the Forgotten Vault", "the Mausoleum of the Forgotten Prince", "the Catacombs",
+                  "the Archives", "the Shrine of Relics", "Room of Lost Manuscripts", "the Apothecaries Workshop",
+                  "the Antechamber", "the Soul Forge", "the Cloisters of Time", "the Sanctum of the Snake God",
+                  "the Alchemist's Workshop" "the Pit of Rats","the Tomb of the Leper King", "the Basement")
 
     def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
 
@@ -192,6 +201,7 @@ class Floor():
         self.first_room = None
         self.current_room = None
         self.last_room = None
+        self.item_user = None
 
         self.map_rooms = []
         self.map_tunnels = []
@@ -260,6 +270,7 @@ class Floor():
         print(room_entities_template)
 
         # Build template that contains the list of entities that we want to add to the Floor
+        # end their maximum count and probability of adding one
         floor_entities = []
         enames = self.floor_parameters.keys()
         for ename in enames:
@@ -268,7 +279,7 @@ class Floor():
             if emax>0 and eprob>0:
                 floor_entities.append((ename,eprob,emax))
 
-        print("*"*40)
+        print("*"*80)
         print(floor_entities)
 
         # List of floor tile colours that can be randomly assigned to a Room
@@ -307,7 +318,7 @@ class Floor():
 
                     # Add some random entities to the room using a template or count and probability
                     room_entities = room_entities_template.copy()
-                    room_entities.append(("Pillar", 15, int(new_room.area / 10)))
+                    room_entities.append(("Pillar", 25, int(new_room.area / 10)))
                     self.add_entities_to_room(new_room, entities=room_entities)
 
                     # Create a tunnel connecting back to the previous room
@@ -326,8 +337,8 @@ class Floor():
         # redefine first and last rooms
         self.last_room = self.map_rooms[-1]
         self.first_room = self.map_rooms[0]
-        self.last_room.name = "The Exit"
-        self.first_room.name = "The Entrance"
+        self.last_room.name = "the Dungeon Exit"
+        self.first_room.name = "the Dungeon Entrance"
 
         # Add random entities to the whole floor
         self.add_entities_to_floor(entities = floor_entities)
@@ -337,6 +348,8 @@ class Floor():
 
         self.entities_added = len(self.entities)
 
+        self.item_user = ItemUser()
+        self.item_user.initialise()
 
     def print(self):
         print(f'Floor {self.name}: ({self.width},{self.height})')
@@ -607,6 +620,24 @@ class Floor():
                 if e.get_property("IsEnemy"):
                     self.attack_entity(self.player, e)
                     self.last_enemy = e
+                # Else if you can interact with the entity...
+                elif e.get_property("IsInteractable"):
+                    print(f"You interact with {e.description}")
+                    success, effect = self.item_user.process(e, self)
+
+                    self.events.add_event(Event(type=Event.GAME,
+                                                name=Event.ACTION_SUCCEEDED,
+                                                description=f"You examine a {e.description}"))
+
+                    if success is True:
+                        self.events.add_event(Event(type=Event.GAME,
+                                                    name=Event.ACTION_SUCCEEDED,
+                                                    description=f"{effect}"))
+                    else:
+                        self.events.add_event(Event(type=Event.GAME,
+                                                    name=Event.ACTION_FAILED,
+                                                    description=f"{effect}"))
+
 
                 # Else raise event about what entity is blocking you
                 else:
@@ -1532,14 +1563,15 @@ class Model():
         if use_equipped_item is True:
             new_item = self.player.fighter.current_item
 
+
         # If we haven't got an item to use then fail
         if new_item is None:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"You don't have an item equipped to use!"))
 
-        # If we have an item that you can interact with...
-        elif new_item.get_property("IsInteractable") == True:
+        # Try and use the item equipped...
+        else:
 
             success, effect = self.item_user.process(new_item, self.current_floor)
 
@@ -1556,17 +1588,9 @@ class Model():
                                             name=Event.ACTION_FAILED,
                                             description=f"{effect}"))
 
-        # Otherwise we can't use this item
-        else:
-            self.events.add_event(Event(type=Event.GAME,
-                                        name=Event.ACTION_FAILED,
-                                        description=f"You can't use {new_item.description}"))
-
         if success is True:
-
             if use_equipped_item is True:
                 self.player.equip_item(None, slot=Fighter.ITEM_SLOT)
-
             self.player.drop_item(new_item)
 
         return success
@@ -1640,11 +1664,13 @@ class ItemUser():
 
     def initialise(self):
 
-
+        # What HP does an Entity give you?
         self.HP_increase = {"Food": 5, "Small Green Potion": 10, "Small Red Potion": 15, "Healing Scroll": 20, "Small Purple Potion": -10}
 
         # What can you swap an entity for?
-        self.entity_swaps = {"Locked Chest":("Gold", "Food", "Small Green Potion", "Helmet")}
+        self.entity_swaps = {"Locked Chest":("Silver", "Food", "Small Green Potion", "Helmet", "Weapon Upgrade"),
+                             "Crate":("Food", "Food", "Copper"),
+                             "Barrel":("Food", "Small Red Potion", "Copper", "Key")}
 
         # If you use an item what effect does it have on the item you used it on?
         self.item_swaps = {"Key":{"Locked Chest":self.entity_swaps["Locked Chest"]}}
@@ -1780,7 +1806,6 @@ class ItemUser():
                 effect = f'No target for {item.description}'
                 success = False
 
-
         # Is the item swappable?
         elif item.name in self.item_swaps:
             swaps = self.item_swaps[item.name]
@@ -1814,6 +1839,12 @@ class ItemUser():
                 effect = f"You can't upgrade {cw.description}!"
                 success = False
 
+        # Is the item swappable?
+        elif item.name in self.entity_swaps:
+            new_entity = EntityFactory.get_entity_by_name(random.choice(self.entity_swaps[item.name]))
+            floor.swap_entity(item, new_entity)
+            effect = f'You break open {item.description}' \
+                     f' and reveal {new_entity.description}'
         else:
             success = False
             effect = "Nothing happens"
