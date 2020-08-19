@@ -624,13 +624,15 @@ class Floor():
                 # Else if you can interact with the entity...
                 elif e.get_property("IsInteractable"):
 
-                    if self.player.fighter.roll_ability_check(ability= "STR", difficulty = "Medium"):
+                    self.events.add_event(Event(type=Event.GAME,
+                                                name=Event.ACTION_SUCCEEDED,
+                                                description=f"You examine {e.description}"))
 
+                    # Do a STR ability check....
+                    if self.player.fighter.roll_ability_check(ability= "STR", difficulty = random.choice(["Easy","Medium"])):
+
+                        # See what happens if you use the item....
                         success, effect = self.item_user.process(e, self)
-
-                        self.events.add_event(Event(type=Event.GAME,
-                                                    name=Event.ACTION_SUCCEEDED,
-                                                    description=f"You examine a {e.description}"))
 
                         if success is True:
                             self.events.add_event(Event(type=Event.GAME,
@@ -641,10 +643,11 @@ class Floor():
                                                         name=Event.ACTION_FAILED,
                                                         description=f"{effect}"))
 
+                    # If ability check failed...
                     else:
                         self.events.add_event(Event(type=Event.GAME,
                                                     name=Event.ACTION_FAILED,
-                                                    description=f"You efforts do nothing"))
+                                                    description=f"Nothing happens."))
 
 
                 # Else raise event about what entity is blocking you
