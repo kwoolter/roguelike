@@ -620,23 +620,31 @@ class Floor():
                 if e.get_property("IsEnemy"):
                     self.attack_entity(self.player, e)
                     self.last_enemy = e
+
                 # Else if you can interact with the entity...
                 elif e.get_property("IsInteractable"):
-                    print(f"You interact with {e.description}")
-                    success, effect = self.item_user.process(e, self)
 
-                    self.events.add_event(Event(type=Event.GAME,
-                                                name=Event.ACTION_SUCCEEDED,
-                                                description=f"You examine a {e.description}"))
+                    if self.player.fighter.roll_ability_check(ability= "STR", difficulty = "Medium"):
 
-                    if success is True:
+                        success, effect = self.item_user.process(e, self)
+
                         self.events.add_event(Event(type=Event.GAME,
                                                     name=Event.ACTION_SUCCEEDED,
-                                                    description=f"{effect}"))
+                                                    description=f"You examine a {e.description}"))
+
+                        if success is True:
+                            self.events.add_event(Event(type=Event.GAME,
+                                                        name=Event.ACTION_SUCCEEDED,
+                                                        description=f"{effect}"))
+                        else:
+                            self.events.add_event(Event(type=Event.GAME,
+                                                        name=Event.ACTION_FAILED,
+                                                        description=f"{effect}"))
+
                     else:
                         self.events.add_event(Event(type=Event.GAME,
                                                     name=Event.ACTION_FAILED,
-                                                    description=f"{effect}"))
+                                                    description=f"You efforts do nothing"))
 
 
                 # Else raise event about what entity is blocking you

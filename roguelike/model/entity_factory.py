@@ -482,6 +482,22 @@ class Fighter():
         dmg = CombatEquipmentFactory.get_damage_roll_by_name(self.current_weapon.name)
         return dmg
 
+    def roll_ability_check(self, ability:str, difficulty:str="Medium")->bool:
+
+        success_levels = {"Very easy":5,
+                          "Easy":10,
+                          "Medium":15,
+                          "Hard":20,
+                          "Very hard":25,
+                          "Nearly impossible":30}
+
+        difficulty_value = success_levels[difficulty]
+        ability_modifier = self.get_property_modifier(ability)
+
+        return random.randint(1,20) + ability_modifier >= difficulty_value
+
+
+
     def get_XP_reward(self) -> int:
         """
         Calculate and return the XP reward for defeating this Fighter
