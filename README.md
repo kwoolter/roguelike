@@ -45,7 +45,7 @@ Character Screen
 
 Shop Screen
 * `E` switch to Buy tab
-* `F` switch to Sell tab
+* `Q` switch to Sell tab
 * Up and down arrow keys or `W` and `S`- change selected item 
 * `ENTER` or `SPACE` buy/sell the selected item
 * Left and Right arrow keys or `A` and `D` - change item category in Buy tab
