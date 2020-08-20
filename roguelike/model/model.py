@@ -621,34 +621,9 @@ class Floor():
                     self.attack_entity(self.player, e)
                     self.last_enemy = e
 
-                # Else if you can interact with the entity...
-                elif e.get_property("IsInteractable"):
-
-                    self.events.add_event(Event(type=Event.GAME,
-                                                name=Event.ACTION_SUCCEEDED,
-                                                description=f"You examine {e.description}"))
-
-                    # Do a STR ability check....
-                    if self.player.fighter.roll_ability_check(ability= "STR", difficulty = random.choice(["Easy","Medium"])):
-
-                        # See what happens if you use the item....
-                        success, effect = self.item_user.process(e, self)
-
-                        if success is True:
-                            self.events.add_event(Event(type=Event.GAME,
-                                                        name=Event.ACTION_SUCCEEDED,
-                                                        description=f"{effect}"))
-                        else:
-                            self.events.add_event(Event(type=Event.GAME,
-                                                        name=Event.ACTION_FAILED,
-                                                        description=f"{effect}"))
-
-                    # If ability check failed...
-                    else:
-                        self.events.add_event(Event(type=Event.GAME,
-                                                    name=Event.ACTION_FAILED,
-                                                    description=f"Nothing happens."))
-
+                # Else if you can ability check with the entity...
+                elif e.get_property("IsCheckable"):
+                    self.run_ability_check(e)
 
                 # Else raise event about what entity is blocking you
                 else:
@@ -657,7 +632,7 @@ class Floor():
                               name=Event.ACTION_FAILED,
                               description=f"{e.description} blocks your way!"))
 
-            # Otherwise the way is block for another reason
+            # Otherwise the way is blocked for another reason
             else:
                 self.events.add_event(
                     Event(type=Event.GAME,
@@ -832,6 +807,69 @@ class Floor():
                 Event(type=Event.GAME,
                       name=Event.ACTION_FAILED,
                       description=f"{attacker.description.capitalize()} swings at {target.description} and misses!"))
+
+    def run_ability_check(self, e:Entity):
+
+        success = False
+        checks = AbilityChecksFactory.get_entity_ability_checks(e.name)
+        ability = random.choice(list(checks.keys()))
+        check = checks.get(ability)
+        ability_modifier = self.player.fighter.get_property_modifier(check.ability)
+
+        if check is not None:
+
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_SUCCEEDED,
+                                        description=check.description))
+
+            success = check.attempt(ability_modifier)
+            if success is True:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=check.success))
+
+                if check.reward is not None:
+                    self.swap_entity(e, check.reward)
+
+                    self.events.add_event(Event(type=Event.GAME,
+                                                name=Event.EFFECT_ITEM_DISCOVERY,
+                                                description=f'You find {check.reward.description}'))
+
+            # If ability check failed...
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=check.failure))
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description="Nothing happens"))
+
+
+        '''
+        # Do a STR ability check....
+        if self.player.fighter.roll_ability_check(ability="STR", difficulty=random.choice(["Easy", "Medium"])):
+
+            # See what happens if you use the item....
+            success, effect = self.item_user.process(e, self)
+
+            if success is True:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"{effect}"))
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"{effect}"))
+
+        # If ability check failed...
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"Nothing happens."))
+        '''
+
+        return success
 
     def get_current_room(self, xy:tuple = None) -> Room:
         """
@@ -1135,6 +1173,7 @@ class Model():
         self.player = None
         self.inventory = {}
         self.entities = None
+        self.ability_checks = None
         self.floors=[]
         self.current_floor = None
         self.shop = None
@@ -1150,6 +1189,7 @@ class Model():
         # Load game data from specified files
         GameParameters.load("game_parameters.csv")
         EntityFactory.load("entities.csv")
+        AbilityChecksFactory.load("ability_checks.csv")
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
 
@@ -2002,3 +2042,147 @@ class AIBotTracker(AIBot):
     def reset(self):
         super().reset()
         self.failed_ticks = 0
+
+
+class AbilityCheck:
+    difficulty_levels = {"Very easy": 5,
+                         "Easy": 10,
+                         "Medium": 15,
+                         "Hard": 20,
+                         "Very hard": 25,
+                         "Nearly impossible": 30}
+
+    ability_to_description = {
+        "STR": "strength",
+        "DEX": "dexterity",
+        "INT": "intelligence",
+        "CON": "constitution",
+        "CHA": "charisma",
+        "WIS": "wisdom"
+    }
+
+    def __init__(self, entity: Entity, ability: str, difficulty: str, description: str, success: str,
+                 failure: str):
+
+        self.entity = entity
+        self.ability = ability
+        self.ability_name = AbilityCheck.ability_to_description[self.ability]
+        self.difficulty = difficulty
+        self.description = description.format(entity=entity.description, ability=self.ability_name)
+        self.success = success.format(entity=entity.description, ability=self.ability_name)
+        self.failure = failure.format(entity=entity.description, ability=self.ability_name)
+        self.attempts = 0
+
+        if self.difficulty in AbilityCheck.difficulty_levels:
+            self.difficulty_value = AbilityCheck.difficulty_levels[self.difficulty]
+        else:
+            self.difficulty_value = 0
+
+        self.rewards = []
+
+    def __str__(self):
+        txt = f'{self.difficulty.upper()} Check: {self.entity.name} versus {self.ability} ability - {len(self.rewards)} rewards:'
+        for reward in self.rewards:
+            txt += f'{reward},'
+
+        return txt
+
+    def add_reward(self, new_reward: str):
+        self.rewards.append(new_reward)
+
+    def attempt(self, ability_modifier: int = 0):
+        self.attempts += 1
+        self.reward = None
+
+        print(self.description)
+        if self.difficulty_value > random.randint(1, 20) + ability_modifier:
+            print(self.success)
+            reward_name = random.choice(self.rewards)
+            self.reward = EntityFactory.get_entity_by_name(reward_name)
+            print(f'Your reward is {self.reward.description}')
+            success = True
+        else:
+            print(self.failure)
+            success = False
+
+        return success
+
+
+class AbilityChecksFactory:
+    ability_checks = None
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def load(file_name: str):
+
+        # Create path for the file that we are going to load
+        data_folder = Path(__file__).resolve().parent
+        file_to_open = data_folder / "data" / file_name
+
+        # Read in the csv file
+        AbilityChecksFactory.ability_checks = pd.read_csv(file_to_open)
+        df = AbilityChecksFactory.ability_checks
+        df.set_index(["Entity", "Ability"], drop=True, inplace=True)
+
+        print(df.head())
+        print(df.dtypes)
+
+    @staticmethod
+    def get_ability_check(entity_name: str, ability_name: str):
+
+        assert AbilityChecksFactory.ability_checks is not None
+        df = AbilityChecksFactory.ability_checks
+
+        check = df.loc[(entity_name, ability_name)]
+        difficulty = check["Difficulty"]
+        description = check["Description"]
+        success_msg = check["Success"]
+        failure_msg = check["Failure"]
+        rewards = check["Rewards"]
+
+        entity = EntityFactory.get_entity_by_name(entity_name)
+
+        new_check = AbilityCheck(entity,
+                                 ability_name,
+                                 difficulty,
+                                 description=description,
+                                 success=success_msg,
+                                 failure=failure_msg)
+        for reward in rewards.split(','):
+            new_check.add_reward(reward.strip())
+
+        return new_check
+
+    def get_entity_ability_checks(entity_name: str):
+
+        assert AbilityChecksFactory.ability_checks is not None, "No ability checks have been loaded!"
+
+        matches = {}
+
+        df = AbilityChecksFactory.ability_checks
+
+        checks = df.loc[entity_name]
+
+        for index, check in checks.iterrows():
+            difficulty = check["Difficulty"]
+            description = check["Description"]
+            success_msg = check["Success"]
+            failure_msg = check["Failure"]
+            rewards = check["Rewards"]
+
+            entity = EntityFactory.get_entity_by_name(entity_name)
+
+            new_check = AbilityCheck(entity,
+                                     index,
+                                     difficulty,
+                                     description=description,
+                                     success=success_msg,
+                                     failure=failure_msg)
+            for reward in rewards.split(','):
+                new_check.add_reward(reward.strip())
+
+            matches[index] = new_check
+
+        return matches

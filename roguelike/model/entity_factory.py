@@ -549,6 +549,9 @@ class EntityFactory:
 
     @staticmethod
     def get_entity_by_name(name: str) -> Entity:
+
+        assert EntityFactory.entities is not None, "No entities have been loaded!"
+
         e = None
         if name in list(EntityFactory.entities.index):
             row = EntityFactory.entities.loc[name]

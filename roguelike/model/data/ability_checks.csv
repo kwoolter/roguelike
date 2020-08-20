@@ -1,0 +1,6 @@
+Entity,Ability,Difficulty,Description,Rewards,Success,Failure
+Crate,STR,Easy,You try and break {entity} using your {ability},"Key,Food,Small Blue Potion",You break open {entity},You cannot open {entity}
+Crate,DEX,Easy,You try and open {entity} using your {ability},"Key,Food,Small Blue Potion",You slide open {entity},You cannot open {entity}
+Barrel,STR,Easy,You try and break {entity} using your {ability},"Key,Food,Small Blue Potion",You break open {entity},You cannot open {entity}
+Locked Chest,DEX,Hard,You try and pick the lock of {entity} using your {ability},"Key,Food,Small Blue Potion,Helmet",You unlock {entity},You cannot open {entity}
+Locked Chest,STR,Hard,You try and break {entity} using your {ability},"Key,Food,Small Blue Potion,Helmet",You break open {entity},You cannot open {entity}
