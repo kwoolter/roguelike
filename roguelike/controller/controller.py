@@ -336,20 +336,20 @@ class Controller():
                                           description=text))
 
         if self.mode == Controller.GAME_MODE_START:
-            keys_help = 'N=Create New Character|ENTER=Start'
+            keys_help = 'N=Create New Character|Enter=Start'
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
-            keys_help = 'N=Change name|C=change class|Esc=Exit'
+            keys_help = 'N=Change name|C=change class|Enter/Space=Confirm|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_PLAYING:
-            keys_help = '^v<>=Move/attack|G=Get item|U=use equipped item|Z=wait|I=show inventory|C=show character sheet|ENTER=take stairs|Esc=Pause'
+            keys_help = '^v<> / WASD=Move/attack|G/Space=Get item|U/Q=use equipped item|Z=wait|I/R=show inventory|C=show character sheet|Enter/X=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
-            keys_help = 'Esc=continue|q=quit the game'
+            keys_help = 'Esc=continue|Q=quit the game'
         elif self.mode == Controller.GAME_MODE_INVENTORY:
-            keys_help = '^v<>=Change selected item|E=equip selected item|D=drop selected item|U=use equipped item|Esc=Exit'
+            keys_help = '^v<> / WASD=Change selected item|E=equip selected item|F=drop selected item|U/Q=use equipped item|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_CHARACTER:
-            keys_help = '^v=Change selected ability|L=level-up selected ability|Esc=Exit'
+            keys_help = '^v / WA=Change selected ability|L/E=level-up selected ability|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_SHOP:
-            keys_help = '^v=Change selected item|B=change to BUY tab|S=change to SELL tab|' \
-                        '<>=change selected buy item category|Enter=Buy or sell selected item|Esc=Exit'
+            keys_help = '^v / WA=Change selected item|B/E=change to BUY tab|Q/V=change to SELL tab|' \
+                        '<> / AD=change selected buy item category|Enter/Space=Buy or sell selected item|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_GAME_OVER:
             keys_help = 'SPACE=continue'
         else:
@@ -357,7 +357,7 @@ class Controller():
 
         for key_help in keys_help.split('|'):
             key_, help_text = key_help.split('=')
-            text = f' * {key_:<5}: {help_text.capitalize()}'
+            text = f' * {key_:<14}: {help_text.capitalize()}'
 
             self.events.add_event(model.Event(type=model.Event.CONTROL,
                                               name=self.mode,
