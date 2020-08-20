@@ -1326,16 +1326,21 @@ class Model():
         cc = CombatClassFactory.get_combat_class_by_name(class_name)
         new_player.fighter = Fighter(combat_class=cc)
 
+
         # Give the player some basic equipment
-        basic_equipment = ("Dagger", "Robe", "Sandals")
+        basic_equipment = new_player.fighter.get_property("StartingEquipment").split(",")
+
         for item in basic_equipment:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
             new_player.fighter.equip_item(eq)
 
         # Give the player some basic items
-        basic_items = ("Food", "Food", "Small Red Potion", "Key", "Weapon Upgrade", "Weapon Upgrade")
-        for item in basic_items:
+        basic_items = new_player.fighter.get_property("StartingItems").split(",")
+        starting_items = ["Food", "Food", "Small Red Potion"]
+        starting_inventory = basic_items + starting_items
+
+        for item in starting_inventory:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
 
