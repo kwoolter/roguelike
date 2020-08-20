@@ -492,9 +492,9 @@ class Controller():
             return {'move': (-1, 0)}
         elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
-        elif key_char == 'e':
+        elif key_char == 'e' or key_char == 'b':
             return {'buy': True}
-        elif key_char == 'q':
+        elif key_char == 'q' or key_char == 'v':
             return {'sell': True}
         elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
             return {'confirm': True}
