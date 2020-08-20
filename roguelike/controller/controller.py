@@ -417,27 +417,27 @@ class Controller():
         key_char = chr(key.c)
 
         # Movement keys
-        if key.vk == libtcod.KEY_UP:
+        if key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
-        elif key.vk == libtcod.KEY_DOWN:
+        elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        elif key.vk == libtcod.KEY_LEFT:
+        elif key.vk == libtcod.KEY_LEFT or key_char == 'a':
             return {'move': (-1, 0)}
-        elif key.vk == libtcod.KEY_RIGHT:
+        elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
-        elif key.vk == libtcod.KEY_ENTER:
+        elif key.vk == libtcod.KEY_ENTER or key_char == 'x':
             return {'take stairs': True}
-        elif key_char == 'g':
+        elif key.vk == libtcod.KEY_SPACE:
             return {'pickup': True}
         elif key_char == 'z':
             return {'wait': True}
-        elif key_char == 'u':
+        elif key_char == 'u' or key_char == 'q':
             return {'use': True}
-        elif key_char == 'i':
+        elif key_char == 'i' or key_char == 'r':
             return {'show_inventory': True}
         elif key_char == 'c':
             return {'show_character': True}
-        elif key_char == 'd':
+        elif key_char == 'f':
             return {'drop_inventory': True}
 
 
@@ -461,17 +461,17 @@ class Controller():
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
         # Movement keys
-        elif key.vk == libtcod.KEY_UP:
+        elif key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
-        elif key.vk == libtcod.KEY_DOWN:
+        elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
         elif key_char == 'e':
             return {'equip': True}
-        elif key_char == 'd':
+        elif key_char == 'f':
             return {'drop': True}
-        elif key_char == 'u':
+        elif key_char == 'u' or key_char == 'q':
             return {'use': True}
-        elif key.vk == libtcod.KEY_ESCAPE:
+        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'r':
             # Exit the menu
             return {'exit': True}
 
@@ -484,19 +484,19 @@ class Controller():
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
         # Movement keys
-        elif key.vk == libtcod.KEY_UP:
+        elif key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
-        elif key.vk == libtcod.KEY_DOWN:
+        elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        elif key.vk == libtcod.KEY_LEFT:
+        elif key.vk == libtcod.KEY_LEFT or key_char == 'a':
             return {'move': (-1, 0)}
-        elif key.vk == libtcod.KEY_RIGHT:
+        elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
-        elif key_char == 'b':
+        elif key_char == 'e':
             return {'buy': True}
-        elif key_char == 's':
+        elif key_char == 'f':
             return {'sell': True}
-        elif key.vk == libtcod.KEY_ENTER:
+        elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
             return {'confirm': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
@@ -507,16 +507,16 @@ class Controller():
     def handle_character_view_keys(self, key):
         key_char = chr(key.c)
 
-        if key_char == 'l':
+        if key_char == 'l' or key_char == 'e':
             return {'level-up': True}
 
         elif key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
         # Movement keys
-        elif key.vk == libtcod.KEY_UP:
+        elif key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
-        elif key.vk == libtcod.KEY_DOWN:
+        elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
         elif key.vk == libtcod.KEY_ESCAPE or key_char == 'c':
             # Exit the menu
@@ -534,11 +534,11 @@ class Controller():
             return {'edit_name': True}
         elif key_char == "c":
             return {'edit_class': True}
-        elif key.vk == libtcod.KEY_UP:
+        elif key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
-        elif key.vk == libtcod.KEY_DOWN:
+        elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        elif key.vk == libtcod.KEY_ENTER:
+        elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
             return {'select': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
