@@ -36,9 +36,9 @@ Medusa,FALSE,0,17d8+5,0,10,15,16,12,13,15,15,2300,a Shortsword,1d6+2,1.5,,
 Stone Giant,FALSE,0,11d12+55,0,23,15,20,10,12,9,17,2900,a Rock,4d10+6,2,,
 Guardian Naga,FALSE,0,15d10+45,0,19,18,16,16,19,18,18,5900,Bite,1d8+4,1.5,,
 Lich,FALSE,0,18d8+54,0,11,16,16,20,14,16,17,33000,Paralyzing Touch,3d6,1.5,,
-Cleric,TRUE,12,,5,11,14,13,12,16,10,1,0,Hands,1d2,1,Mace,"Protection Ring, Healing Scroll"
-Fighter,TRUE,15,,6,16,11,14,10,12,13,2,0,Hands,1d2,1,"Longsword, Helmet",Food
+Cleric,TRUE,12,,5,11,14,13,12,16,10,1,0,Hands,1d2,1,Mace,"Protection Ring,Healing Scroll"
+Fighter,TRUE,15,,6,16,11,14,10,12,13,2,0,Hands,1d2,1,"Longsword,Helmet",Food
 Paladin,TRUE,15,,6,16,10,13,11,12,14,1,0,Hands,1d2,1,"Sword,Shield",Food
-Ranger,TRUE,12,,5,11,16,14,12,13,10,1,0,Hands,1d2,1,"Leather Armour, Hand Axe","Key, Bronze Ring"
+Ranger,TRUE,12,,5,11,16,14,12,13,10,1,0,Hands,1d2,1,"Axe,Leather Armour","Key,Bronze Ring"
 Rogue,TRUE,12,,5,10,16,14,11,13,12,1,0,Hands,1d2,1,"Dagger,Buckler",Key
-Wizard,TRUE,10,,4,10,14,11,16,13,12,0,0,Hands,1d2,1,"Quarterstaff,Robe of Learning","Fireball Scroll, Lightning Scroll"
+Wizard,TRUE,10,,4,10,14,11,16,13,12,0,0,Hands,1d2,1,"Quarterstaff,Robe of Learning","Fireball Scroll,Lightning Scroll"
