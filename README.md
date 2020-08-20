@@ -9,21 +9,23 @@ This game is a rogue-like game that uses the `libtcod` library and is loosely ba
 
 Game Ready Screen
 * `N` create a new character
-* `SPACE` to start the game
+* `ENTER` or `SPACE` to start the game
 * `Esc` quit the game
 
 Create New Character Screen
 * `N` change player's name
 * `C` change player's class
+* `ENTER` or `SPACE` confirm class selection
 * `Esc` exit screen
 
 Game Playing Screen
 * Arrow keys - move and attack enemy
-* `G` get an item
-* `U` use item currently equipped in Item slot
+* `G` or `SPACE` get an item
+* `Q` or `U` use item currently equipped in Item slot
 * `Z` skip turn
 * `C` character screen
-* `I` inventory screen
+* `R` inventory screen
+* `ENTER` or `X` travel down stairs
 * `Esc` pause game
 
 Game Paused Screen
@@ -32,21 +34,21 @@ Game Paused Screen
 
 Inventory Screen
 * `E` equip an item
-* `U` use and item
-* `D` drop and item
-* `Esc` exit screen
+* `Q` or `U` use an item
+* `F` drop an item
+* `Esc` or `R` exit screen
 
 Character Screen
-* Arrow keys - change selected ability
-* `L` level-up and increase selected ability
+* Arrow keys or `WASD` - change selected ability
+* `L` or `E` level-up and increase selected ability
 * `Esc` exit screen
 
 Shop Screen
-* `B` switch to Buy tab
-* `S` switch to Sell tab
-* Up and down arrow keys - change selected item 
-* `ENTER` buy/sell the selected item
-* Left and Right arrow keys - change item category in Buy tab
+* `E` switch to Buy tab
+* `F` switch to Sell tab
+* Up and down arrow keys or `W` and `S`- change selected item 
+* `ENTER` or `SPACE` buy/sell the selected item
+* Left and Right arrow keys or `A` and `D` - change item category in Buy tab
 * `Esc` exit screen
 
 Game Over Screen
