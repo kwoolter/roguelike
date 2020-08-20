@@ -169,7 +169,7 @@ class Floor():
                   "the Temple of Effigies", "the Forgotten Vault", "the Mausoleum of the Forgotten Prince", "the Catacombs",
                   "the Archives", "the Shrine of Relics", "Room of Lost Manuscripts", "the Apothecaries Workshop",
                   "the Antechamber", "the Soul Forge", "the Cloisters of Time", "the Sanctum of the Snake God",
-                  "the Alchemist's Workshop" "the Pit of Rats","the Tomb of the Leper King", "the Basement")
+                  "the Alchemist's Workshop", "the Pit of Rats","the Tomb of the Leper King", "the Basement")
 
     def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
 
