@@ -1,5 +1,5 @@
 ﻿Name,Description,Slot,HANDS,ATK,DEF,AC,DMG,INT,DEX,Weight,Range
-Hand Axe,a handaxe,Main Hand,1H,STR,AC,0,1d6,0,0,3,1
+Axe,a hand axe,Main Hand,1H,STR,AC,0,1d6,0,0,3,1
 Bronze Ring,a plain bronze ring,Finger,,,,0,0,1,1,0,0
 Buckler,a small buckler,Off Hand,1H,,,1,0,0,0,2,0
 Dagger,a small dagger,Main Hand,1H,STR,AC,0,1d4,0,0,1,1
