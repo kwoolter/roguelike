@@ -191,13 +191,25 @@ class Player(Entity):
 
         success = False
 
+        # If new item is None then effectively we are just unequipping whatever is in teh specified slot
         if new_item is None:
             old_item = self.fighter.equip_item(new_item, slot)
             success = True
 
+        # Check if the new item is equippable or is is somethign that you can collect and use e.g. a key
         elif new_item.get_property("IsEquippable") == True or \
                 (new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True):
 
+
+            if slot == "Off Hand":
+                main_hand = self.equipment.get("Main Hand")
+                is_2H = main_hand.get_property("HANDS") == "2H"
+                if is_2H is True:
+                    success = False
+                    print(f'Can not equip offhand slot with 2H weapon {main_hand.name}')
+                    return
+
+            # Equip the new item unequipping anything that was already equipped in that slot
             old_item = self.fighter.equip_item(new_item, slot)
 
             success = True
@@ -432,6 +444,7 @@ class Fighter():
             new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)
             slot = new_eq.slot
 
+
         # Get any item that is currently equipped in the target slot
         existing_item = self.equipment.get(slot)
 
@@ -626,7 +639,7 @@ class Inventory:
         self.max_items = max_items
         self.stackable_items = {}
         self.other_items = []
-        self.coins = {c_name: 0 for c_name in Inventory.COINS}#
+        self.coins = {c_name: 0 for c_name in Inventory.COINS}
         self.money = 0
 
     @property
