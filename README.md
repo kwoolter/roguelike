@@ -168,27 +168,29 @@ Pulling all of this together you end up with the following lines of code to calc
 ```
 
 An example visualisation of this is shown in the graph below where the orange line is `y = ax + b`, 
-the blue line is `(x div d) * ad` and the grey line is the sum of these two lines with a maximum and minimum applied (4 and 0 respectively).
+the blue line is `(x div d) * ad` and the grey line is `y' which is the sum of these two lines with a maximum and minimum applied (4 and 0 respectively).
 
-<img src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/graphy.JPG">
+<img src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/graph.JPG">
 
-Using this basic concept you can create interesting curves for count and probability for each `Entity` in the game.
+Using this basic concept you can create interesting **curves** for count and probability for each `Entity` in the game.
 
 ## `game_parameters.csv` file
 This file defines the count and probability for each entity that you want to appear in the game.
 
 Columns:
-* `Entity` - the name of the entity you want to define a metric for
-* `Metric` - which metric are you defining e.g. Count, Probability
-* `Scope` - what scope if the metric for e.g. Room or Floor?
-* `x` - what is the name of the variable that you want to substitue as `x` into the model?
+* `Entity` - the name of the entity you want to define a metric for e.g. `Rat`
+* `Metric` - which metric are you defining e.g. `Count` or `Probability`?
+* `Scope` - what scope is the metric for e.g. `Room` or `Floor`?
+* `x` - what is the name of the variable that you want to substitute as `x` into the model - typically `Level`
 * `a` - slope
 * `b` - y intercept
-* `d` - x modulo value
-* `ad` - x modulo value slope
-* min - the minimum value of `y`
-* max - the maximum value of `y`
-* Template - use a template instead of a,b,d,ad values
+* `d` - x DIV value
+* `ad` - x DIV value slope
+* `min` - the minimum value of `y`
+* `max` - the maximum value of `y`
+* `Template` - use a template instead of a,b,d,ad values
+
+Use templates for when you want to share `Count` or `Probability` curves across multiple types of `Entity`
 
 # Useful Links
 
