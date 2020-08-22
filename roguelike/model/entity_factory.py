@@ -189,21 +189,20 @@ class Player(Entity):
 
         assert self.fighter is not None, "Trying to equip an item when you don't have a fighter set-up"
 
-        success = False
-
+        # If new item is None then effectively we are just unequipping whatever is in teh specified slot
         if new_item is None:
-            old_item = self.fighter.equip_item(new_item, slot)
-            success = True
+            success = self.fighter.equip_item(new_item, slot)
 
+        # Check if the new item is equippable or is is somethign that you can collect and use e.g. a key
         elif new_item.get_property("IsEquippable") == True or \
                 (new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True):
 
-            old_item = self.fighter.equip_item(new_item, slot)
-
-            success = True
+            # Equip the new item unequipping anything that was already equipped in that slot
+            success = self.fighter.equip_item(new_item, slot)
 
         else:
             print(f"{new_item.name} is not equippable")
+            success = False
 
         return success
 
@@ -249,6 +248,7 @@ class Fighter():
     DEFAULT_WEAPON = None
     DEFAULT_WEAPON_NAME = "Hands"
     WEAPON_SLOT = "Main Hand"
+    OFF_HAND = "Off Hand"
     ITEM_SLOT = "Item Slot"
 
     def __init__(self, combat_class: CombatClass):
@@ -419,7 +419,7 @@ class Fighter():
 
         return success
 
-    def equip_item(self, new_item: Entity, slot: str = None) -> Entity:
+    def equip_item(self, new_item: Entity, slot: str = None) -> bool:
         """
         Equip an item in the specified equipment slot.
         :param new_item: the new item that we are equipping.  If None you are un-eqipping back to inventory
@@ -427,22 +427,43 @@ class Fighter():
         :return: the item that was replaced in the equipment slot
         """
 
-        # If no slot specified use the default slot for this type of equipment
-        if slot is None:
-            new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)
-            slot = new_eq.slot
-
-        # Get any item that is currently equipped in the target slot
-        existing_item = self.equipment.get(slot)
+        success = True
 
         # If no new item is being equipped then remove existing item from the slot
         if new_item is None:
             del self.equipment[slot]
-        # Otherwise fill the slot with teh new item
-        else:
-            self.equipment[slot] = new_item
 
-        return existing_item
+        else:
+
+            # Get the CombatClass details of the new item
+            new_eq = CombatEquipmentFactory.get_equipment_by_name(new_item.name)
+
+            # If no slot specified use the default slot for this type of equipment
+            if slot is None:
+                slot = new_eq.slot
+
+            # If trying to equip in off hand slot...
+            if slot == Fighter.OFF_HAND:
+
+                # Check if you are already using a 2 handed weapon and fail if you are!
+                main_hand = self.equipment.get(Fighter.WEAPON_SLOT)
+                if main_hand is not None:
+                    main_eq = CombatEquipmentFactory.get_equipment_by_name(main_hand.name)
+                    if main_eq.get_property("HANDS") == "2H":
+                        print(f'Can not equip offhand slot with 2H weapon {main_hand.name}')
+                        success = False
+
+            # If trying to equip a 2H weapon in main hand then unequip off hand item
+            elif slot == Fighter.WEAPON_SLOT:
+                if new_eq.get_property("HANDS") == "2H":
+                    self.equip_item(None, Fighter.OFF_HAND)
+                    print(f'Unequipped offhand item {new_item.description}')
+
+            # If good to go the slot with the new item
+            if success is True:
+                self.equipment[slot] = new_item
+
+        return success
 
     def unequip_item(self, old_item: Entity):
 
@@ -626,7 +647,7 @@ class Inventory:
         self.max_items = max_items
         self.stackable_items = {}
         self.other_items = []
-        self.coins = {c_name: 0 for c_name in Inventory.COINS}#
+        self.coins = {c_name: 0 for c_name in Inventory.COINS}
         self.money = 0
 
     @property
