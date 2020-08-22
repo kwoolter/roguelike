@@ -1557,28 +1557,40 @@ class Model():
 
     def equip_item(self, new_item : Entity)->bool:
         """
-        Attempt to equipe the specified item
+        Attempt to equip the specified item
         :param new_item: the new item that you want the Player to equip
         :return: True if we succeeded in equipping the item else False
         """
         success = False
 
+        # If this item is an equippable item e.g. Sword, Shield....
         if new_item.get_property("IsEquippable") == True:
+
+            # Attempt to equip it in the default slot for the item
             success = self.player.equip_item(new_item)
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_EQUIP,
                                             description=f"You equip {new_item.description}"))
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"You can't equip {new_item.description} right now"))
 
+        # If this is a collectable item that you can use...
         elif new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True:
 
+            # Attempt to equip it in the Item slot
             success = self.player.equip_item(new_item, Fighter.ITEM_SLOT)
 
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_EQUIP,
                                             description=f"You take {new_item.description} out of your backpack"))
-
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"You can't equip {new_item.description} right now"))
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
