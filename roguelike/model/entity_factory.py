@@ -431,8 +431,8 @@ class Fighter():
 
         # If no new item is being equipped then remove existing item from the slot
         if new_item is None:
-            del self.equipment[slot]
-
+            if slot is not None and slot in self.equipment:
+                del self.equipment[slot]
         else:
 
             # Get the CombatClass details of the new item

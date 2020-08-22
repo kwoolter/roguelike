@@ -1333,7 +1333,7 @@ class Model():
         for item in class_equipment:
             eq = EntityFactory.get_entity_by_name(item)
             new_player.take_item(eq)
-            new_player.fighter.equip_item(eq)
+            new_player.equip_item(eq)
 
         # Give the player their class items and some basic items
         class_items = new_player.fighter.get_property("StartingItems").split(",")
