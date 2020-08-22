@@ -453,13 +453,11 @@ class Fighter():
                         print(f'Can not equip offhand slot with 2H weapon {main_hand.name}')
                         success = False
 
-            # If trying to equip a 2H weapon in main hand then unequip off hand item
-            elif slot == Fighter.WEAPON_SLOT:
-                if new_eq.get_property("HANDS") == "2H":
-                    self.equip_item(None, Fighter.OFF_HAND)
-                    print(f'Unequipped offhand item {new_item.description}')
+            # Else If trying to equip a 2H weapon in main hand then unequip off hand item
+            elif slot == Fighter.WEAPON_SLOT and new_eq.get_property("HANDS") == "2H":
+                self.equip_item(None, Fighter.OFF_HAND)
 
-            # If good to go the slot with the new item
+            # If good to go then equip slot with the new item
             if success is True:
                 self.equipment[slot] = new_item
 

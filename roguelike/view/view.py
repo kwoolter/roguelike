@@ -720,8 +720,16 @@ class InventoryView(View):
         else:
             fg = self.equipped_item_fg
             for slot, item in equipment.items():
+
                 # Print each item that is equipped and in which slot
                 text = f'{slot}: {item.description}'
+
+                # Special logic for 2 handed weapons equipped in main hand
+                if slot == model.Fighter.WEAPON_SLOT:
+                    ce = self.character.fighter.current_weapon_details
+                    if ce.get_property("HANDS") == "2H":
+                        text = f'Both Hands: {item.description}'
+
                 so = ScreenString(text,
                                   fg=fg,
                                   bg=self.bg,
@@ -803,6 +811,12 @@ class InventoryView(View):
                 if equipped is True:
                     fg = self.equipped_item_fg
                     bg = self.bg
+
+                    # Special logic for 2 handed weapons equipped in main hand
+                    if slot == model.Fighter.WEAPON_SLOT:
+                        ce = self.character.fighter.current_weapon_details
+                        if ce.get_property("HANDS") == "2H":
+                            text = f'Both Hands: {item.description}'
 
                 # Otherwise default colours
                 else:
@@ -1520,8 +1534,16 @@ class CharacterView(View):
         # Else loop through the equipment...
         else:
             for slot, item in equipment.items():
+
                 # Print each item that is equipped and in which slot
                 text = f'{slot}: {item.description}'
+
+                # Special logic for 2 handed weapons equipped in main hand
+                if slot == model.Fighter.WEAPON_SLOT:
+                    ce = self.character.fighter.current_weapon_details
+                    if ce.get_property("HANDS") == "2H":
+                        text = f'Both Hands: {item.description}'
+
                 so = ScreenString(text,
                                   fg=self.fg,
                                   bg=self.bg,
