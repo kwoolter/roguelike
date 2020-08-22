@@ -85,7 +85,7 @@ class MainFrame(View):
                                             border_fg=libtcod.gold)
 
         self.character_creation_view = CreateCharacterView(width=int(self.width - 2),
-                                                           height=26,
+                                                           height=40,
                                                            fg=libtcod.dark_sepia,
                                                            bg=libtcod.lightest_sepia,
                                                            border_bg=libtcod.sepia,
@@ -1507,7 +1507,42 @@ class CharacterView(View):
 
         so.render(self.con, cx, y)
 
+        y += 2
 
+        equipment = self.character.fighter.equipment
+        equipment_to_slot = {v: k for k, v in equipment.items()}
+        equipped_item = self.character.fighter.current_item
+
+        # If nothing equipped then say so
+        if len(equipment) == 0:
+
+            text = "Nothing"
+            so = ScreenStringRect(text,
+                                  width=self.width - 2,
+                                  height=self.height - 2,
+                                  fg=libtcod.light_yellow,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+            y += 1
+
+        # Else loop through the equipment...
+        else:
+            fg = self.fg
+            bg= self.bg
+            for slot, item in equipment.items():
+                # Print each item that is equipped and in which slot
+                text = f'{slot}: {item.description}'
+                so = ScreenString(text,
+                                  fg=fg,
+                                  bg=bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, cx, y)
+                y += 1
+
+        y += 1
 
 class CreateCharacterView(View):
     
@@ -1539,7 +1574,7 @@ class CreateCharacterView(View):
         self.character = None
 
         self.character_view = CharacterView(width=self.width - 4,
-                                            height=30,
+                                            height=40,
                                             fg=dim_rgb(self.fg,30),
                                             bg=dim_rgb(self.bg,30),
                                             border_bg=border_bg,
@@ -1658,7 +1693,7 @@ class CreateCharacterView(View):
 
         self.character_view.draw()
         libtcod.console_blit(self.character_view.con,
-                             0, 0, self.character_view.width, 15,
+                             0, 0, self.character_view.width, 29,
                              self.con, 2, y)
 
 
