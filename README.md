@@ -79,9 +79,9 @@ Features:
 * Potions and Scrolls have randomised effects
 * DnD-like classes, abilities, monsters and combat rules
 * DnD-like armour, weapons and other items
+* DnD-like ability checks
 * Inventory and Shop features
 * Perma-death
-* No game save feature (as yet)
 
 ## Package Structure
 Overview:
@@ -139,6 +139,56 @@ Overview:
 </tr>
 </table>
 
+# How Does The Game's Difficulty Scale?
+## Basic concept
+The `Entity` objects that appear in the game have a count and probability metric defined either for the current `Floor` or for each individual `Room` on the `Floor`.  
+For example, what is the maximum number of rats that you want to add to a room and what is the probability of a each rate successfully being added?  You may want at most 3 rats per room each with a 50% probability.
+
+So in the game, for a given metric `y` you can specify how it is calculated using this formula:
+
+`y = a*x + b + (x//d) * ad`
+
+Where `x` is the dungeon level that you are currently on and a, b, d and ad are parameters defined for each metric.
+
+So breaking this up, `y = a*x + b` is the simple formula for any straight line plotted on an xy axis. `a` represents 
+the slope of the line and `b` is the y intercept.  However, you may want an increasing number of rats at lower dungeon 
+levels but no rats beyond level 10.  To support this you can add (or subtract) `x` DIV `d` multiplied by a different slope.
+So if you want no rats to appear after level 10 you can specific `(x DIV 10) * -100`.
+
+Furthermore, you can constraint `y` by specifying minimum and maximum values.  
+This means you can cap the number of rats per room at say 4 but at a minimum always attempt to add 1.
+
+Pulling all of this together you end up with the following lines of code to calculate `y`:
+
+```
+        # Calculate y = a*x + b + (x div d)*ad applying min and max constraints
+        result = a*xvalue + b
+        result += (ad * (xvalue//d))
+        result = min(max(result, min_), max_)
+```
+
+An example visualisation of this is shown in the graph below where the orange line is `y = ax + b`, 
+the blue line is `(x div d) * ad` and the grey line is the sum of these two lines with a maximum and minimum applied (4 and 0 respectively).
+
+<img src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/graphy.JPG">
+
+Using this basic concept you can create interesting curves for count and probability for each `Entity` in the game.
+
+## `game_parameters.csv` file
+This file defines the count and probability for each entity that you want to appear in the game.
+
+Columns:
+* `Entity` - the name of the entity you want to define a metric for
+* `Metric` - which metric are you defining e.g. Count, Probability
+* `Scope` - what scope if the metric for e.g. Room or Floor?
+* `x` - what is the name of the variable that you want to substitue as `x` into the model?
+* `a` - slope
+* `b` - y intercept
+* `d` - x modulo value
+* `ad` - x modulo value slope
+* min - the minimum value of `y`
+* max - the maximum value of `y`
+* Template - use a template instead of a,b,d,ad values
 
 # Useful Links
 
