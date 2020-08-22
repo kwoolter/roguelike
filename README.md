@@ -93,14 +93,15 @@ Overview:
 
 ### `model` package
 * `model.py` - main module that contains `Model`, `Floor`, `Room`, `Tunnel` classes 
-* `entity_factory.py`
-* `combat.py`
-* `events.py`
+* `entity_factory.py` - contains `Entity`, `EntityFactory`, `Player`, `Fighter`, `Inventory` classes
+* `combat.py` - contains `CombatEquipment`, `CombatEquipmentFactory`, `CombatClass`, `CombatClassFactory` classes
+* `events.py` - all of the event names used in the game
 * `data` directory - data files for the game
     * `entities.csv` - all of the game objects and their properties
-    * `combat_equipment.csv`- more properties for entities that are armour of weapons
+    * `combat_equipment.csv`- more properties for entities that are armour or weapons
     * `combat_classes.csv` - the different types of fighter classes and their abilities
     * `game_parameters.csv` - the rules of how the game scales in difficulty
+    * `ability_checks.csv` - which items can you perform an ability check on and what are the outcomes for success and failure
 
 ### `view` package
 * `view.py` - main module that contains `MainFrame`, `FloorView` and other UI View related classes
@@ -140,9 +141,9 @@ Overview:
 </table>
 
 # How Does The Game's Difficulty Scale?
-## Basic concept
+## Basic Concept
 The `Entity` objects that appear in the game have a count and probability metric defined either for the current `Floor` or for each individual `Room` on the `Floor`.  
-For example, what is the maximum number of rats that you want to add to a room and what is the probability of a each rate successfully being added?  You may want at most 3 rats per room each with a 50% probability.
+For example, what is the maximum number of rats that you want to add to a room and what is the probability of each rat successfully being added?  You may want at most 3 rats per room each with a 50% probability.
 
 So in the game, for a given metric `y` you can specify how it is calculated using this formula:
 
@@ -155,7 +156,7 @@ the slope of the line and `b` is the y intercept.  However, you may want an incr
 levels but no rats beyond level 10.  To support this you can add (or subtract) `x` DIV `d` multiplied by a different slope.
 So if you want no rats to appear after level 10 you can specific `(x DIV 10) * -100`.
 
-Furthermore, you can constraint `y` by specifying minimum and maximum values.  
+Furthermore, you can constrain `y` by specifying minimum and maximum values.  
 This means you can cap the number of rats per room at say 4 but at a minimum always attempt to add 1.
 
 Pulling all of this together you end up with the following lines of code to calculate `y`:
@@ -168,14 +169,14 @@ Pulling all of this together you end up with the following lines of code to calc
 ```
 
 An example visualisation of this is shown in the graph below where the orange line is `y = ax + b`, 
-the blue line is `(x div d) * ad` and the grey line is `y' which is the sum of these two lines with a maximum and minimum applied (4 and 0 respectively).
+the blue line is `(x div d) * ad` and the grey line is `y` which is the sum of these two lines with a maximum and minimum applied (4 and 0 respectively).
 
 <img src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/graph.JPG">
 
 Using this basic concept you can create interesting **curves** for count and probability for each `Entity` in the game.
 
 ## `game_parameters.csv` file
-This file defines the count and probability for each entity that you want to appear in the game.
+This file defines the count and probability for each entity that you want to appear in the game's rooms or floors.
 
 Columns:
 * `Entity` - the name of the entity you want to define a metric for e.g. `Rat`
@@ -191,6 +192,36 @@ Columns:
 * `Template` - use a template instead of a,b,d,ad values
 
 Use templates for when you want to share `Count` or `Probability` curves across multiple types of `Entity`
+
+## `entities.csv` file
+Each `Entity` in the game needs to be defined as a row in this file.
+
+Columns:
+* `Name` - the short name of the `Entity` used in other property files e.g. `combat_equipment.csv`
+* `Description` - a description of the `Entity` used when it is displayed in text messages
+* `Char` - the character used to represent the `Entity` on the game `FloorView`
+* `Category` - group entities together by category
+* `FG` - foreground colour
+* `BG` - background colour
+* `Zorder` - order of display in descending order i.e. 0 is draw last
+* `IsTransparent` - does light shine through it?
+* `IsWalkable` - can you walk onto the same tile as it?
+* `IsInteractable` - can you interact with it?
+* `IsCollectable` - can you pick it up and put it in your inventory?
+* `IsStackable` - can you stack many of the same item?
+* `IsEquippable` - can you equip it as a weapon or armour?
+* `IsCheckable` - can the player perform an ability check on it?
+* `IsEnemy` - is it an enemy of the `Player`?
+* `Value` - how much is it worth?
+
+
+## Adding new Entities
+The process for adding new types of `Entity` to the game is as follows:-
+
+1. Add a new row to `entities.csv`
+2. Add 2 new rows to `game_parameters.csv`; one for generating `Count` and one for `Probability` metrics
+3. If the new `Entity`is a piece of `CombatEquipment` then add a new row to `combat_equipment.csv`
+4. If you can ability check the `Entity` then add a new row to `ability_checks.csv`
 
 # Useful Links
 
