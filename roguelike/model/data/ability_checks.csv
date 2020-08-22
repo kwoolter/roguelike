@@ -1,6 +1,8 @@
-Entity,Ability,Difficulty,Description,Rewards,Success,Failure
-Crate,STR,Easy,You try and break {entity} using your {ability},"Key,Food,Small Blue Potion",You break open {entity},You cannot open {entity}
-Crate,DEX,Easy,You try and open {entity} using your {ability},"Key,Food,Small Blue Potion",You slide open {entity},You cannot open {entity}
-Barrel,STR,Easy,You try and break {entity} using your {ability},"Key,Food,Small Blue Potion",You break open {entity},You cannot open {entity}
-Locked Chest,DEX,Hard,You try and pick the lock of {entity} using your {ability},"Key,Food,Small Blue Potion,Helmet",You unlock {entity},You cannot open {entity}
-Locked Chest,STR,Hard,You try and break {entity} using your {ability},"Key,Food,Small Blue Potion,Helmet",You break open {entity},You cannot open {entity}
+Entity,Ability,Difficulty,MaxAttempts,Description,SuccessMsg,SuccessRewards,SuccessStats,FailureMsg,FailureRewards,FailureStats
+Crate,STR,Easy,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
+Crate,DEX,Easy,10,You try and open {entity} using your {ability},You slide open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
+Barrel,STR,Easy,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
+Locked Chest,DEX,Hard,10,You try and pick the lock of {entity} using your {ability},You unlock {entity},"Key,Food,Small Blue Potion,Helmet",XP=10,You cannot open {entity},,
+Locked Chest,STR,Hard,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion,Helmet",XP=10,You cannot open {entity},,
+Hidden Trap,INT,Easy,10,,You detect {entity} using your {ability},Trap,XP=10,You step on {entity},Trap,HP=-10
+Trap,DEX,Easy,10,You try and disable {entity} using your {ability},You disable {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to disable {entity},,HP=-10

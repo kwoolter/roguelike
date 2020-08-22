@@ -42,11 +42,13 @@ Silver,a silver coin,$,Object,white,silver,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FAL
 Copper,a copper coin,$,Object,light_orange,copper,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Key,a small key,?,Object,copper,,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,15
 Locked Chest,a locked wooden chest,X,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Hidden Exit,a hidden secret passageway,v,Object,black,yellow,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Locked Down Stairs,a locked entrance,v,Object,red,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Pillar,a stone pillar,+,Object,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Room,a room,O,Object,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Shop,a shop,S,Object,grey,black,9,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Trap,a hidden trap,*,Object,yellow,red,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Hidden Trap,a hidden trap,*,Object,darkest_grey,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Trap,a metal trap,*,Object,yellow,red,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 NPC,a strange man,K,Player,yellow,,1,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0

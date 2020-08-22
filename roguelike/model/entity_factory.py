@@ -185,6 +185,10 @@ class Player(Entity):
         if self.fighter is not None:
             self.fighter.heal(heal_amount=heal_amount)
 
+    def take_damage(self, damage_amount: int):
+        if self.fighter is not None:
+            self.fighter.take_damage(damage_amount)
+
     def equip_item(self, new_item: Entity, slot=None) -> bool:
 
         assert self.fighter is not None, "Trying to equip an item when you don't have a fighter set-up"
