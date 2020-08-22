@@ -6,3 +6,8 @@ Locked Chest,DEX,Hard,10,You try and pick the lock of {entity} using your {abili
 Locked Chest,STR,Hard,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion,Helmet",XP=10,You cannot open {entity},,
 Hidden Trap,INT,Easy,10,,You detect {entity} using your {ability},Trap,XP=10,You step on {entity},Trap,HP=-10
 Trap,DEX,Easy,10,You try and disable {entity} using your {ability},You disable {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to disable {entity},,HP=-10
+Nature Item,WIS,Easy,10,You examine something that you notice on the floor,Using your {ability} of nature you find an interesting item,"Healing Herbs,Blue Mushroom,Red Mushroom",XP=10,Nothing of use,Empty,
+Boulder,STR,Easy,10,You try and move {entity} using your {ability},You roll {entity} aside,"Down Stairs,Copper,Gold,Map",XP=10,You cannot move {entity},,
+Rock,STR,Easy,10,You try and lift {entity} using your {ability},With a heave you lift {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to lift {entity} ,,
+NPC,CHA,Easy,10,You approach {entity} and talk to them,Using your {ability} you charm {entity}.  They give you something and then dissappear,"Map, Silver,Key",XP=10,{entity} is not interested in you and walks away,Empty,
+Floorboard,INT,Easy,10,,You notice {entity} and lift it up,"Copper, Copper, Map",XP=10,,Empty,

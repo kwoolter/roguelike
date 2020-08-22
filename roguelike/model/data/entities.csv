@@ -51,7 +51,7 @@ Hidden Trap,a hidden trap,*,Object,darkest_grey,,2,TRUE,FALSE,TRUE,FALSE,FALSE,F
 Trap,a metal trap,*,Object,yellow,red,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-NPC,a strange man,K,Player,yellow,,1,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+NPC,a stranger,N,Player,yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Player,the player,@,Player,grey,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Small Bubbling Potion,a bottle of bubbling potion,P,Potion,sky,fuchsia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Small Green Potion,a bottle of green potion,P,Potion,lightest_grey,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
@@ -112,3 +112,11 @@ Sword+1,a sword +1,\,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FAL
 Sword+1+1,a sword +2,\,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,200
 Crate,a wooden crate,C,Object,red,dark_red,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Barrel,an oak barrel,O,Object,red,dark_red,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Nature Item,a nature item,.,Object,darkest_green,,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Empty,an empty tile, ,Object,,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Healing Herbs,some healing herbs,+,Object,dark_green,,2,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,10
+Red Mushroom,a red mushroom,+,Object,dark_red,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Blue Mushroom,a blue mushroom,+,Object,dark_blue,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Boulder,a large boulder,O,Object,grey,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Rock,a small rock,o,Object,grey,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Floorboard,a loose floorboard,|,Object,,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0

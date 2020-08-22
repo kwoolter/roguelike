@@ -468,6 +468,9 @@ class FloorView(View):
         if len(fov_entities) > 0:
             entities = sorted(fov_entities, key=lambda x: x.get_property("Zorder"), reverse=True)
             for e in entities:
+                if e.name == model.Floor.EMPTY_TILE or (e.bg is None and e.fg is None):
+                    continue
+
                 x, y = e.xy
                 bg = e.bg
                 try:
@@ -479,7 +482,7 @@ class FloorView(View):
                     if bg is not None:
                         bg = dim_rgb(bg, a)
                         libtcod.console_set_char_background(self.con, x, y, bg)
-                except e:
+                except Exception as e:
                     print("Problem drawing {e.name} {e.fg} {e.bg}")
                     print(e)
 

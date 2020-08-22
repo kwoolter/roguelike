@@ -171,6 +171,8 @@ class Floor():
                   "the Antechamber", "the Soul Forge", "the Cloisters of Time", "the Sanctum of the Snake God",
                   "the Alchemist's Workshop", "the Pit of Rats","the Tomb of the Leper King", "the Basement")
 
+    EMPTY_TILE = "Empty"
+
     def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
 
         # Properties of this floor
@@ -703,10 +705,10 @@ class Floor():
         """
         Swap an entity on the floor with a new entity
         :param old_entity: the entity that you want to swap out
-        :param new_entity: the new entity that uyou want to replace it with. Default is None which means remove the old entity
+        :param new_entity: the new entity that you want to replace it with. Default is None which means remove the old entity
         """
         if old_entity in self.entities:
-            if new_entity is not None:
+            if new_entity is not None and new_entity.name != Floor.EMPTY_TILE:
                 new_entity.xy = old_entity.xy
                 self.entities.append(new_entity)
             self.entities.remove(old_entity)
@@ -1752,7 +1754,14 @@ class ItemUser():
     def initialise(self):
 
         # What HP does an Entity give you?
-        self.HP_increase = {"Food": 5, "Small Green Potion": 10, "Small Red Potion": 15, "Healing Scroll": 20, "Small Purple Potion": -10}
+        self.HP_increase = {"Food": 5,
+                            "Small Green Potion": 10,
+                            "Small Red Potion": 15,
+                            "Healing Scroll": 20,
+                            "Small Purple Potion": -10,
+                            "Healing Herbs" : 5,
+                            "Red Mushroom" : 5,
+                            "Blue Mushroom": -5}
 
         # What can you swap an entity for?
         self.entity_swaps = {"Locked Chest":("Silver", "Food", "Small Green Potion", "Helmet", "Weapon Upgrade"),
@@ -2185,7 +2194,7 @@ class AbilityChecksFactory:
         file_to_open = data_folder / "data" / file_name
 
         # Read in the csv file
-        AbilityChecksFactory.ability_checks = pd.read_csv(file_to_open)
+        AbilityChecksFactory.ability_checks = pd.read_csv(file_to_open,encoding='latin1')
         df = AbilityChecksFactory.ability_checks
         df.set_index(["Entity", "Ability"], drop=True, inplace=True)
         df.fillna("", inplace=True)
