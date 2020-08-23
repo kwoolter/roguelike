@@ -224,3 +224,11 @@ Venomous Snake,Count,Room,Level,,,,,,,L5-medium-uncommon
 Venomous Snake,Probability,Room,Level,,,,,,,L5-medium-uncommon
 Wraith,Count,Room,Level,,,,,,,L15-medium-uncommon
 Wraith,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Tomb,Count,Floor,Level,0.3,0.5,10,0,0,2,
+Plaque,Count,Floor,Level,0.3,0.5,10,0,0,2,
+Shrine,Count,Floor,Level,0.3,0.5,10,0,0,2,
+Altar,Count,Floor,Level,0.3,0.5,10,0,0,2,
+Tomb,Probability,Floor,Level,4,5,5,-5,0,50,
+Plaque,Probability,Floor,Level,4,5,5,-5,0,50,
+Shrine,Probability,Floor,Level,4,5,5,-5,0,50,
+Altar,Probability,Floor,Level,4,5,5,-5,0,50,

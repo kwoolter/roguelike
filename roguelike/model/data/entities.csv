@@ -7,7 +7,7 @@ Lightning Scroll,a magic lightning scroll,~,Combat,black,yellow,4,TRUE,TRUE,TRUE
 Poison Scroll,a magic poison scroll,~,Combat,pink,darker_magenta,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
 Spear,a wooden spear,I,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,0
 Sword,a short sword,\,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
-War Hammer,a mighty War Hammer,T,Combat,darkest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,32
+War Hammer,a mighty War Hammer,T,Combat,darkest_grey,,4,TRUE,TRUE,FALSE,TRUE,,TRUE,FALSE,FALSE,32
 Goblin,an evil Goblin,g,Enemy,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Orc,a small green Orc,o,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Spider,a large spider,*,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
@@ -117,8 +117,12 @@ Empty,an empty tile, ,Object,,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Healing Herbs,some healing herbs,+,Object,dark_green,,2,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,10
 Red Mushroom,a red mushroom,+,Object,dark_red,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
 Blue Mushroom,a blue mushroom,+,Object,dark_blue,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
-Boulder,a large boulder,O,Object,grey,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0
-Rock,a small rock,o,Object,grey,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0
-Floorboard,a loose floorboard,|,Object,,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0
-Nature Trap,a nature trap,?,Object,dark_sea,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0
-Tile,a cracked tile,+,Object,,,2,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Boulder,a large boulder,O,Object,grey,,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Rock,a small rock,o,Object,grey,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Floorboard,a loose floorboard,|,Object,,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Nature Trap,a nature trap,?,Object,dark_sea,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Tile,a cracked tile,+,Object,,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Tomb,a tomb stone,+,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Plaque,an inscribed plaque,~,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Shrine,a small shrine,*,Object,dark_red,darker_red,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Altar,a stone altar,-,Object,darker_yellow,darker_cyan,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
