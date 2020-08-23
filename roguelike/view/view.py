@@ -1819,6 +1819,8 @@ class EventView(View):
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
                             model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),
+                            model.Event.GAIN_HEALTH: (libtcod.light_green, libtcod.dark_green),
+                            model.Event.LOSE_HEALTH: (libtcod.yellow, libtcod.darkest_yellow),
                             model.Event.LEVEL_UP_AVAILABLE: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.PLAYER_DEAD: (libtcod.red, None)
                             }

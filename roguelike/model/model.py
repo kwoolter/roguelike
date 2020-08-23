@@ -822,12 +822,26 @@ class Floor():
         # See of there any ability checks for the specified Entity
         checks = AbilityChecksFactory.get_entity_ability_checks(e.name)
 
+        # If there are more than one type of check for this entity...
         if len(checks) > 1:
-            # need to improve this to select ability most likely to succeed based on check difficulty and ability modifier
-            # for now it is just a random pick!!!
-            ability = random.choice(list(checks.keys()))
-        else:
+
+            # Build a list to see which ability check we are most likely to succeed at...
+            stats = []
+            for ability, check in checks.items():
+                # Get the ability modifier that is appropriate for the ability check
+                ability_modifier = self.player.fighter.get_property_modifier(check.ability)
+                stats.append((ability, check.difficulty_value - ability_modifier))
+
+            stats.sort(key=operator.itemgetter(1))
+            print(stats)
+            # Pick the ability that has the lowest diffculty score
+            ability, score = stats[0]
+            print(f'Chosen check = {stats[0]}')
+
+        elif len(checks) == 1:
             ability = list(checks.keys())[0]
+        else:
+            ability = "NONE"
 
         check = checks.get(ability)
 
@@ -863,16 +877,32 @@ class Floor():
                 if check.success_reward is not None:
                     self.swap_entity(e, check.success_reward)
 
-                    self.events.add_event(Event(type=Event.GAME,
-                                                name=Event.EFFECT_ITEM_DISCOVERY,
-                                                description=f'You find {check.success_reward.description}'))
+                    if check.success_reward != Floor.EMPTY_TILE:
+                        self.events.add_event(Event(type=Event.GAME,
+                                                    name=Event.EFFECT_ITEM_DISCOVERY,
+                                                    description=f'You find {check.success_reward.description}'))
 
                 # Update any stats with any rewards
                 for stat, value in check.success_stats.items():
                     if stat == "HP":
-                        self.player.heal(value)
+                        if value > 0:
+                            self.player.heal(value)
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.GAIN_HEALTH,
+                                      description=f"You recover {value} HP"))
+                        else:
+                            self.player.take_damage(value)
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.LOSE_HEALTH,
+                                      description=f"You lose {abs(value)} some HP"))
                     elif stat == "XP":
                         self.player.fighter.add_XP(value)
+                        self.events.add_event(
+                            Event(type=Event.GAME,
+                                  name=Event.ACTION_GAIN_XP,
+                                  description=f"You gain {value} XP"))
                     else:
                         print(f'get reward {stat}={value} but did nothing!')
 
@@ -891,9 +921,24 @@ class Floor():
                 # Update any stats with any failure rewards
                 for stat, value in check.failure_stats.items():
                     if stat == "HP":
-                        self.player.heal(value)
+                        if value > 0:
+                            self.player.heal(value)
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.GAIN_HEALTH,
+                                      description=f"You recover {value} HP"))
+                        else:
+                            self.player.take_damage(value)
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.LOSE_HEALTH,
+                                      description=f"You lose {abs(value)} HP"))
                     elif stat == "XP":
                         self.player.fighter.add_XP(value)
+                        self.events.add_event(
+                            Event(type=Event.GAME,
+                                  name=Event.ACTION_GAIN_XP,
+                                  description=f"You gain {value} XP"))
                     else:
                         print(f'get reward {stat}={value} but did nothing!')
 
@@ -1366,7 +1411,7 @@ class Model():
         class_equipment = new_player.fighter.get_property("StartingEquipment").split(",")
 
         for item in class_equipment:
-            eq = EntityFactory.get_entity_by_name(item)
+            eq = EntityFactory.get_entity_by_name(item.strip())
             new_player.take_item(eq)
             new_player.equip_item(eq)
 
@@ -1376,7 +1421,7 @@ class Model():
         starting_items = class_items + base_items
 
         for item in starting_items:
-            eq = EntityFactory.get_entity_by_name(item)
+            eq = EntityFactory.get_entity_by_name(item.strip())
             new_player.take_item(eq)
 
         # Give the Player some money
@@ -1385,7 +1430,6 @@ class Model():
             eq = EntityFactory.get_entity_by_name(c)
             for i in range(v):
                 new_player.take_item(eq)
-
 
         new_player.level_up()
 
@@ -2063,10 +2107,10 @@ class AIBotTracker(AIBot):
             return success
 
         # See if we are close enough to the target and
-        # Check that there is a direct path to it
+        # Check that there is a direct path to it i.e. bot is in current FOV
         d = self.distance_to_target(self.target_entity)
         target_in_range = d <= self.sight_range
-        target_in_sight = self.target_entity.xy in self.floor.get_fov_cells()
+        target_in_sight = self.bot_entity.xy in self.floor.get_fov_cells()
 
         # If we can attack it....
         attack_range = self.bot_entity.fighter.current_weapon_details.get_property("Range")

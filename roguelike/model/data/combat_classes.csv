@@ -39,6 +39,6 @@ Lich,FALSE,0,18d8+54,0,11,16,16,20,14,16,17,33000,Paralyzing Touch,3d6,1.5,,
 Cleric,TRUE,12,,5,11,14,13,12,16,10,1,0,Hands,1d2,1,Mace,"Protection Ring,Healing Scroll"
 Fighter,TRUE,15,,6,16,11,14,10,12,13,2,0,Hands,1d2,1,"Longsword,Helmet",Food
 Paladin,TRUE,15,,6,16,10,13,11,12,14,1,0,Hands,1d2,1,"Sword,Shield",Food
-Ranger,TRUE,12,,5,11,16,14,12,13,10,1,0,Hands,1d2,1,"Axe,Leather Armour","Key,Bronze Ring"
-Rogue,TRUE,12,,5,10,16,14,11,13,12,1,0,Hands,1d2,1,"Dagger,Buckler",Key
-Wizard,TRUE,10,,4,10,14,11,16,13,12,0,0,Hands,1d2,1,"Quarterstaff,Robe of Learning","Fireball Scroll,Lightning Scroll"
+Ranger,TRUE,12,,5,11,16,14,12,13,10,1,0,Hands,1d2,1,"Axe,Leather Armour","Key,Bronze Ring,Red Mushroom,Healing Herbs"
+Rogue,TRUE,12,,5,10,16,14,11,13,12,1,0,Hands,1d2,1,"Dagger,Buckler","Key,Food,Food"
+Wizard,TRUE,10,,4,10,14,11,16,13,12,0,0,Hands,1d2,1,"Quarterstaff,Robe of Learning","Fireball Scroll,Lightning Scroll,Healing Herbs,Food"
