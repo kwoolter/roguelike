@@ -126,3 +126,11 @@ Tomb,a tomb stone,+,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE
 Plaque,an inscribed plaque,~,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Shrine,a small shrine,*,Object,dark_red,darker_red,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Altar,a stone altar,-,Object,darker_yellow,darker_cyan,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Casket,an ornate casket,%,Object,brass,gold,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Box,a strong wooden box,:,Object,sepia,dark_sepia,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Lever,a rusty metal lever,\,Object,brass,,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Ruby,a dark red ruby gemstone,.,Object,dark_red,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,50
+Emerald,a green emerald gemstone,.,Object,dark_green,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
+Sapphire,a blue sapphire gemstone,.,Object,blue,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
+Amethyst,an amethyst gemstone,.,Object,light_fuchsia,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
+Onyx,a black onyx gemstone,.,Object,black,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25

@@ -1652,35 +1652,41 @@ class Model():
 
         return success
 
-    def use_item(self, new_item : Entity = None)->bool:
+    def use_item(self, selected_item : Entity = None)->bool:
         """
         Attempt to use a specified item. Default is to use item in Item Slot
-        :param new_item:
+        :param selected_item:
         :return:
         """
-        use_equipped_item = new_item is None
+        use_equipped_item = selected_item is None
         
         success = False
 
         # No item specified so get the current equipped item
         if use_equipped_item is True:
-            new_item = self.player.fighter.current_item
+            selected_item = self.player.fighter.current_item
 
 
         # If we haven't got an item to use then fail
-        if new_item is None:
+        if selected_item is None:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"You don't have an item equipped to use!"))
 
+        # If the item is not interactable then fail
+        elif selected_item.get_property("IsInteractable") == False:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You can't use {selected_item.description}!"))
+
         # Try and use the item equipped...
         else:
 
-            success, effect = self.item_user.process(new_item, self.current_floor)
+            success, effect = self.item_user.process(selected_item, self.current_floor)
 
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_SUCCEEDED,
-                                        description=f"You use {new_item.description}"))
+                                        description=f"You use {selected_item.description}"))
 
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
@@ -1694,7 +1700,7 @@ class Model():
         if success is True:
             if use_equipped_item is True:
                 self.player.equip_item(None, slot=Fighter.ITEM_SLOT)
-            self.player.drop_item(new_item)
+            self.player.drop_item(selected_item)
 
         return success
 

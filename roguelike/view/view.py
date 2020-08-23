@@ -849,7 +849,7 @@ class InventoryView(View):
                     else:
                         libtcod.console_set_char_background(self.con, 2, y, libtcod.light_gray)
                 except Exception:
-                    print("Problem drawing {e.name} {e.fg} {e.bg}")
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
                 y += 1
 
@@ -901,7 +901,7 @@ class InventoryView(View):
                     else:
                         libtcod.console_set_char_background(self.con, 2, y, libtcod.light_gray)
                 except Exception:
-                    print("Problem drawing {e.name} {e.fg} {e.bg}")
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
                 y += 1
 
