@@ -827,6 +827,8 @@ class Floor():
         # If we found an ability check....
         if check is not None:
 
+            print(str(check))
+
             # Get the ability modifier that is appropriate for the ability check
             ability_modifier = self.player.fighter.get_property_modifier(check.ability)
 
@@ -2136,7 +2138,7 @@ class AbilityCheck:
         self.failure_stats = {}
 
     def __str__(self):
-        txt = f'{self.difficulty.upper()} Check: {self.entity.name} versus {self.ability} ability - {len(self.success_rewards)} rewards:'
+        txt = f'{self.difficulty.upper()}:{self.difficulty_value} Check: {self.entity.name} versus {self.ability} ability - {len(self.success_rewards)} rewards:'
         for reward in self.success_rewards:
             txt += f'{reward},'
 
@@ -2161,21 +2163,17 @@ class AbilityCheck:
         self.success_reward = None
         self.failure_reward = None
 
-        print(self.description)
-        if self.difficulty_value > random.randint(1, 20) + ability_modifier:
-            print(self.success_msg)
+        if self.difficulty_value <= (random.randint(1, 20) + ability_modifier):
+            success = True
             if len(self.success_rewards) > 0:
                 reward_name = random.choice(self.success_rewards)
                 self.success_reward = EntityFactory.get_entity_by_name(reward_name)
-                #print(f'Your reward is {self.success_reward.description}')
-            success = True
+
         else:
-            print(self.failure_msg)
+            success = False
             if len(self.failure_rewards) > 0:
                 reward_name = random.choice(self.failure_rewards)
                 self.failure_reward = EntityFactory.get_entity_by_name(reward_name)
-                #print(f'Your reward is {self.failure_reward.description}')
-            success = False
 
         return success
 
@@ -2244,11 +2242,13 @@ class AbilityChecksFactory:
                                  success_msg=success_msg,
                                  failure_msg=failure_msg)
 
-        for reward in success_rewards.split(','):
-            new_check.add_reward(reward.strip(), success=True)
+        if success_rewards != "":
+            for reward in success_rewards.split(','):
+                new_check.add_reward(reward.strip(), success=True)
 
-        for reward in failure_rewards.split(','):
-            new_check.add_reward(reward.strip(), success=False)
+        if failure_rewards != "":
+            for reward in failure_rewards.split(','):
+                new_check.add_reward(reward.strip(), success=False)
 
         if success_stats != "":
             for reward in success_stats.split(','):

@@ -1,13 +1,16 @@
 Entity,Ability,Difficulty,MaxAttempts,Description,SuccessMsg,SuccessRewards,SuccessStats,FailureMsg,FailureRewards,FailureStats
 Crate,STR,Easy,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
-Crate,DEX,Easy,10,You try and open {entity} using your {ability},You slide open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
-Barrel,STR,Easy,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
+Crate,DEX,Medium,10,You try and open {entity} using your {ability},You slide open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
+Barrel,STR,Medium,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion",XP=10,You cannot open {entity},,
 Locked Chest,DEX,Hard,10,You try and pick the lock of {entity} using your {ability},You unlock {entity},"Key,Food,Small Blue Potion,Helmet",XP=10,You cannot open {entity},,
 Locked Chest,STR,Hard,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion,Helmet",XP=10,You cannot open {entity},,
-Hidden Trap,INT,Easy,10,,You detect {entity} using your {ability},Trap,XP=10,You step on {entity},Trap,HP=-10
-Trap,DEX,Easy,10,You try and disable {entity} using your {ability},You disable {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to disable {entity},,HP=-10
-Nature Item,WIS,Easy,10,You examine something that you notice on the floor,Using your {ability} of nature you find an interesting item,"Healing Herbs,Blue Mushroom,Red Mushroom",XP=10,Nothing of use,Empty,
-Boulder,STR,Easy,10,You try and move {entity} using your {ability},You roll {entity} aside,"Down Stairs,Copper,Gold,Map",XP=10,You cannot move {entity},,
+Hidden Trap,INT,Medium,10,,You detect {entity} using your {ability},Trap,XP=10,You step on {entity},Trap,HP=-5
+Trap,DEX,Medium,10,You try and disable {entity} using your {ability},You disable {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to disable {entity},,HP=-5
+Nature Item,WIS,Medium,10,You examine something that you notice on the floor,Using your {ability} of nature you find a useful item,"Healing Herbs,Blue Mushroom,Red Mushroom",XP=10,Nothing of use,Empty,
+Boulder,STR,Hard,10,You try and move {entity} using your {ability},You roll {entity} aside,"Down Stairs,Copper,Gold,Map",XP=10,You cannot move {entity},,
 Rock,STR,Easy,10,You try and lift {entity} using your {ability},With a heave you lift {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to lift {entity} ,,
-NPC,CHA,Easy,10,You approach {entity} and talk to them,Using your {ability} you charm {entity}.  They give you something and then dissappear,"Map, Silver,Key",XP=10,{entity} is not interested in you and walks away,Empty,
-Floorboard,INT,Easy,10,,You notice {entity} and lift it up,"Copper, Copper, Map",XP=10,,Empty,
+NPC,CHA,Medium,10,You approach {entity} and talk to them,Using your {ability} you charm {entity}.  They give you something and then dissappear,"Map, Silver,Key",XP=10,{entity} is not interested in you and walks away,Empty,
+Floorboard,INT,Medium,10,,You notice {entity} and gently lift it up,"Copper, Copper, Map,Scroll of Greed,Scroll of Revelation,Scroll of Secrets,Scroll of Teleportation,Scroll of XYZ",XP=10,,Empty,
+Nature Trap,WIS,Medium,10,You examine something that you notice on the floor,Using your {ability} of nature you identify a poisonous liquid and avoid it,Empty,XP=10,There is a green liquid that burns you as you touch it,Empty,HP=-5
+Tile,INT,Easy,10,,You notice {entity} and examine it closely,"Copper, Copper, Map,Scroll of Greed,Scroll of Revelation,Scroll of Secrets,Scroll of Teleportation,Scroll of XYZ",XP=10,,Empty,
+Hidden Exit,INT,Hard,10,You examine the stone pillar,You discover {entity},Down Stairs,XP=10,You don't find anything of particular interest,Pillar,
