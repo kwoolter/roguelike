@@ -110,6 +110,9 @@ class Entity():
     def get_property(self, property_name: str):
         return self.properties.get(property_name)
 
+    def set_property(self, property_name: str, new_value):
+        self.properties.update({property_name: new_value})
+
     def move(self, dx: int, dy: int):
         self.x += dx
         self.y += dy

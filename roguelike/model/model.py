@@ -821,18 +821,28 @@ class Floor():
 
         # See of there any ability checks for the specified Entity
         checks = AbilityChecksFactory.get_entity_ability_checks(e.name)
-        ability = random.choice(list(checks.keys()))
+
+        if len(checks) > 1:
+            # need to improve this to select ability most likely to succeed based on check difficulty and ability modifier
+            # for now it is just a random pick!!!
+            ability = random.choice(list(checks.keys()))
+        else:
+            ability = list(checks.keys())[0]
+
         check = checks.get(ability)
 
         # If we found an ability check....
         if check is not None:
 
             print(str(check))
+            # Make this entity non-checkable going forward!
+            # You get one go at attempting the check!
+            e.set_property("IsCheckable", False)
 
             # Get the ability modifier that is appropriate for the ability check
             ability_modifier = self.player.fighter.get_property_modifier(check.ability)
 
-            # Print the description of teh check
+            # Print the description of the check
             if check.description is not None:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
@@ -864,7 +874,8 @@ class Floor():
                     elif stat == "XP":
                         self.player.fighter.add_XP(value)
                     else:
-                        pass
+                        print(f'get reward {stat}={value} but did nothing!')
+
 
             # If ability check failed...
             else:
@@ -884,7 +895,8 @@ class Floor():
                     elif stat == "XP":
                         self.player.fighter.add_XP(value)
                     else:
-                        pass
+                        print(f'get reward {stat}={value} but did nothing!')
+
 
         # No ability checks found for this Entity
         else:
