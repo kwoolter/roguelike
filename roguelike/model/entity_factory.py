@@ -159,8 +159,12 @@ class Player(Entity):
         self.inventory = Inventory(max_items=Player.MAX_INVENTORY_ITEMS)
 
     @property
-    def combat_class(self):
+    def combat_class_name(self):
         return self.fighter.combat_class.name
+
+    @property
+    def combat_class(self):
+        return self.fighter.combat_class
 
     def get_property(self, property_name: str):
         value = self.properties.get(property_name)

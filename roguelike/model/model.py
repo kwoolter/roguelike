@@ -591,8 +591,8 @@ class Floor():
         moved = self.move_entity(self.player, dx, dy, relative)
         if moved is True:
 
-            # Recalculate their current FOV
-            self.recompute_fov()
+            # Recalculate their current FOV using sight radius of combat class
+            self.recompute_fov(radius = self.player.fighter.combat_class.get_property("SightRange"))
 
             # See if we found something?
             e = self.get_entity_at_pos(self.player.xy)
@@ -933,7 +933,7 @@ class Floor():
                                       name=Event.GAIN_HEALTH,
                                       description=f"You recover {value} HP"))
                         else:
-                            self.player.take_damage(value)
+                            self.player.take_damage(abs(value))
                             self.events.add_event(
                                 Event(type=Event.GAME,
                                       name=Event.LOSE_HEALTH,
@@ -1484,7 +1484,7 @@ class Model():
 
         self.events.add_event(Event(type=Event.GAME,
                                     name=Event.GAME_NEW_PLAYER,
-                                    description=f"{self.player.combat_class} {self.player.name} joined {self.name}!"))
+                                    description=f"{self.player.combat_class_name} {self.player.name} joined {self.name}!"))
 
         if self.current_floor is not None:
             self.current_floor.add_player(self.player)
@@ -2117,6 +2117,7 @@ class AIBotTracker(AIBot):
 
         super().__init__(str(__class__), bot_entity, floor, tick_slow_factor)
 
+        self.combat_class = None
         self.target_entity = None
         self.navigator = None
         self.failed_ticks = 0
@@ -2125,15 +2126,17 @@ class AIBotTracker(AIBot):
     def __str__(self):
 
         text = f"{self.name}: Bot {self.bot_entity.name} at {self.bot_entity.xy}:"
+        if self.combat_class is not None:
+            text+= f'range:{self.sight_range} '
         if self.target_entity is not None:
             text += f'target:{self.target_entity.name}'
 
         return text
 
-    def set_instructions(self, new_target: Entity, sight_range: int = 5, loop: bool = True):
+    def set_instructions(self, new_target: Entity):
         self.target_entity = new_target
-        self.sight_range = sight_range
-        self.loop = loop
+        self.combat_class = CombatClassFactory.get_combat_class_by_name(self.bot_entity.name)
+        self.sight_range = self.combat_class.get_property("SightRange")
 
     def tick(self):
 

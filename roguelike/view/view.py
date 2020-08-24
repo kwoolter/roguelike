@@ -1384,7 +1384,7 @@ class CharacterView(View):
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
-        self.other_stats = ('XP', 'Level', 'HP')
+        self.other_stats = ('XP', 'Level', 'HP', "SightRange")
         self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
 
         # Components
@@ -1646,7 +1646,7 @@ class CreateCharacterView(View):
 
         self.character = self.game.player
         self.character_name = self.character.name
-        self.character_class = self.character.fighter.combat_class.name
+        self.character_class = self.character.combat_class_name
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
