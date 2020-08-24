@@ -347,6 +347,8 @@ class Floor():
 
         # Build a map of the floor
         self.build_floor_map()
+        if random.randint(0,10) > 8:
+            self.build_floor_cave()
 
         self.entities_added = len(self.entities)
 
@@ -1044,6 +1046,7 @@ class Floor():
         # Start with no fg and bg colours specified
         self.floor_tile_colours = np.full((self.width, self.height, 3), 0)
 
+
         # Make floor walkable where tunnels are and store the floor tile colour
         for tunnel in self.map_tunnels:
             for sx, sy in tunnel.get_segments():
@@ -1055,6 +1058,37 @@ class Floor():
             x, y, w, h = room.rect
             self.walkable[x:x + w, y: y + h] = 1
             self.floor_tile_colours[x:x + w, y: y + h] = list(room.bg)
+
+        # Convert walkable to array of bools
+        self.walkable = self.walkable > 0
+
+    def build_floor_cave(self, reset:bool = False):
+        """
+        Build arrays the represent different properties of each floor til in the Floor.  The arrays are:-
+        - walkable - can you walk on a tile?
+        - explored - have you seen this tile yet?
+        - floor_tile_colours - the colour of each floor tile
+        """
+        assert self.first_room in self.map_rooms
+        assert self.last_room in self.map_rooms
+
+        if reset is True:
+
+            # Start with nothing explored!
+            self.explored = np.zeros((self.width, self.height), dtype=bool)
+
+            # Start with nothing walkable!
+            self.walkable = np.zeros((self.width, self.height))
+
+        # Start with no fg and bg colours specified
+        self.floor_tile_colours = np.full((self.width, self.height, 3), 0)
+
+        for x in range(1,self.width-1):
+            self.walkable[x, 2+ random.randint(0,5):self.height-2 - random.randint(0,5)] = 1
+
+        for y in range(2,self.height-4):
+            self.walkable[:random.randint(0,5),y] = 0
+            self.walkable[random.randint(-5, -1):, y] = 0
 
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0

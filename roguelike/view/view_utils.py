@@ -12,9 +12,9 @@ def dim_rgb(rgb, dc: int):
     :return: a libtcod.Color object with the dimmed RGB colour
     """
     r, g, b = rgb
-    r = max(0, r - dc)
-    g = max(0, g - dc)
-    b = max(0, b - dc)
+    r = min(max(0, r - dc),255)
+    g = min(max(0, g - dc),255)
+    b = min(max(0, b - dc),255)
     return libtcod.Color(r, g, b)
 
 
