@@ -348,7 +348,7 @@ class Floor():
         # Build a map of the floor
         self.build_floor_map()
         if random.randint(0,10) > 8:
-            self.build_floor_cave()
+            self.build_floor_cave(tile_colour= random.choice(valid_room_colours))
 
         self.entities_added = len(self.entities)
 
@@ -1062,7 +1062,7 @@ class Floor():
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
 
-    def build_floor_cave(self, reset:bool = False):
+    def build_floor_cave(self, tile_colour, reset:bool = False):
         """
         Build arrays the represent different properties of each floor til in the Floor.  The arrays are:-
         - walkable - can you walk on a tile?
@@ -1072,6 +1072,7 @@ class Floor():
         assert self.first_room in self.map_rooms
         assert self.last_room in self.map_rooms
 
+        # Rest everything if requested to
         if reset is True:
 
             # Start with nothing explored!
@@ -1080,18 +1081,23 @@ class Floor():
             # Start with nothing walkable!
             self.walkable = np.zeros((self.width, self.height))
 
-        # Start with no fg and bg colours specified
-        self.floor_tile_colours = np.full((self.width, self.height, 3), 0)
+        other_walkable = np.zeros((self.width, self.height))
 
+        # Start with no fg and bg colours specified then populate with specified tile colour
+        self.floor_tile_colours = np.full((self.width, self.height,3), 0)
+        self.floor_tile_colours[:,:] = list(tile_colour)
+
+        # Make a column with random walkable middle areas
         for x in range(1,self.width-1):
-            self.walkable[x, 2+ random.randint(0,5):self.height-2 - random.randint(0,5)] = 1
+            other_walkable[x, 2+ random.randint(0,5):self.height-2 - random.randint(0,5)] = 1
 
+        # Make row with random non-walkable edges
         for y in range(2,self.height-4):
-            self.walkable[:random.randint(0,5),y] = 0
-            self.walkable[random.randint(-5, -1):, y] = 0
+            other_walkable[:random.randint(0,5),y] = 0
+            other_walkable[random.randint(-5, -1):, y] = 0
 
-        # Convert walkable to array of bools
-        self.walkable = self.walkable > 0
+        # Logical OR of current walkablr grid and teh random cave grid
+        self.walkable = np.logical_or(self.walkable, other_walkable)
 
     def reveal_map(self, only_exit = False):
         """

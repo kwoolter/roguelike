@@ -376,8 +376,8 @@ class MainFrame(View):
 
         HP_status_bar_width = 48
         hp_pct = hp / max_hp
-        full_bar_text = chr(195) + chr(196) * HP_status_bar_width + chr(185)
-        bar_text = chr(205) * (int(hp_pct * HP_status_bar_width)) + chr(185)
+        full_bar_text = chr(195) + chr(196) * HP_status_bar_width + chr(180)
+        bar_text = chr(204) + chr(205) * (int(hp_pct * HP_status_bar_width)) + chr(185)
         hp_text = f'HP={hp}/{max_hp}'
 
         libtcod.console_set_default_foreground(0,libtcod.dark_grey)
@@ -396,11 +396,13 @@ class MainFrame(View):
             bg = libtcod.darkest_green
         '''
 
-        fg = libtcod.Color(int(255*(1-hp_pct)), int(255*hp_pct),10)
+        fg = libtcod.Color(int(255 * (1 - hp_pct)), int(255 * hp_pct), 10)
         bg = dim_rgb(fg, 100)
-        libtcod.console_set_default_foreground(0,fg)
-        libtcod.console_set_default_background(0, bg)
-        libtcod.console_print_ex(0, x+1, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
+
+        if hp > 0:
+            libtcod.console_set_default_foreground(0,fg)
+            libtcod.console_set_default_background(0, bg)
+            libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
 
         libtcod.console_set_default_foreground(0, dim_rgb(fg,-50))
         libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=hp_text)
