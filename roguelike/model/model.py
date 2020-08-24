@@ -347,8 +347,11 @@ class Floor():
 
         # Build a map of the floor
         self.build_floor_map()
+
+        # Randomly use cavern floor layout
         if random.randint(0,10) > 8:
             self.build_floor_cave(tile_colour= random.choice(valid_room_colours))
+            self.map_rooms = [self.first_room, self.last_room]
 
         self.entities_added = len(self.entities)
 
@@ -1087,16 +1090,17 @@ class Floor():
         self.floor_tile_colours = np.full((self.width, self.height,3), 0)
         self.floor_tile_colours[:,:] = list(tile_colour)
 
-        # Make a column with random walkable middle areas
+        # Make a column with random walkable middle areas and some random non-walkable points
         for x in range(1,self.width-1):
             other_walkable[x, 2+ random.randint(0,5):self.height-2 - random.randint(0,5)] = 1
+            other_walkable[x] = np.logical_and(other_walkable[x], random.choices([0,1],[10,90], k=self.height))
 
         # Make row with random non-walkable edges
         for y in range(2,self.height-4):
             other_walkable[:random.randint(0,5),y] = 0
             other_walkable[random.randint(-5, -1):, y] = 0
 
-        # Logical OR of current walkablr grid and teh random cave grid
+        # Logical OR of current walkable grid and the random cave grid
         self.walkable = np.logical_or(self.walkable, other_walkable)
 
     def reveal_map(self, only_exit = False):
