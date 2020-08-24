@@ -219,6 +219,7 @@ class MainFrame(View):
 
         # Clear the root console
         self.con.default_bg = libtcod.black
+        libtcod.console_set_default_background(0,libtcod.black)
         libtcod.console_clear(0)
 
         cx, cy = self.center
@@ -356,15 +357,46 @@ class MainFrame(View):
                              ffade=1, bfade=1)
 
         # Draw the status line
+        x=0
+        y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 2
+
         ac = self.game.player.fighter.get_defence("AC")
-        status = f'F={self.game.dungeon_level} HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} AC={ac} '
+        hp = self.game.player.get_property("HP")
+        max_hp = self.game.player.fighter.get_max_HP()
+        status = f'F={self.game.dungeon_level} AC={ac} '
         stats = ["DEX", "INT", "XP", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
             status += f'{stat}={stat_value} '
 
         so = ScreenString(text=status, fg=libtcod.lightest_grey, alignment=libtcod.LEFT)
-        so.render(0, x=0, y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 1)
+        so.render(0, x=x, y=y)
+
+        y +=1
+
+        HP_status_bar_width = 48
+        hp_pct = hp / max_hp
+        full_bar_text = chr(204) + chr(205) * HP_status_bar_width + chr(185)
+        bar_text = chr(204) + chr(205) * int(hp_pct * HP_status_bar_width) + chr(185)
+        hp_text = f'HP={hp}/{max_hp}'
+
+        libtcod.console_set_default_foreground(0,libtcod.dark_grey)
+        libtcod.console_set_default_background(0, libtcod.darkest_grey)
+        libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=full_bar_text)
+
+        if hp_pct < 0.25:
+            fg = libtcod.dark_red
+            bg = libtcod.darkest_red
+        elif hp_pct < 0.5:
+            fg = libtcod.dark_yellow
+            bg=libtcod.darkest_yellow
+        else:
+            fg = libtcod.dark_green
+            bg = libtcod.darkest_green
+        libtcod.console_set_default_foreground(0,fg)
+        libtcod.console_set_default_background(0, bg)
+        libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
+        libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=hp_text)
 
         libtcod.console_flush()
 

@@ -30,7 +30,7 @@ class Controller():
         self.model.initialise()
         self.events = self.model.events
 
-        self.view = view.MainFrame(50,65)
+        self.view = view.MainFrame(50,66)
         self.view.initialise(self.model)
         self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
