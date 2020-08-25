@@ -464,7 +464,7 @@ class FloorView(View):
             if (x, y) in fov_cells:
 
                 # Get how much we should dim the tile colour based on distance from player
-                a = int(self.floor.get_fov_light_attenuation(x, y, 45))
+                a = int(self.floor.get_fov_light_attenuation(x, y, 40))
 
                 # Lit path
                 if (x, y) in walkable_cells:

@@ -411,6 +411,10 @@ class Floor():
         self.move_player(0, 0)
         #self.entities.append(self.player)
 
+        # Update FOV range with the player's combat class sight range
+        self.fov_radius = new_player.combat_class.get_property("SightRange")
+        self.fov_radius2 = self.fov_radius**2
+
         # Point all bots at the player!!!!
         for bot in self.bots:
             bot.set_instructions(new_target=self.player)
@@ -1214,7 +1218,9 @@ class Floor():
 
 
     def tick(self):
-
+        """
+        Do a tick on this Floor
+        """
         dead_bots = []
 
         # Tick all bots and collect any dead ones
@@ -2153,10 +2159,11 @@ class AIBotTracker(AIBot):
             self.failed_ticks = 0
             return success
 
-        # See if we are close enough to the target and
+        # See if we are close enough to the target given the target's DEX abilities and
         # Check that there is a direct path to it i.e. bot is in current FOV
         d = self.distance_to_target(self.target_entity)
-        target_in_range = d <= self.sight_range
+        target_dex_modifier = self.target_entity.fighter.get_property_modifier("DEX")
+        target_in_range = d <= max(4,self.sight_range - target_dex_modifier)
         target_in_sight = self.bot_entity.xy in self.floor.get_fov_cells()
 
         # If we can attack it....
@@ -2188,7 +2195,8 @@ class AIBotTracker(AIBot):
             # If we moved and are still in sight of the target then all good
             success = (bx,by) != self.bot_entity.xy or target_in_range
 
-            print(f'{self.bot_entity.name}: "I can see you {self.target_entity.name}"')
+            print(f'{self.bot_entity.name}: "I can see you {self.target_entity.name} at d={d} with my range={self.sight_range} and your dex={target_dex_modifier}"')
+
 
         if self._debug is True and self.failed_ticks >0:
             print("Failed {0} vs. limit {1}".format(self.failed_ticks, self.failed_ticks_limit   ))
