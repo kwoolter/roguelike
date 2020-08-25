@@ -422,16 +422,28 @@ class MainFrame(View):
 
 
 class FloorView(View):
+
+    # fg,bg,lit_path,lit_wall,explored_path,explored_wall
+    FLOOR_THEME = {
+        "default": ["white", "black", "darker_yellow", "darkest_yellow", "darker_grey", "darkest_grey"],
+        "Dungeon": ["white", "black", "darker_yellow", "darkest_yellow", "darker_grey", "darkest_grey"],
+        "Desert": ["light_grey", "lighter_sepia", "lighter_blue", "lighter_sepia", "dark_sepia", "darker_sepia"],
+        "Swamp": ["light_lime", "light_lime", "lighter_lime", "lime", "dark_chartreuse", "darker_chartreuse"]
+    }
+
     def __init__(self, width: int, height: int, fg=libtcod.white, bg=libtcod.black):
         super().__init__(width=width, height=height)
 
-        # Appearance of the view content
-        self.fg = fg
-        self.bg = bg
-        self.bg_lit_path = libtcod.darker_yellow
-        self.bg_lit_wall = libtcod.darkest_yellow
-        self.bg_explored_path = libtcod.Color(45, 45, 45)
-        self.bg_explored_wall = libtcod.Color(15, 15, 15)
+
+        # Appearance of the view content - HACKING
+        theme = tuple(map(model.text_to_color,FloorView.FLOOR_THEME["default"] ))
+
+        self.fg, \
+        self.bg, \
+        self.bg_lit_path, \
+        self.bg_lit_wall, \
+        self.bg_explored_path, \
+        self.bg_explored_wall = theme
 
         # Model Floor that we are going to render
         self.floor = None
@@ -440,8 +452,23 @@ class FloorView(View):
         self.con = None
 
     def initialise(self, floor: model.Floor):
+        """
+        Initialise the FloorView
+        :param floor: the Floor object that we are going to display in the view
+        """
         # Connect the view to the model
         self.floor = floor
+
+        # Appearance of the view content
+        theme = tuple(map(model.text_to_color,FloorView.FLOOR_THEME[self.floor.theme]))
+
+        self.fg, \
+        self.bg, \
+        self.bg_lit_path, \
+        self.bg_lit_wall, \
+        self.bg_explored_path, \
+        self.bg_explored_wall = theme
+
 
         # Create a new console to draw on
         self.con = libtcod.console_new(self.width, self.height)

@@ -12,3 +12,4 @@ from . combat import CombatEquipment
 from . combat import CombatEquipmentFactory
 from . combat import CombatClass
 from . combat import CombatClassFactory
+from . entity_factory import text_to_color

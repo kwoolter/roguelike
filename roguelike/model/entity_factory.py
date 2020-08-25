@@ -272,7 +272,7 @@ class Fighter():
 
     @property
     def is_dead(self) -> bool:
-        return self.combat_class.get_property("HP") < 0
+        return self.combat_class.get_property("HP") <= 0
 
     @property
     def current_weapon(self) -> Entity:

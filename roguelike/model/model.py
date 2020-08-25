@@ -1,6 +1,7 @@
 import collections
-import operator
 import copy
+import operator
+
 import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
@@ -50,9 +51,14 @@ class Tunnel:
     DIRECTION_H_V = "HV"
     DIRECTIONS = (DIRECTION_V_H, DIRECTION_H_V)
 
-    def __init__(self, start_pos, end_pos, direction=None, fg=libtcod.white, bg=libtcod.black):
+    STYLE_STRAIGHT = "straight"
+    STYLE_STRAIGHT_FAT = "straight_fat"
+    STYLE_CURVED = "curved"
+
+    def __init__(self, start_pos, end_pos, direction=None, fg=libtcod.white, bg=libtcod.black, style=STYLE_STRAIGHT):
         self.start_pos = start_pos
         self.end_pos = end_pos
+        self.style = style
         self.fg = fg
         self.bg = bg
 
@@ -149,14 +155,46 @@ class Room:
 
 class Floor():
 
-    ROOM_COLOURS = ["darker_yellow",
+    ROOM_THEMES = {
+        "default": ["darker_yellow",
                     "desaturated_amber",
                     "desaturated_orange",
                     "desaturated_flame",
                     "desaturated_lime",
                     "desaturated_chartreuse",
                     "grey",
-                    "sepia_light"]
+                    "sepia_light"],
+
+        "Dungeon": ["darker_yellow",
+                    "desaturated_amber",
+                    "desaturated_orange",
+                    "desaturated_flame",
+                    "desaturated_lime",
+                    "desaturated_chartreuse",
+                    "grey",
+                    "sepia_light"],
+
+        "Desert": ["brass",
+                   "gold",
+                   "silver",
+                   "lightest_yellow",
+                   "lightest_grey"
+                   "lightest_sepia"],
+
+        "Swamp": ["darker_lime",
+                   "daker_green",
+                   "darker_sea",
+                   "darker_yellow"]
+    }
+
+    ROOM_COLOURS = ROOM_THEMES["Desert"]
+
+    TUNNEL_THEME = {
+        "default":libtcod.dark_grey,
+        "Dungeon":libtcod.dark_grey,
+        "Desert": libtcod.sepia,
+        "Swamp": libtcod.dark_green,
+    }
 
     ROOM_NAMES = ("the Guard Room", "the Equipment Store", "a stone chamber", "the Armoury", "the Sleeping Quarters",
                   "the Crypt of Hollows", "the Kitchen", "the Torture Room", "the Wizard's Laboratory", "the Ossuary",
@@ -173,10 +211,13 @@ class Floor():
 
     EMPTY_TILE = "Empty"
 
-    def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
+    def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, theme:str = "default", params = None):
 
         # Properties of this floor
         self.name = name
+        self.theme = random.choice(list(Floor.ROOM_THEMES.keys()))
+        Floor.ROOM_COLOURS = Floor.ROOM_THEMES[self.theme]
+
         self.width = width
         self.height = height
         self.level = level
@@ -294,9 +335,12 @@ class Floor():
                 valid_room_colours.append(lc)
 
         # List of floor tile colours that can be randomly assigned to a Tunnel
-        valid_tunnel_colours = []
-        for i in range(80,100,5):
-            valid_tunnel_colours.append(libtcod.Color(i,i,i))
+        tunnel_colour= Floor.TUNNEL_THEME[self.theme]
+        valid_tunnel_colours = [tunnel_colour]
+        for i in range(0,50,5):
+            # Make the colour even darker!
+            tunnel_colour = dim_rgb(list(tunnel_colour), 5)
+            valid_tunnel_colours.append(tunnel_colour)
 
         # Define initial values for the first and last room
         self.last_room = None
@@ -2145,7 +2189,10 @@ class AIBotTracker(AIBot):
         self.sight_range = self.combat_class.get_property("SightRange")
 
     def tick(self):
-
+        """
+        Tick this Bot
+        :return:
+        """
         success = False
 
         # If it's not our turn or
