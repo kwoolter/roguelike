@@ -13,6 +13,7 @@ from .entity_factory import text_to_color
 from .events import Event
 from .game_parameters import GameParameters
 
+from .themes import ThemeManager
 
 def dim_rgb(rgb, dc: int):
     """
@@ -70,7 +71,7 @@ class Tunnel:
     def print(self):
         print(f'Tunnel running from {self.start_pos} to {self.end_pos} using {self.direction}')
 
-    def get_segments(self):
+    def get_segments(self)->list:
         segments = []
 
         start_x, start_y = self.start_pos
@@ -84,6 +85,39 @@ class Tunnel:
 
         for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
             segments.append((vx, y))
+
+        return segments
+
+    def get_segments_direct(self)->list:
+
+        segments = []
+
+        start_x, start_y = self.start_pos
+        end_x, end_y = self.end_pos
+
+        w = end_x - start_x
+        h = end_y - start_y
+
+        if w == 0 :
+            dx = 0
+        else:
+            dx = w / abs(w)
+
+
+        if h == 0:
+            dy = 0
+        else:
+            dy = h / w
+
+        x = start_x
+        y = start_y
+        for i in range(abs(w)):
+            segments.append((int(x),int(y)))
+            #segments.append((int(x), int(y-1)))
+            x+=dx
+            y+=dy
+
+
 
         return segments
 
@@ -155,40 +189,6 @@ class Room:
 
 class Floor():
 
-    ROOM_THEMES = {
-        "default": ["darker_yellow",
-                    "desaturated_amber",
-                    "desaturated_orange",
-                    "desaturated_flame",
-                    "desaturated_lime",
-                    "desaturated_chartreuse",
-                    "grey",
-                    "sepia_light"],
-
-        "Dungeon": ["darker_yellow",
-                    "desaturated_amber",
-                    "desaturated_orange",
-                    "desaturated_flame",
-                    "desaturated_lime",
-                    "desaturated_chartreuse",
-                    "grey",
-                    "sepia_light"],
-
-        "Desert": ["brass",
-                   "gold",
-                   "silver",
-                   "lightest_yellow",
-                   "lightest_grey"
-                   "lightest_sepia"],
-
-        "Swamp": ["darker_lime",
-                   "daker_green",
-                   "darker_sea",
-                   "darker_yellow"]
-    }
-
-    ROOM_COLOURS = ROOM_THEMES["Desert"]
-
     TUNNEL_THEME = {
         "default":libtcod.dark_grey,
         "Dungeon":libtcod.dark_grey,
@@ -196,27 +196,14 @@ class Floor():
         "Swamp": libtcod.dark_green,
     }
 
-    ROOM_NAMES = ("the Guard Room", "the Equipment Store", "a stone chamber", "the Armoury", "the Sleeping Quarters",
-                  "the Crypt of Hollows", "the Kitchen", "the Torture Room", "the Wizard's Laboratory", "the Ossuary",
-                  "the Wine Cellar", "The Food Store" , "a dank cell", "the Shrine to the Chaos God",
-                  "the Shrine to the Fire Goddess", "the Library", "the Room of Scrolls",
-                  "the Inner Temple", "the Merchant's Quarter", "the Spice Store", "the Blacksmith's Workshop",
-                  "the Combat Training Room", "the Chamber of the Evil Eye", "the Hall of Echoes",
-                  "the Chamber of the High Priest", "the Annex of the Dead", "the Hall of Statues", "the Crypt of Eternity",
-                  "the Throne Room", "the Altar of Shadows", "the Weaponry", "the Tomb of Lords",
-                  "the Temple of Effigies", "the Forgotten Vault", "the Mausoleum of the Forgotten Prince", "the Catacombs",
-                  "the Archives", "the Shrine of Relics", "Room of Lost Manuscripts", "the Apothecaries Workshop",
-                  "the Antechamber", "the Soul Forge", "the Cloisters of Time", "the Sanctum of the Snake God",
-                  "the Alchemist's Workshop", "the Pit of Rats","the Tomb of the Leper King", "the Basement")
-
     EMPTY_TILE = "Empty"
 
     def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, theme:str = "default", params = None):
 
         # Properties of this floor
         self.name = name
-        self.theme = random.choice(list(Floor.ROOM_THEMES.keys()))
-        Floor.ROOM_COLOURS = Floor.ROOM_THEMES[self.theme]
+        self.theme = random.choice(list(ThemeManager.themes))
+        self.room_colours = ThemeManager.get_room_colours_by_theme(self.theme)
 
         self.width = width
         self.height = height
@@ -327,7 +314,7 @@ class Floor():
 
         # List of floor tile colours that can be randomly assigned to a Room
         valid_room_colours = []
-        for c in Floor.ROOM_COLOURS:
+        for c in self.room_colours:
             lc = text_to_color(c)
             if lc is not None:
                 # Make the colour even darker!
@@ -335,7 +322,7 @@ class Floor():
                 valid_room_colours.append(lc)
 
         # List of floor tile colours that can be randomly assigned to a Tunnel
-        tunnel_colour= Floor.TUNNEL_THEME[self.theme]
+        tunnel_colour = text_to_color(ThemeManager.get_tunnel_colour_by_theme(self.theme))
         valid_tunnel_colours = [tunnel_colour]
         for i in range(0,50,5):
             # Make the colour even darker!
@@ -350,11 +337,10 @@ class Floor():
         for i in range(self.room_count):
 
             # Create a new room of random name, size and tile colour
-            random_colour = random.choice(valid_room_colours)
-            new_room = Room(name=random.choice(Floor.ROOM_NAMES),
+            new_room = Room(name=ThemeManager.get_random_room_name_by_theme(self.theme),
                             w=random.randint(self.room_min_size, self.room_max_size),
                             h=random.randint(self.room_min_size, self.room_max_size),
-                            bg=random_colour)
+                            bg=dim_rgb(text_to_color(ThemeManager.get_random_room_colour_by_theme(self.theme)),35))
 
             # If we were able to add the room to the map...
             if self.add_map_room(new_room) is True:
@@ -394,7 +380,7 @@ class Floor():
 
         # Randomly use cavern floor layout
         if random.randint(0,10) > 8:
-            self.build_floor_cave(tile_colour= random.choice(valid_room_colours))
+            self.build_floor_cave(tile_colour= text_to_color(ThemeManager.get_random_room_colour_by_theme(self.theme)))
             self.map_rooms = [self.first_room, self.last_room]
 
         self.entities_added = len(self.entities)
@@ -1097,7 +1083,6 @@ class Floor():
         # Start with no fg and bg colours specified
         self.floor_tile_colours = np.full((self.width, self.height, 3), 0)
 
-
         # Make floor walkable where tunnels are and store the floor tile colour
         for tunnel in self.map_tunnels:
             for sx, sy in tunnel.get_segments():
@@ -1361,6 +1346,9 @@ class Model():
         """
 
         # Load game data from specified files
+        ThemeManager.load_room_names("room_names.csv")
+        ThemeManager.load_room_colour_palettes("room_palettes.csv")
+        ThemeManager.load_floor_colour_palettes("floor_palettes.csv")
         GameParameters.load("game_parameters.csv")
         EntityFactory.load("entities.csv")
         AbilityChecksFactory.load("ability_checks.csv")
