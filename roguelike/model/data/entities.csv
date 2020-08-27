@@ -7,7 +7,7 @@ Lightning Scroll,a magic lightning scroll,~,Combat,black,yellow,4,TRUE,TRUE,TRUE
 Poison Scroll,a magic poison scroll,~,Combat,pink,darker_magenta,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
 Spear,a wooden spear,I,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,0
 Sword,a short sword,\,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
-War Hammer,a mighty War Hammer,T,Combat,darkest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,32
+War Hammer,a mighty War Hammer,T,Combat,darkest_grey,,4,TRUE,TRUE,FALSE,TRUE,,TRUE,FALSE,FALSE,32
 Goblin,an evil Goblin,g,Enemy,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Orc,a small green Orc,o,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Spider,a large spider,*,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
@@ -42,14 +42,16 @@ Silver,a silver coin,$,Object,white,silver,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FAL
 Copper,a copper coin,$,Object,light_orange,copper,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Key,a small key,?,Object,copper,,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,15
 Locked Chest,a locked wooden chest,X,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Hidden Exit,a hidden secret passageway,+,Object,black,darkest_yellow,4,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Locked Down Stairs,a locked entrance,v,Object,red,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Pillar,a stone pillar,+,Object,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Room,a room,O,Object,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Shop,a shop,S,Object,grey,black,9,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Trap,a hidden trap,*,Object,yellow,red,2,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Hidden Trap,a hidden trap, ,Object,,,2,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Trap,a metal trap,*,Object,yellow,red,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-NPC,a strange man,K,Player,yellow,,1,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+NPC,a stranger,@,Player,darker_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Player,the player,@,Player,grey,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Small Bubbling Potion,a bottle of bubbling potion,P,Potion,sky,fuchsia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Small Green Potion,a bottle of green potion,P,Potion,lightest_grey,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
@@ -110,3 +112,25 @@ Sword+1,a sword +1,\,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FAL
 Sword+1+1,a sword +2,\,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,200
 Crate,a wooden crate,C,Object,red,dark_red,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Barrel,an oak barrel,O,Object,red,dark_red,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Nature Item,a nature item,?,Object,darkest_green,,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Empty,an empty tile, ,Object,,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Healing Herbs,some healing herbs,+,Object,dark_green,,2,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,10
+Red Mushroom,a red mushroom,+,Object,dark_red,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Blue Mushroom,a blue mushroom,+,Object,dark_blue,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Boulder,a large boulder,O,Object,grey,,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Rock,a small rock,o,Object,grey,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Floorboard,a loose floorboard,|,Object,,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Nature Trap,a nature trap,?,Object,dark_sea,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Tile,a cracked tile,+,Object,,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Tomb,a tomb stone,+,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Plaque,an inscribed plaque,~,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Shrine,a small shrine,*,Object,dark_red,darker_red,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Altar,a stone altar,-,Object,darker_yellow,darker_cyan,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Casket,an ornate casket,%,Object,brass,gold,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Box,a strong wooden box,:,Object,sepia,dark_sepia,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Lever,a rusty metal lever,\,Object,brass,,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Ruby,a dark red ruby gemstone,.,Object,dark_red,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,50
+Emerald,a green emerald gemstone,.,Object,dark_green,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
+Sapphire,a blue sapphire gemstone,.,Object,blue,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
+Amethyst,an amethyst gemstone,.,Object,light_fuchsia,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
+Onyx,a black onyx gemstone,.,Object,black,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25

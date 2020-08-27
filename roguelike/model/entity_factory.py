@@ -110,6 +110,9 @@ class Entity():
     def get_property(self, property_name: str):
         return self.properties.get(property_name)
 
+    def set_property(self, property_name: str, new_value):
+        self.properties.update({property_name: new_value})
+
     def move(self, dx: int, dy: int):
         self.x += dx
         self.y += dy
@@ -156,8 +159,12 @@ class Player(Entity):
         self.inventory = Inventory(max_items=Player.MAX_INVENTORY_ITEMS)
 
     @property
-    def combat_class(self):
+    def combat_class_name(self):
         return self.fighter.combat_class.name
+
+    @property
+    def combat_class(self):
+        return self.fighter.combat_class
 
     def get_property(self, property_name: str):
         value = self.properties.get(property_name)
@@ -184,6 +191,10 @@ class Player(Entity):
     def heal(self, heal_amount: int):
         if self.fighter is not None:
             self.fighter.heal(heal_amount=heal_amount)
+
+    def take_damage(self, damage_amount: int):
+        if self.fighter is not None:
+            self.fighter.take_damage(damage_amount)
 
     def equip_item(self, new_item: Entity, slot=None) -> bool:
 
@@ -261,7 +272,7 @@ class Fighter():
 
     @property
     def is_dead(self) -> bool:
-        return self.combat_class.get_property("HP") < 0
+        return self.combat_class.get_property("HP") <= 0
 
     @property
     def current_weapon(self) -> Entity:
@@ -431,8 +442,8 @@ class Fighter():
 
         # If no new item is being equipped then remove existing item from the slot
         if new_item is None:
-            del self.equipment[slot]
-
+            if slot is not None and slot in self.equipment:
+                del self.equipment[slot]
         else:
 
             # Get the CombatClass details of the new item
@@ -453,13 +464,11 @@ class Fighter():
                         print(f'Can not equip offhand slot with 2H weapon {main_hand.name}')
                         success = False
 
-            # If trying to equip a 2H weapon in main hand then unequip off hand item
-            elif slot == Fighter.WEAPON_SLOT:
-                if new_eq.get_property("HANDS") == "2H":
-                    self.equip_item(None, Fighter.OFF_HAND)
-                    print(f'Unequipped offhand item {new_item.description}')
+            # Else If trying to equip a 2H weapon in main hand then unequip off hand item
+            elif slot == Fighter.WEAPON_SLOT and new_eq.get_property("HANDS") == "2H":
+                self.equip_item(None, Fighter.OFF_HAND)
 
-            # If good to go the slot with the new item
+            # If good to go then equip slot with the new item
             if success is True:
                 self.equipment[slot] = new_item
 

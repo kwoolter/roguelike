@@ -1,9 +1,8 @@
 import math
 from pathlib import Path
-import textwrap
+
 import roguelike.model as model
 from .view_utils import *
-
 
 class View():
     events = None
@@ -67,11 +66,11 @@ class MainFrame(View):
                                           fg=libtcod.white,
                                           bg=libtcod.black,
                                           border_fg=libtcod.dark_green,
-                                          border_bg = libtcod.darkest_green)
+                                          border_bg=libtcod.darkest_green)
 
         self.inventory_view = InventoryView(width=int(self.width - 2),
                                             height=50,
-                                            #fg=libtcod.lightest_yellow,
+                                            # fg=libtcod.lightest_yellow,
                                             fg=libtcod.dark_sepia,
                                             bg=libtcod.lightest_sepia,
                                             border_bg=libtcod.sepia,
@@ -101,7 +100,6 @@ class MainFrame(View):
         self.text_entry = TextEntryBox()
         self.frame1 = None
 
-
     @property
     def mode(self):
         return self._mode
@@ -121,10 +119,10 @@ class MainFrame(View):
         self.game = model
 
         # Create the Game title Banner text
-        self.game_name = chr(206)+chr(205)*2 + "  "
+        self.game_name = chr(206) + chr(205) * 2 + "  "
         for c in self.game.name:
             self.game_name += f'{c} '
-        self.game_name += chr(205)*2 + chr(206) + " "
+        self.game_name += chr(205) * 2 + chr(206) + " "
 
         font_file_specs = {
             "arial10x10.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
@@ -135,10 +133,10 @@ class MainFrame(View):
         }
 
         font_file = "polyducks_12x12.png"
-        #font_file = "dejavu_wide16x16_gs_tc.png"
-        #font_file = "arial10x10.png"
-        #font_file = "dundalk12x12_gs_tc.png"
-        #font_file = "terminal8x12_gs_ro.png"
+        # font_file = "dejavu_wide16x16_gs_tc.png"
+        # font_file = "arial10x10.png"
+        # font_file = "dundalk12x12_gs_tc.png"
+        # font_file = "terminal8x12_gs_ro.png"
 
         # Create path for the file that we are going to load
         data_folder = Path(__file__).resolve().parent
@@ -156,7 +154,7 @@ class MainFrame(View):
         # Initialise the root console
         libtcod.console_init_root(self.width,
                                   self.height,
-                                  title = self.game.name,
+                                  title=self.game.name,
                                   fullscreen=False)
 
         # Create a console for the Mainframe
@@ -178,23 +176,24 @@ class MainFrame(View):
         self.character_creation_view.initialise(self.game)
 
         w = self.width
-        h=self.height
-        cx,cy = self.center
-        instructions = ("U:1|R:1|" * 4) + ("R:1|D:1|" * 3) +  f'R:{cx+4}|' + ("U:1|R:1|"*3)  + ("R:1|D:1|" * 4) + f"D:{cy-10}|"
-        instructions += ("d:1|L:1|")*4 + ("l:1|U:1|") * 3 + f"l:{cx+4}|" + ("d:1|l:1|"*3) + ("l:1|u:1|"*4) + f'U:{cy-10}'
-        instructions += f"|d:{cy-21}|l:2|R:{cx+22}"
+        h = self.height
+        cx, cy = self.center
+        instructions = ("U:1|R:1|" * 4) + ("R:1|D:1|" * 3) + f'R:{cx + 4}|' + ("U:1|R:1|" * 3) + (
+                    "R:1|D:1|" * 4) + f"D:{cy - 10}|"
+        instructions += ("d:1|L:1|") * 4 + ("l:1|U:1|") * 3 + f"l:{cx + 4}|" + ("d:1|l:1|" * 3) + (
+                    "l:1|u:1|" * 4) + f'U:{cy - 10}'
+        instructions += f"|d:{cy - 21}|l:2|R:{cx + 22}"
         frame_template = Boxes.turtle_to_box(instructions)
         self.frame1 = Boxes.array_to_border(frame_template, border_type=ShopView.BORDER_TYPE2)
 
     def set_mode(self, new_mode: str):
         self.mode = new_mode
 
-
     def process_event(self, new_event: model.Event):
 
         super().process_event(new_event)
 
-        #print(str(new_event))
+        # print(str(new_event))
 
         if new_event.type == model.Event.GAME:
             if new_event.name == model.Event.GAME_NEW_FLOOR:
@@ -219,6 +218,7 @@ class MainFrame(View):
 
         # Clear the root console
         self.con.default_bg = libtcod.black
+        libtcod.console_set_default_background(0,libtcod.black)
         libtcod.console_clear(0)
 
         cx, cy = self.center
@@ -309,7 +309,7 @@ class MainFrame(View):
             # Draw box with current game mode
             fg = libtcod.dark_orange
             bg = libtcod.darkest_red
-            bw = int(self.width *3/4) + 1
+            bw = int(self.width * 3 / 4) + 1
             bh = 5
             bx = int((self.width - bw) / 2)
             by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT + 10
@@ -335,7 +335,7 @@ class MainFrame(View):
             bw = len(panel_text) + 3
             bh = 5
             bx = int((self.width - bw) / 2)
-            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - bh +3
+            by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - bh + 3
             box = Boxes.get_box(bw, bh, border_type=Boxes.BORDER_TYPE_1)
             bo = ScreenObject2DArray(box, fg=fg, bg=bg)
             bo.render(0, bx, by)
@@ -343,7 +343,7 @@ class MainFrame(View):
             so = ScreenString(panel_text,
                               fg=fg,
                               bg=libtcod.black)
-            so.render(0, int(self.width/2), by + 2, alignment=libtcod.CENTER)
+            so.render(0, int(self.width / 2), by + 2, alignment=libtcod.CENTER)
 
         # Blit the message panel
         self.message_panel.draw()
@@ -356,17 +356,55 @@ class MainFrame(View):
                              ffade=1, bfade=1)
 
         # Draw the status line
+        x=0
+        y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 2
+
         ac = self.game.player.fighter.get_defence("AC")
-        status = f'F={self.game.dungeon_level} HP={self.game.player.get_property("HP")}/{self.game.player.fighter.get_max_HP()} AC={ac} '
+        hp = self.game.player.get_property("HP")
+        max_hp = self.game.player.fighter.get_max_HP()
+        status = f'F={self.game.dungeon_level} AC={ac} '
         stats = ["DEX", "INT", "XP", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
             status += f'{stat}={stat_value} '
 
         so = ScreenString(text=status, fg=libtcod.lightest_grey, alignment=libtcod.LEFT)
-        so.render(0, x=0, y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 1)
+        so.render(0, x=x, y=y)
 
+        y +=1
 
+        HP_status_bar_width = 48
+        hp_pct = hp / max_hp
+        full_bar_text = chr(195) + chr(196) * HP_status_bar_width + chr(180)
+        bar_text = chr(204) + chr(205) * (int(hp_pct * HP_status_bar_width)) + chr(185)
+        hp_text = f'HP={hp}/{max_hp}'
+
+        libtcod.console_set_default_foreground(0,libtcod.dark_grey)
+        libtcod.console_set_default_background(0, libtcod.darkest_grey)
+        libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=full_bar_text)
+
+        '''
+        if hp_pct < 0.25:
+            fg = libtcod.dark_red
+            bg = libtcod.darkest_red
+        elif hp_pct < 0.5:
+            fg = libtcod.dark_yellow
+            bg=libtcod.darkest_yellow
+        else:
+            fg = libtcod.dark_green
+            bg = libtcod.darkest_green
+        '''
+
+        fg = libtcod.Color(int(255 * (1 - hp_pct)), int(255 * hp_pct), 10)
+        bg = dim_rgb(fg, 100)
+
+        if hp > 0:
+            libtcod.console_set_default_foreground(0,fg)
+            libtcod.console_set_default_background(0, bg)
+            libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
+
+        libtcod.console_set_default_foreground(0, dim_rgb(fg,-50))
+        libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=hp_text)
 
         libtcod.console_flush()
 
@@ -383,16 +421,11 @@ class MainFrame(View):
 
 
 class FloorView(View):
+
+
+
     def __init__(self, width: int, height: int, fg=libtcod.white, bg=libtcod.black):
         super().__init__(width=width, height=height)
-
-        # Appearance of the view content
-        self.fg = fg
-        self.bg = bg
-        self.bg_lit_path = libtcod.darker_yellow
-        self.bg_lit_wall = libtcod.darkest_yellow
-        self.bg_explored_path = libtcod.Color(45, 45, 45)
-        self.bg_explored_wall = libtcod.Color(15, 15, 15)
 
         # Model Floor that we are going to render
         self.floor = None
@@ -401,8 +434,25 @@ class FloorView(View):
         self.con = None
 
     def initialise(self, floor: model.Floor):
+        """
+        Initialise the FloorView
+        :param floor: the Floor object that we are going to display in the view
+        """
         # Connect the view to the model
         self.floor = floor
+
+        # Appearance of the view content
+        theme_data = model.ThemeManager.get_floor_colours_by_theme(self.floor.theme)
+        theme = tuple(map(model.text_to_color,theme_data ))
+
+        # fg,bg,lit_path,lit_wall,explored_path,explored_wall
+        self.fg, \
+        self.bg, \
+        self.bg_lit_path, \
+        self.bg_lit_wall, \
+        self.bg_explored_path, \
+        self.bg_explored_wall = theme
+
 
         # Create a new console to draw on
         self.con = libtcod.console_new(self.width, self.height)
@@ -425,7 +475,7 @@ class FloorView(View):
             if (x, y) in fov_cells:
 
                 # Get how much we should dim the tile colour based on distance from player
-                a = int(self.floor.get_fov_light_attenuation(x, y, 45))
+                a = int(self.floor.get_fov_light_attenuation(x, y, 40))
 
                 # Lit path
                 if (x, y) in walkable_cells:
@@ -470,18 +520,21 @@ class FloorView(View):
         if len(fov_entities) > 0:
             entities = sorted(fov_entities, key=lambda x: x.get_property("Zorder"), reverse=True)
             for e in entities:
+                if e.name == model.Floor.EMPTY_TILE or (e.bg is None and e.fg is None):
+                    continue
+
                 x, y = e.xy
                 bg = e.bg
                 try:
                     # Get how much we should dim the entity colour based on distance from player
                     a = int(self.floor.get_fov_light_attenuation(x, y, 80))
-                    fg = dim_rgb(e.fg, a*3)
+                    fg = dim_rgb(e.fg, a * 3)
                     libtcod.console_set_default_foreground(self.con, fg)
                     libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
                     if bg is not None:
                         bg = dim_rgb(bg, a)
                         libtcod.console_set_char_background(self.con, x, y, bg)
-                except e:
+                except Exception as e:
                     print("Problem drawing {e.name} {e.fg} {e.bg}")
                     print(e)
 
@@ -544,7 +597,7 @@ class MessagePanel(View):
         # Prune the length of the messages that we are looking to display
         self.clear_messages(self.height)
 
-    def clear_messages(self, count = None):
+    def clear_messages(self, count=None):
         """
         Prune the number of messages that we are looking to display
         Args:
@@ -553,7 +606,7 @@ class MessagePanel(View):
         if count is None:
             self.messages = []
         else:
-            self.messages = self.messages[0-count:]
+            self.messages = self.messages[0 - count:]
 
     def draw(self):
 
@@ -575,7 +628,7 @@ class MessagePanel(View):
                 break
 
             # Text wrap each message and print each line in the message
-            lines = textwrap.wrap(message, self.width -2)
+            lines = textwrap.wrap(message, self.width - 2)
             for line in lines:
                 # If we have run out of space then stop
                 if y > self.height - 2:
@@ -590,7 +643,6 @@ class MessagePanel(View):
 
                 # Move to the next line in the message panel
                 y += 1
-
 
 
 class InventoryView(View):
@@ -723,8 +775,16 @@ class InventoryView(View):
         else:
             fg = self.equipped_item_fg
             for slot, item in equipment.items():
+
                 # Print each item that is equipped and in which slot
                 text = f'{slot}: {item.description}'
+
+                # Special logic for 2 handed weapons equipped in main hand
+                if slot == model.Fighter.WEAPON_SLOT:
+                    ce = self.character.fighter.current_weapon_details
+                    if ce.get_property("HANDS") == "2H":
+                        text = f'Both Hands: {item.description}'
+
                 so = ScreenString(text,
                                   fg=fg,
                                   bg=self.bg,
@@ -744,13 +804,13 @@ class InventoryView(View):
             # Draw the coin icon and current value held
             try:
                 libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
-                self.con.print(x+1, y, f'{coin_value:<2}', fg=self.fg, bg=None)
+                self.con.print(x + 1, y, f'{coin_value:<2}', fg=self.fg, bg=None)
             except Exception:
                 print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
-            x+= 4
+            x += 4
 
-        y+=2
+        y += 2
 
         # Draw a divider
         divider.render(self.con, 0, y)
@@ -807,6 +867,12 @@ class InventoryView(View):
                     fg = self.equipped_item_fg
                     bg = self.bg
 
+                    # Special logic for 2 handed weapons equipped in main hand
+                    if slot == model.Fighter.WEAPON_SLOT:
+                        ce = self.character.fighter.current_weapon_details
+                        if ce.get_property("HANDS") == "2H":
+                            text = f'Both Hands: {item.description}'
+
                 # Otherwise default colours
                 else:
                     bg = self.bg
@@ -835,13 +901,13 @@ class InventoryView(View):
                     else:
                         libtcod.console_set_char_background(self.con, 2, y, libtcod.light_gray)
                 except Exception:
-                    print("Problem drawing {e.name} {e.fg} {e.bg}")
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
                 y += 1
 
             self.con.default_fg = self.fg
-            self.con.hline(1,y,self.width-2)
-            y+=1
+            self.con.hline(1, y, self.width - 2)
+            y += 1
 
             # Then Draw all of the stackable items...
             for i, (item, count) in enumerate(inventory_stackable.items()):
@@ -887,7 +953,7 @@ class InventoryView(View):
                     else:
                         libtcod.console_set_char_background(self.con, 2, y, libtcod.light_gray)
                 except Exception:
-                    print("Problem drawing {e.name} {e.fg} {e.bg}")
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
                 y += 1
 
@@ -918,9 +984,7 @@ class InventoryView(View):
                 so.render(self.con, 1, y)
 
 
-
 class ShopView(View):
-
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
 
@@ -942,7 +1006,7 @@ class ShopView(View):
         self.sell_fg = libtcod.dark_red
         self.buy_fg = libtcod.darker_green
         self.title_bg = dim_rgb(self.bg, -20)
-        self.tab_off_bg = dim_rgb(self.bg,40)
+        self.tab_off_bg = dim_rgb(self.bg, 40)
         self.equipped_item_fg = libtcod.desaturated_chartreuse
 
         self.mode = ShopView.MODE_SELL
@@ -977,11 +1041,11 @@ class ShopView(View):
         h = self.height - 4
         th = 4
 
-        sell_border_instructions = f'U:{th}|R:{cx - 3}|D:{h-1}|L:{w-1}|U:{h-1}|r:{cx-3}|d:{th}|r:{cx+1}'
+        sell_border_instructions = f'U:{th}|R:{cx - 3}|D:{h - 1}|L:{w - 1}|U:{h - 1}|r:{cx - 3}|d:{th}|r:{cx + 1}'
         sell_border_template = Boxes.turtle_to_box(sell_border_instructions)
         self.sell_border = Boxes.array_to_border(sell_border_template, border_type=ShopView.BORDER_TYPE2)
 
-        buy_border_instructions = f'U:{th}|L:{cx - 3}|D:{h-1}|R:{w-1}|U:{h-1}|L:{cx-3}|d:{th}|L:{cx+1}'
+        buy_border_instructions = f'U:{th}|L:{cx - 3}|D:{h - 1}|R:{w - 1}|U:{h - 1}|L:{cx - 3}|d:{th}|L:{cx + 1}'
         buy_border_template = Boxes.turtle_to_box(buy_border_instructions)
         self.buy_border = Boxes.array_to_border(buy_border_template, border_type=ShopView.BORDER_TYPE2)
 
@@ -1019,7 +1083,8 @@ class ShopView(View):
             # Change the selection of the item in chosen category that you want to buy
             category = self.buy_item_categories[self.selected_buy_item_category]
             self.selected_buy_item_by_category[category] += dy
-            self.selected_buy_item = min(max(0,self.selected_buy_item_by_category[category]), len(self.category_to_entity[category]) - 1)
+            self.selected_buy_item = min(max(0, self.selected_buy_item_by_category[category]),
+                                         len(self.category_to_entity[category]) - 1)
 
         # If we are in SELL mode...
         elif self.mode == ShopView.MODE_SELL:
@@ -1073,7 +1138,7 @@ class ShopView(View):
 
         so.render(self.con, cx, y)
 
-        y+=4
+        y += 4
 
         # Draw the BUY and SELL tabs based on current mode
 
@@ -1083,19 +1148,19 @@ class ShopView(View):
 
             # Colour the SELL tab background
             self.con.default_bg = self.bg
-            self.con.rect(0, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+            self.con.rect(0, y - 2, cx - 2, 5, False, libtcod.BKGND_SET)
 
             # Colour the buy tab background
             self.con.default_bg = self.tab_off_bg
-            self.con.rect(cx+2, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+            self.con.rect(cx + 2, y - 2, cx - 2, 5, False, libtcod.BKGND_SET)
         else:
             fg = dim_rgb(fg, 30)
             bg = self.tab_off_bg
 
         # Print the sell tab label
         side = "S E L L"
-        so = ScreenString(f"{side:^16}", fg=fg, bg=bg,alignment=libtcod.CENTER)
-        so.render(self.con, int(x=cx/2)-1, y=y)
+        so = ScreenString(f"{side:^16}", fg=fg, bg=bg, alignment=libtcod.CENTER)
+        so.render(self.con, int(x=cx / 2) - 1, y=y)
 
         # BUY mode processing
         fg = self.buy_fg
@@ -1104,22 +1169,21 @@ class ShopView(View):
 
             # draw the Buy tab in bright colours
             self.con.default_bg = self.bg
-            self.con.rect(cx+2, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+            self.con.rect(cx + 2, y - 2, cx - 2, 5, False, libtcod.BKGND_SET)
 
             # draw the Sell tab in darker colours
             self.con.default_bg = self.tab_off_bg
-            self.con.rect(0, y-2, cx-2, 5, False, libtcod.BKGND_SET)
+            self.con.rect(0, y - 2, cx - 2, 5, False, libtcod.BKGND_SET)
 
         else:
             fg = dim_rgb(fg, 30)
             bg = self.tab_off_bg
 
-
         side = "B U Y"
-        so = ScreenString(f"{side:^16}",fg=fg, bg=bg,alignment=libtcod.CENTER)
-        so.render(self.con, x=int(cx*3/2)+1, y=y)
+        so = ScreenString(f"{side:^16}", fg=fg, bg=bg, alignment=libtcod.CENTER)
+        so.render(self.con, x=int(cx * 3 / 2) + 1, y=y)
 
-        y+=3
+        y += 3
 
         # If we are in SELL item mode
         if self.mode == ShopView.MODE_SELL:
@@ -1129,7 +1193,7 @@ class ShopView(View):
             # Draw the items that are in your inventory that can be sold...
             for i, sell_item in enumerate(self.sell_list):
 
-                e=sell_item
+                e = sell_item
 
                 fg = self.fg
                 bg = self.bg
@@ -1138,10 +1202,10 @@ class ShopView(View):
                     fg = self.equipped_item_fg
 
                 if i == self.selected_sell_item:
-                    fg,bg = bg,fg
+                    fg, bg = bg, fg
                     self.selected_sell_item_entity = sell_item
 
-                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^30}',
+                self.con.print_box(padding, y, self.width - padding * 2, 1, f'{e.description:^30}',
                                    fg=fg,
                                    bg=bg,
                                    alignment=libtcod.CENTER)
@@ -1149,7 +1213,7 @@ class ShopView(View):
                 # Draw the coloured character of the item
                 bg = e.bg
                 fg = e.fg
-                x=padding
+                x = padding
                 try:
                     libtcod.console_set_default_foreground(self.con, fg)
                     libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
@@ -1167,9 +1231,9 @@ class ShopView(View):
                     coins = model.Inventory.value_to_gsb_coin_text(item_value)
                     for coin, count in coins.items():
                         if count > 0:
-                            e=model.EntityFactory.get_entity_by_name(coin)
+                            e = model.EntityFactory.get_entity_by_name(coin)
                             libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
-                            self.con.print(x+1, y, f'{count}', fg=self.fg, bg=None)
+                            self.con.print(x + 1, y, f'{count}', fg=self.fg, bg=None)
                             x += 1 + len(str(count))
 
                 except Exception:
@@ -1183,13 +1247,13 @@ class ShopView(View):
         # We are in BUY item mode
         elif self.mode == ShopView.MODE_BUY:
 
-            y+=1
+            y += 1
 
             # Draw the category selection buttons
             category_count = len(self.buy_item_categories)
-            button_width = int((self.width-padding)/category_count) - 1
+            button_width = int((self.width - padding) / category_count) - 1
 
-            for i,category in enumerate(self.buy_item_categories):
+            for i, category in enumerate(self.buy_item_categories):
                 if i == self.selected_buy_item_category:
                     selected_category = self.buy_item_categories[i]
                     fg = self.fg
@@ -1220,10 +1284,10 @@ class ShopView(View):
                 bg = self.bg
 
                 if i == self.selected_buy_item:
-                    fg,bg = bg,fg
+                    fg, bg = bg, fg
                     self.selected_buy_item_entity = buy_item
 
-                self.con.print_box(padding, y, self.width-padding*2, 1, f'{e.description:^30}',
+                self.con.print_box(padding, y, self.width - padding * 2, 1, f'{e.description:^30}',
                                    fg=fg,
                                    bg=bg,
                                    alignment=libtcod.CENTER)
@@ -1231,7 +1295,7 @@ class ShopView(View):
                 # Draw the coloured icon of the item
                 bg = e.bg
                 fg = e.fg
-                x=padding
+                x = padding
                 try:
                     libtcod.console_set_default_foreground(self.con, fg)
                     libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
@@ -1249,9 +1313,9 @@ class ShopView(View):
                     coins = model.Inventory.value_to_gsb_coin_text(item_value)
                     for coin, count in coins.items():
                         if count > 0:
-                            e=model.EntityFactory.get_entity_by_name(coin)
+                            e = model.EntityFactory.get_entity_by_name(coin)
                             libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
-                            self.con.print(x+1, y, f'{count}', fg=self.fg, bg=None)
+                            self.con.print(x + 1, y, f'{count}', fg=self.fg, bg=None)
                             x += 1 + len(str(count))
 
                 except Exception:
@@ -1262,8 +1326,8 @@ class ShopView(View):
             so = ScreenObject2DArray(self.buy_border, fg=self.border_fg, bg=self.border_bg)
             so.render(self.con, 0, 4)
 
-        x=cx-2
-        y=4
+        x = cx - 2
+        y = 4
 
         # Print what coins you are holding
         coins = self.game.player.inventory.get_coins()
@@ -1272,11 +1336,11 @@ class ShopView(View):
             # Draw the coin icon and current value held
             try:
                 libtcod.console_put_char_ex(self.con, x, y, e.char, fore=e.fg, back=e.bg)
-                self.con.print(x+1, y, f'{coin_value:.>3}', fg=self.fg, bg=None)
+                self.con.print(x + 1, y, f'{coin_value:.>3}', fg=self.fg, bg=None)
             except Exception:
                 print(f"Problem drawing {e.name} {e.fg} {e.bg}")
 
-            y+=1
+            y += 1
 
         y = self.height - 5
 
@@ -1312,7 +1376,6 @@ class ShopView(View):
                 so.render(self.con, 1, y)
 
 
-
 class CharacterView(View):
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
@@ -1332,7 +1395,7 @@ class CharacterView(View):
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
-        self.other_stats = ('XP', 'Level', 'HP')
+        self.other_stats = ('XP', 'Level', 'HP', "SightRange")
         self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
 
         # Components
@@ -1341,14 +1404,12 @@ class CharacterView(View):
         self.character = None
         self.selected_item = -1
 
-
     def initialise(self, game: model.Model):
 
         self.game = game
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
-
 
     def process_event(self, new_event: model.Event):
         pass
@@ -1510,8 +1571,6 @@ class CharacterView(View):
         y += 2
 
         equipment = self.character.fighter.equipment
-        equipment_to_slot = {v: k for k, v in equipment.items()}
-        equipped_item = self.character.fighter.current_item
 
         # If nothing equipped then say so
         if len(equipment) == 0:
@@ -1520,7 +1579,7 @@ class CharacterView(View):
             so = ScreenStringRect(text,
                                   width=self.width - 2,
                                   height=self.height - 2,
-                                  fg=libtcod.light_yellow,
+                                  fg=self.fg,
                                   bg=self.bg,
                                   alignment=libtcod.CENTER)
 
@@ -1529,23 +1588,27 @@ class CharacterView(View):
 
         # Else loop through the equipment...
         else:
-            fg = self.fg
-            bg= self.bg
             for slot, item in equipment.items():
+
                 # Print each item that is equipped and in which slot
                 text = f'{slot}: {item.description}'
+
+                # Special logic for 2 handed weapons equipped in main hand
+                if slot == model.Fighter.WEAPON_SLOT:
+                    ce = self.character.fighter.current_weapon_details
+                    if ce.get_property("HANDS") == "2H":
+                        text = f'Both Hands: {item.description}'
+
                 so = ScreenString(text,
-                                  fg=fg,
-                                  bg=bg,
+                                  fg=self.fg,
+                                  bg=self.bg,
                                   alignment=libtcod.CENTER)
 
                 so.render(self.con, cx, y)
                 y += 1
 
-        y += 1
 
 class CreateCharacterView(View):
-    
     MODE_DISPLAY_CHARACTER = "display_character"
     MODE_NAME_PICK = "name_pick"
     MODE_CLASS_PICK = "class_pick"
@@ -1575,18 +1638,17 @@ class CreateCharacterView(View):
 
         self.character_view = CharacterView(width=self.width - 4,
                                             height=40,
-                                            fg=dim_rgb(self.fg,30),
-                                            bg=dim_rgb(self.bg,30),
+                                            fg=dim_rgb(self.fg, 30),
+                                            bg=dim_rgb(self.bg, 30),
                                             border_bg=border_bg,
                                             border_fg=border_fg)
 
-        
         self.class_picker = ItemPickerView(width=self.width,
-                                            height=self.height,
-                                            fg=libtcod.white,
-                                            bg=libtcod.black,
-                                            border_bg=border_bg,
-                                            border_fg=border_fg)
+                                           height=self.height,
+                                           fg=libtcod.white,
+                                           bg=libtcod.black,
+                                           border_bg=border_bg,
+                                           border_fg=border_fg)
 
         self.text_entry = None
 
@@ -1595,7 +1657,7 @@ class CreateCharacterView(View):
 
         self.character = self.game.player
         self.character_name = self.character.name
-        self.character_class = self.character.fighter.combat_class.name
+        self.character_class = self.character.combat_class_name
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
@@ -1604,7 +1666,7 @@ class CreateCharacterView(View):
         self.character_view.initialise(self.game)
 
         available_classes = model.CombatClassFactory.get_playable_classes()
-        self.class_picker.initialise("Choose Combat Class:",available_classes )
+        self.class_picker.initialise("Choose Combat Class:", available_classes)
 
         self.text_entry = TextEntryBox(width=20, parent=self.con)
 
@@ -1615,7 +1677,7 @@ class CreateCharacterView(View):
         if self.mode == CreateCharacterView.MODE_CLASS_PICK:
             self.class_picker.change_selection(d)
 
-    def get_selected_class(self)->str:
+    def get_selected_class(self) -> str:
         return self.class_picker.get_selected_item()
 
     def clear_messages(self):
@@ -1654,20 +1716,19 @@ class CreateCharacterView(View):
         y += 2
 
         if self.mode == CreateCharacterView.MODE_NAME_PICK:
-            text_entry = TextEntryBox(width=20, parent=self.con, xpos=8, ypos = 6)
-            #text_entry = TextEntryBox(width=20, parent=0, xpos=8, ypos=6)
+            text_entry = TextEntryBox(width=20, parent=self.con, xpos=8, ypos=6)
+            # text_entry = TextEntryBox(width=20, parent=0, xpos=8, ypos=6)
             self.character_name = text_entry.get_text(max_length=20)
             self.character.name = self.character_name
             self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
 
         elif self.mode == CreateCharacterView.MODE_CLASS_PICK:
             self.class_picker.draw()
-            y+=2
+            y += 2
             libtcod.console_blit(self.class_picker.con,
                                  0, 0, self.class_picker.width, self.class_picker.height,
-                                 self.con, int((self.width - self.class_picker.width)/2), y)
+                                 self.con, int((self.width - self.class_picker.width) / 2), y)
             return
-            
 
         text = f'Name: {self.character_name}'
 
@@ -1720,7 +1781,7 @@ class ItemPickerView(View):
         self.selected_item = -1
         self.border = None
 
-    def initialise(self, title: str, item_list : list):
+    def initialise(self, title: str, item_list: list):
 
         self.title = title
         self.item_list = item_list
@@ -1782,11 +1843,11 @@ class ItemPickerView(View):
         # Print the items tha the user can choose from
         for i, item in enumerate(self.item_list):
             # Print each item that is equipped and in which slot
-            text = f'{i+1}: {item}'
+            text = f'{i + 1}: {item}'
             fg = self.fg
             bg = self.bg
             if i == self.selected_item:
-                fg,bg = bg, fg
+                fg, bg = bg, fg
             so = ScreenString(text,
                               fg=fg,
                               bg=bg,
@@ -1810,6 +1871,8 @@ class EventView(View):
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
                             model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),
+                            model.Event.GAIN_HEALTH: (libtcod.green, libtcod.darker_green),
+                            model.Event.LOSE_HEALTH: (libtcod.yellow, libtcod.darkest_yellow),
                             model.Event.LEVEL_UP_AVAILABLE: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.PLAYER_DEAD: (libtcod.red, None)
                             }

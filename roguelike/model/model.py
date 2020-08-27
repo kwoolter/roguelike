@@ -1,6 +1,7 @@
 import collections
-import operator
 import copy
+import operator
+
 import numpy as np
 import pygame.rect as rect
 import tcod as libtcod
@@ -12,6 +13,7 @@ from .entity_factory import text_to_color
 from .events import Event
 from .game_parameters import GameParameters
 
+from .themes import ThemeManager
 
 def dim_rgb(rgb, dc: int):
     """
@@ -50,9 +52,14 @@ class Tunnel:
     DIRECTION_H_V = "HV"
     DIRECTIONS = (DIRECTION_V_H, DIRECTION_H_V)
 
-    def __init__(self, start_pos, end_pos, direction=None, fg=libtcod.white, bg=libtcod.black):
+    STYLE_STRAIGHT = "straight"
+    STYLE_STRAIGHT_FAT = "straight_fat"
+    STYLE_CURVED = "curved"
+
+    def __init__(self, start_pos, end_pos, direction=None, fg=libtcod.white, bg=libtcod.black, style=STYLE_STRAIGHT):
         self.start_pos = start_pos
         self.end_pos = end_pos
+        self.style = style
         self.fg = fg
         self.bg = bg
 
@@ -64,7 +71,7 @@ class Tunnel:
     def print(self):
         print(f'Tunnel running from {self.start_pos} to {self.end_pos} using {self.direction}')
 
-    def get_segments(self):
+    def get_segments(self)->list:
         segments = []
 
         start_x, start_y = self.start_pos
@@ -78,6 +85,39 @@ class Tunnel:
 
         for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
             segments.append((vx, y))
+
+        return segments
+
+    def get_segments_direct(self)->list:
+
+        segments = []
+
+        start_x, start_y = self.start_pos
+        end_x, end_y = self.end_pos
+
+        w = end_x - start_x
+        h = end_y - start_y
+
+        if w == 0 :
+            dx = 0
+        else:
+            dx = w / abs(w)
+
+
+        if h == 0:
+            dy = 0
+        else:
+            dy = h / w
+
+        x = start_x
+        y = start_y
+        for i in range(abs(w)):
+            segments.append((int(x),int(y)))
+            #segments.append((int(x), int(y-1)))
+            x+=dx
+            y+=dy
+
+
 
         return segments
 
@@ -149,32 +189,22 @@ class Room:
 
 class Floor():
 
-    ROOM_COLOURS = ["darker_yellow",
-                    "desaturated_amber",
-                    "desaturated_orange",
-                    "desaturated_flame",
-                    "desaturated_lime",
-                    "desaturated_chartreuse",
-                    "grey",
-                    "sepia_light"]
+    TUNNEL_THEME = {
+        "default":libtcod.dark_grey,
+        "Dungeon":libtcod.dark_grey,
+        "Desert": libtcod.sepia,
+        "Swamp": libtcod.dark_green,
+    }
 
-    ROOM_NAMES = ("the Guard Room", "the Equipment Store", "a stone chamber", "the Armoury", "the Sleeping Quarters",
-                  "the Crypt of Hollows", "the Kitchen", "the Torture Room", "the Wizard's Laboratory", "the Ossuary",
-                  "the Wine Cellar", "The Food Store" , "a dank cell", "the Shrine to the Chaos God",
-                  "the Shrine to the Fire Goddess", "the Library", "the Room of Scrolls",
-                  "the Inner Temple", "the Merchant's Quarter", "the Spice Store", "the Blacksmith's Workshop",
-                  "the Combat Training Room", "the Chamber of the Evil Eye", "the Hall of Echoes",
-                  "the Chamber of the High Priest", "the Annex of the Dead", "the Hall of Statues", "the Crypt of Eternity",
-                  "the Throne Room", "the Altar of Shadows", "the Weaponry", "the Tomb of Lords",
-                  "the Temple of Effigies", "the Forgotten Vault", "the Mausoleum of the Forgotten Prince", "the Catacombs",
-                  "the Archives", "the Shrine of Relics", "Room of Lost Manuscripts", "the Apothecaries Workshop",
-                  "the Antechamber", "the Soul Forge", "the Cloisters of Time", "the Sanctum of the Snake God",
-                  "the Alchemist's Workshop", "the Pit of Rats","the Tomb of the Leper King", "the Basement")
+    EMPTY_TILE = "Empty"
 
-    def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, params = None):
+    def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, theme:str = "default", params = None):
 
         # Properties of this floor
         self.name = name
+        self.theme = random.choice(list(ThemeManager.themes))
+        self.room_colours = ThemeManager.get_room_colours_by_theme(self.theme)
+
         self.width = width
         self.height = height
         self.level = level
@@ -284,7 +314,7 @@ class Floor():
 
         # List of floor tile colours that can be randomly assigned to a Room
         valid_room_colours = []
-        for c in Floor.ROOM_COLOURS:
+        for c in self.room_colours:
             lc = text_to_color(c)
             if lc is not None:
                 # Make the colour even darker!
@@ -292,9 +322,12 @@ class Floor():
                 valid_room_colours.append(lc)
 
         # List of floor tile colours that can be randomly assigned to a Tunnel
-        valid_tunnel_colours = []
-        for i in range(80,100,5):
-            valid_tunnel_colours.append(libtcod.Color(i,i,i))
+        tunnel_colour = text_to_color(ThemeManager.get_tunnel_colour_by_theme(self.theme))
+        valid_tunnel_colours = [tunnel_colour]
+        for i in range(0,50,5):
+            # Make the colour even darker!
+            tunnel_colour = dim_rgb(list(tunnel_colour), 5)
+            valid_tunnel_colours.append(tunnel_colour)
 
         # Define initial values for the first and last room
         self.last_room = None
@@ -304,11 +337,10 @@ class Floor():
         for i in range(self.room_count):
 
             # Create a new room of random name, size and tile colour
-            random_colour = random.choice(valid_room_colours)
-            new_room = Room(name=random.choice(Floor.ROOM_NAMES),
+            new_room = Room(name=ThemeManager.get_random_room_name_by_theme(self.theme),
                             w=random.randint(self.room_min_size, self.room_max_size),
                             h=random.randint(self.room_min_size, self.room_max_size),
-                            bg=random_colour)
+                            bg=dim_rgb(text_to_color(ThemeManager.get_random_room_colour_by_theme(self.theme)),35))
 
             # If we were able to add the room to the map...
             if self.add_map_room(new_room) is True:
@@ -345,6 +377,11 @@ class Floor():
 
         # Build a map of the floor
         self.build_floor_map()
+
+        # Randomly use cavern floor layout
+        if random.randint(0,10) > 8:
+            self.build_floor_cave(tile_colour= text_to_color(ThemeManager.get_random_room_colour_by_theme(self.theme)))
+            self.map_rooms = [self.first_room, self.last_room]
 
         self.entities_added = len(self.entities)
 
@@ -403,6 +440,10 @@ class Floor():
         self.player.xy = (x, y)
         self.move_player(0, 0)
         #self.entities.append(self.player)
+
+        # Update FOV range with the player's combat class sight range
+        self.fov_radius = new_player.combat_class.get_property("SightRange")
+        self.fov_radius2 = self.fov_radius**2
 
         # Point all bots at the player!!!!
         for bot in self.bots:
@@ -584,8 +625,8 @@ class Floor():
         moved = self.move_entity(self.player, dx, dy, relative)
         if moved is True:
 
-            # Recalculate their current FOV
-            self.recompute_fov()
+            # Recalculate their current FOV using sight radius of combat class
+            self.recompute_fov(radius = self.player.fighter.combat_class.get_property("SightRange"))
 
             # See if we found something?
             e = self.get_entity_at_pos(self.player.xy)
@@ -703,10 +744,10 @@ class Floor():
         """
         Swap an entity on the floor with a new entity
         :param old_entity: the entity that you want to swap out
-        :param new_entity: the new entity that uyou want to replace it with. Default is None which means remove the old entity
+        :param new_entity: the new entity that you want to replace it with. Default is None which means remove the old entity
         """
         if old_entity in self.entities:
-            if new_entity is not None:
+            if new_entity is not None and new_entity.name != Floor.EMPTY_TILE:
                 new_entity.xy = old_entity.xy
                 self.entities.append(new_entity)
             self.entities.remove(old_entity)
@@ -809,65 +850,143 @@ class Floor():
                       description=f"{attacker.description.capitalize()} swings at {target.description} and misses!"))
 
     def run_ability_check(self, e:Entity):
+        """
+        See if there any ability checks for the specified object and run them
+        :param e:
+        :return:
+        """
 
         success = False
-        checks = AbilityChecksFactory.get_entity_ability_checks(e.name)
-        ability = random.choice(list(checks.keys()))
-        check = checks.get(ability)
-        ability_modifier = self.player.fighter.get_property_modifier(check.ability)
 
+        # See of there any ability checks for the specified Entity
+        checks = AbilityChecksFactory.get_entity_ability_checks(e.name)
+
+        # If there are more than one type of check for this entity...
+        if len(checks) > 1:
+
+            # Build a list to see which ability check we are most likely to succeed at...
+            stats = []
+            for ability, check in checks.items():
+                # Get the ability modifier that is appropriate for the ability check
+                ability_modifier = self.player.fighter.get_property_modifier(check.ability)
+                stats.append((ability, check.difficulty_value - ability_modifier))
+
+            stats.sort(key=operator.itemgetter(1))
+            print(stats)
+            # Pick the ability that has the lowest diffculty score
+            ability, score = stats[0]
+            print(f'Chosen check = {stats[0]}')
+
+        elif len(checks) == 1:
+            ability = list(checks.keys())[0]
+        else:
+            ability = "NONE"
+
+        check = checks.get(ability)
+
+        # If we found an ability check....
         if check is not None:
 
-            self.events.add_event(Event(type=Event.GAME,
-                                        name=Event.ACTION_SUCCEEDED,
-                                        description=check.description))
+            print(str(check))
+            # Make this entity non-checkable going forward!
+            # You get one go at attempting the check!
+            e.set_property("IsCheckable", False)
 
-            success = check.attempt(ability_modifier)
-            if success is True:
+            # Get the ability modifier that is appropriate for the ability check
+            ability_modifier = self.player.fighter.get_property_modifier(check.ability)
+
+            # Print the description of the check
+            if check.description is not None:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
-                                            description=check.success))
+                                            description=check.description))
 
-                if check.reward is not None:
-                    self.swap_entity(e, check.reward)
+            # Attempt the ability check
+            success = check.attempt(ability_modifier)
 
-                    self.events.add_event(Event(type=Event.GAME,
-                                                name=Event.EFFECT_ITEM_DISCOVERY,
-                                                description=f'You find {check.reward.description}'))
+            # If we succeeded...
+            if success is True:
+
+                # Print success message
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=check.success_msg))
+
+                # See if we got a reward item
+                if check.success_reward is not None:
+                    self.swap_entity(e, check.success_reward)
+
+                    if check.success_reward != Floor.EMPTY_TILE:
+                        self.events.add_event(Event(type=Event.GAME,
+                                                    name=Event.EFFECT_ITEM_DISCOVERY,
+                                                    description=f'You find {check.success_reward.description}'))
+
+                # Update any stats with any rewards
+                for stat, value in check.success_stats.items():
+                    if stat == "HP":
+                        if value > 0:
+                            self.player.heal(value)
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.GAIN_HEALTH,
+                                      description=f"You recover {value} HP"))
+                        else:
+                            self.player.take_damage(value)
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.LOSE_HEALTH,
+                                      description=f"You lose {abs(value)} some HP"))
+                    elif stat == "XP":
+                        self.player.fighter.add_XP(value)
+                        self.events.add_event(
+                            Event(type=Event.GAME,
+                                  name=Event.ACTION_GAIN_XP,
+                                  description=f"You gain {value} XP"))
+                    else:
+                        print(f'get reward {stat}={value} but did nothing!')
+
 
             # If ability check failed...
             else:
+
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_FAILED,
-                                            description=check.failure))
+                                            description=check.failure_msg))
+
+                # See if we got a failure reward item
+                if check.failure_reward is not None:
+                    self.swap_entity(e, check.failure_reward)
+
+                # Update any stats with any failure rewards
+                for stat, value in check.failure_stats.items():
+                    if stat == "HP":
+                        if value > 0:
+                            self.player.heal(value)
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.GAIN_HEALTH,
+                                      description=f"You recover {value} HP"))
+                        else:
+                            self.player.take_damage(abs(value))
+                            self.events.add_event(
+                                Event(type=Event.GAME,
+                                      name=Event.LOSE_HEALTH,
+                                      description=f"You lose {abs(value)} HP"))
+                    elif stat == "XP":
+                        self.player.fighter.add_XP(value)
+                        self.events.add_event(
+                            Event(type=Event.GAME,
+                                  name=Event.ACTION_GAIN_XP,
+                                  description=f"You gain {value} XP"))
+                    else:
+                        print(f'get reward {stat}={value} but did nothing!')
+
+
+        # No ability checks found for this Entity
         else:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description="Nothing happens"))
-
-
-        '''
-        # Do a STR ability check....
-        if self.player.fighter.roll_ability_check(ability="STR", difficulty=random.choice(["Easy", "Medium"])):
-
-            # See what happens if you use the item....
-            success, effect = self.item_user.process(e, self)
-
-            if success is True:
-                self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_SUCCEEDED,
-                                            description=f"{effect}"))
-            else:
-                self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_FAILED,
-                                            description=f"{effect}"))
-
-        # If ability check failed...
-        else:
-            self.events.add_event(Event(type=Event.GAME,
-                                        name=Event.ACTION_FAILED,
-                                        description=f"Nothing happens."))
-        '''
 
         return success
 
@@ -978,6 +1097,44 @@ class Floor():
 
         # Convert walkable to array of bools
         self.walkable = self.walkable > 0
+
+    def build_floor_cave(self, tile_colour, reset:bool = False):
+        """
+        Build arrays the represent different properties of each floor til in the Floor.  The arrays are:-
+        - walkable - can you walk on a tile?
+        - explored - have you seen this tile yet?
+        - floor_tile_colours - the colour of each floor tile
+        """
+        assert self.first_room in self.map_rooms
+        assert self.last_room in self.map_rooms
+
+        # Rest everything if requested to
+        if reset is True:
+
+            # Start with nothing explored!
+            self.explored = np.zeros((self.width, self.height), dtype=bool)
+
+            # Start with nothing walkable!
+            self.walkable = np.zeros((self.width, self.height))
+
+        other_walkable = np.zeros((self.width, self.height))
+
+        # Start with no fg and bg colours specified then populate with specified tile colour
+        self.floor_tile_colours = np.full((self.width, self.height,3), 0)
+        self.floor_tile_colours[:,:] = list(tile_colour)
+
+        # Make a column with random walkable middle areas and some random non-walkable points
+        for x in range(1,self.width-1):
+            other_walkable[x, 2+ random.randint(0,5):self.height-2 - random.randint(0,5)] = 1
+            other_walkable[x] = np.logical_and(other_walkable[x], random.choices([0,1],[10,90], k=self.height))
+
+        # Make row with random non-walkable edges
+        for y in range(2,self.height-4):
+            other_walkable[:random.randint(0,5),y] = 0
+            other_walkable[random.randint(-5, -1):, y] = 0
+
+        # Logical OR of current walkable grid and the random cave grid
+        self.walkable = np.logical_or(self.walkable, other_walkable)
 
     def reveal_map(self, only_exit = False):
         """
@@ -1090,7 +1247,9 @@ class Floor():
 
 
     def tick(self):
-
+        """
+        Do a tick on this Floor
+        """
         dead_bots = []
 
         # Tick all bots and collect any dead ones
@@ -1187,6 +1346,9 @@ class Model():
         """
 
         # Load game data from specified files
+        ThemeManager.load_room_names("room_names.csv")
+        ThemeManager.load_room_colour_palettes("room_palettes.csv")
+        ThemeManager.load_floor_colour_palettes("floor_palettes.csv")
         GameParameters.load("game_parameters.csv")
         EntityFactory.load("entities.csv")
         AbilityChecksFactory.load("ability_checks.csv")
@@ -1331,9 +1493,9 @@ class Model():
         class_equipment = new_player.fighter.get_property("StartingEquipment").split(",")
 
         for item in class_equipment:
-            eq = EntityFactory.get_entity_by_name(item)
+            eq = EntityFactory.get_entity_by_name(item.strip())
             new_player.take_item(eq)
-            new_player.fighter.equip_item(eq)
+            new_player.equip_item(eq)
 
         # Give the player their class items and some basic items
         class_items = new_player.fighter.get_property("StartingItems").split(",")
@@ -1341,7 +1503,7 @@ class Model():
         starting_items = class_items + base_items
 
         for item in starting_items:
-            eq = EntityFactory.get_entity_by_name(item)
+            eq = EntityFactory.get_entity_by_name(item.strip())
             new_player.take_item(eq)
 
         # Give the Player some money
@@ -1350,7 +1512,6 @@ class Model():
             eq = EntityFactory.get_entity_by_name(c)
             for i in range(v):
                 new_player.take_item(eq)
-
 
         new_player.level_up()
 
@@ -1361,7 +1522,7 @@ class Model():
 
         self.events.add_event(Event(type=Event.GAME,
                                     name=Event.GAME_NEW_PLAYER,
-                                    description=f"{self.player.combat_class} {self.player.name} joined {self.name}!"))
+                                    description=f"{self.player.combat_class_name} {self.player.name} joined {self.name}!"))
 
         if self.current_floor is not None:
             self.current_floor.add_player(self.player)
@@ -1617,35 +1778,41 @@ class Model():
 
         return success
 
-    def use_item(self, new_item : Entity = None)->bool:
+    def use_item(self, selected_item : Entity = None)->bool:
         """
         Attempt to use a specified item. Default is to use item in Item Slot
-        :param new_item:
+        :param selected_item:
         :return:
         """
-        use_equipped_item = new_item is None
+        use_equipped_item = selected_item is None
         
         success = False
 
         # No item specified so get the current equipped item
         if use_equipped_item is True:
-            new_item = self.player.fighter.current_item
+            selected_item = self.player.fighter.current_item
 
 
         # If we haven't got an item to use then fail
-        if new_item is None:
+        if selected_item is None:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"You don't have an item equipped to use!"))
 
+        # If the item is not interactable then fail
+        elif selected_item.get_property("IsInteractable") == False:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You can't use {selected_item.description}!"))
+
         # Try and use the item equipped...
         else:
 
-            success, effect = self.item_user.process(new_item, self.current_floor)
+            success, effect = self.item_user.process(selected_item, self.current_floor)
 
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_SUCCEEDED,
-                                        description=f"You use {new_item.description}"))
+                                        description=f"You use {selected_item.description}"))
 
             if success is True:
                 self.events.add_event(Event(type=Event.GAME,
@@ -1659,7 +1826,7 @@ class Model():
         if success is True:
             if use_equipped_item is True:
                 self.player.equip_item(None, slot=Fighter.ITEM_SLOT)
-            self.player.drop_item(new_item)
+            self.player.drop_item(selected_item)
 
         return success
 
@@ -1733,7 +1900,14 @@ class ItemUser():
     def initialise(self):
 
         # What HP does an Entity give you?
-        self.HP_increase = {"Food": 5, "Small Green Potion": 10, "Small Red Potion": 15, "Healing Scroll": 20, "Small Purple Potion": -10}
+        self.HP_increase = {"Food": 5,
+                            "Small Green Potion": 10,
+                            "Small Red Potion": 15,
+                            "Healing Scroll": 20,
+                            "Small Purple Potion": -10,
+                            "Healing Herbs" : 5,
+                            "Red Mushroom" : 5,
+                            "Blue Mushroom": -5}
 
         # What can you swap an entity for?
         self.entity_swaps = {"Locked Chest":("Silver", "Food", "Small Green Potion", "Helmet", "Weapon Upgrade"),
@@ -1981,6 +2155,7 @@ class AIBotTracker(AIBot):
 
         super().__init__(str(__class__), bot_entity, floor, tick_slow_factor)
 
+        self.combat_class = None
         self.target_entity = None
         self.navigator = None
         self.failed_ticks = 0
@@ -1989,18 +2164,23 @@ class AIBotTracker(AIBot):
     def __str__(self):
 
         text = f"{self.name}: Bot {self.bot_entity.name} at {self.bot_entity.xy}:"
+        if self.combat_class is not None:
+            text+= f'range:{self.sight_range} '
         if self.target_entity is not None:
             text += f'target:{self.target_entity.name}'
 
         return text
 
-    def set_instructions(self, new_target: Entity, sight_range: int = 5, loop: bool = True):
+    def set_instructions(self, new_target: Entity):
         self.target_entity = new_target
-        self.sight_range = sight_range
-        self.loop = loop
+        self.combat_class = CombatClassFactory.get_combat_class_by_name(self.bot_entity.name)
+        self.sight_range = self.combat_class.get_property("SightRange")
 
     def tick(self):
-
+        """
+        Tick this Bot
+        :return:
+        """
         success = False
 
         # If it's not our turn or
@@ -2014,11 +2194,12 @@ class AIBotTracker(AIBot):
             self.failed_ticks = 0
             return success
 
-        # See if we are close enough to the target and
-        # Check that there is a direct path to it
+        # See if we are close enough to the target given the target's DEX abilities and
+        # Check that there is a direct path to it i.e. bot is in current FOV
         d = self.distance_to_target(self.target_entity)
-        target_in_range = d <= self.sight_range
-        target_in_sight = self.target_entity.xy in self.floor.get_fov_cells()
+        target_dex_modifier = self.target_entity.fighter.get_property_modifier("DEX")
+        target_in_range = d <= max(4,self.sight_range - target_dex_modifier)
+        target_in_sight = self.bot_entity.xy in self.floor.get_fov_cells()
 
         # If we can attack it....
         attack_range = self.bot_entity.fighter.current_weapon_details.get_property("Range")
@@ -2049,7 +2230,8 @@ class AIBotTracker(AIBot):
             # If we moved and are still in sight of the target then all good
             success = (bx,by) != self.bot_entity.xy or target_in_range
 
-            print(f'{self.bot_entity.name}: "I can see you {self.target_entity.name}"')
+            print(f'{self.bot_entity.name}: "I can see you {self.target_entity.name} at d={d} with my range={self.sight_range} and your dex={target_dex_modifier}"')
+
 
         if self._debug is True and self.failed_ticks >0:
             print("Failed {0} vs. limit {1}".format(self.failed_ticks, self.failed_ticks_limit   ))
@@ -2078,49 +2260,72 @@ class AbilityCheck:
         "WIS": "wisdom"
     }
 
-    def __init__(self, entity: Entity, ability: str, difficulty: str, description: str, success: str,
-                 failure: str):
+    def __init__(self,
+                 entity: Entity,
+                 ability: str,
+                 difficulty: str,
+                 description: str,
+                 success_msg: str,
+                 failure_msg: str,
+                 max_attempts:int=-1):
 
         self.entity = entity
         self.ability = ability
         self.ability_name = AbilityCheck.ability_to_description[self.ability]
         self.difficulty = difficulty
-        self.description = description.format(entity=entity.description, ability=self.ability_name)
-        self.success = success.format(entity=entity.description, ability=self.ability_name)
-        self.failure = failure.format(entity=entity.description, ability=self.ability_name)
-        self.attempts = 0
+        self.description = None if description == "" else description.format(entity=entity.description, ability=self.ability_name)
+        self.success_msg = success_msg.format(entity=entity.description, ability=self.ability_name)
+        self.failure_msg = failure_msg.format(entity=entity.description, ability=self.ability_name)
+        self.max_attempts = max_attempts
+        self.attempts_remaining = self.max_attempts
 
         if self.difficulty in AbilityCheck.difficulty_levels:
             self.difficulty_value = AbilityCheck.difficulty_levels[self.difficulty]
         else:
             self.difficulty_value = 0
 
-        self.rewards = []
+        self.success_rewards = []
+        self.failure_rewards = []
+        self.success_stats = {}
+        self.failure_stats = {}
 
     def __str__(self):
-        txt = f'{self.difficulty.upper()} Check: {self.entity.name} versus {self.ability} ability - {len(self.rewards)} rewards:'
-        for reward in self.rewards:
+        txt = f'{self.difficulty.upper()}:{self.difficulty_value} Check: {self.entity.name} versus {self.ability} ability - {len(self.success_rewards)} rewards:'
+        for reward in self.success_rewards:
             txt += f'{reward},'
 
         return txt
 
-    def add_reward(self, new_reward: str):
-        self.rewards.append(new_reward)
+    def add_reward(self, new_reward: str, success:bool = True):
+
+        if success is True:
+            self.success_rewards.append(new_reward)
+        else:
+            self.failure_rewards.append(new_reward)
+
+    def add_reward_stat(self, new_stat:str, stats_reward_value:int, success:bool = True):
+        if success is True:
+            self.success_stats[new_stat] = stats_reward_value
+        else:
+            self.failure_stats[new_stat] = stats_reward_value
+
 
     def attempt(self, ability_modifier: int = 0):
-        self.attempts += 1
-        self.reward = None
+        self.attempts_remaining -= 1
+        self.success_reward = None
+        self.failure_reward = None
 
-        print(self.description)
-        if self.difficulty_value > random.randint(1, 20) + ability_modifier:
-            print(self.success)
-            reward_name = random.choice(self.rewards)
-            self.reward = EntityFactory.get_entity_by_name(reward_name)
-            print(f'Your reward is {self.reward.description}')
+        if self.difficulty_value <= (random.randint(1, 20) + ability_modifier):
             success = True
+            if len(self.success_rewards) > 0:
+                reward_name = random.choice(self.success_rewards)
+                self.success_reward = EntityFactory.get_entity_by_name(reward_name)
+
         else:
-            print(self.failure)
             success = False
+            if len(self.failure_rewards) > 0:
+                reward_name = random.choice(self.failure_rewards)
+                self.failure_reward = EntityFactory.get_entity_by_name(reward_name)
 
         return success
 
@@ -2139,9 +2344,10 @@ class AbilityChecksFactory:
         file_to_open = data_folder / "data" / file_name
 
         # Read in the csv file
-        AbilityChecksFactory.ability_checks = pd.read_csv(file_to_open)
+        AbilityChecksFactory.ability_checks = pd.read_csv(file_to_open,encoding='latin1')
         df = AbilityChecksFactory.ability_checks
         df.set_index(["Entity", "Ability"], drop=True, inplace=True)
+        df.fillna("", inplace=True)
 
         print(df.head())
         print(df.dtypes)
@@ -2150,27 +2356,64 @@ class AbilityChecksFactory:
     def get_ability_check(entity_name: str, ability_name: str):
 
         assert AbilityChecksFactory.ability_checks is not None
+
+        new_check = None
+
         df = AbilityChecksFactory.ability_checks
 
         check = df.loc[(entity_name, ability_name)]
+
+        if check is not None:
+            new_check = AbilityChecksFactory.ability_check_from_row(entity_name=entity_name,
+                                                                    ability_name=ability_name,
+                                                                    check=check)
+
+        return new_check
+
+
+    @staticmethod
+    def ability_check_from_row(entity_name:str, ability_name:str, check)->AbilityCheck:
+
         difficulty = check["Difficulty"]
         description = check["Description"]
-        success_msg = check["Success"]
-        failure_msg = check["Failure"]
-        rewards = check["Rewards"]
+        success_msg = check["SuccessMsg"]
+        failure_msg = check["FailureMsg"]
+        success_rewards = check["SuccessRewards"]
+        failure_rewards = check["FailureRewards"]
+        success_stats = check["SuccessStats"]
+        failure_stats = check["FailureStats"]
+        max_attempts = check["MaxAttempts"]
 
         entity = EntityFactory.get_entity_by_name(entity_name)
 
-        new_check = AbilityCheck(entity,
-                                 ability_name,
-                                 difficulty,
+        new_check = AbilityCheck(entity=entity,
+                                 ability=ability_name,
+                                 difficulty=difficulty,
+                                 max_attempts=max_attempts,
                                  description=description,
-                                 success=success_msg,
-                                 failure=failure_msg)
-        for reward in rewards.split(','):
-            new_check.add_reward(reward.strip())
+                                 success_msg=success_msg,
+                                 failure_msg=failure_msg)
+
+        if success_rewards != "":
+            for reward in success_rewards.split(','):
+                new_check.add_reward(reward.strip(), success=True)
+
+        if failure_rewards != "":
+            for reward in failure_rewards.split(','):
+                new_check.add_reward(reward.strip(), success=False)
+
+        if success_stats != "":
+            for reward in success_stats.split(','):
+                stat, value = reward.split('=')
+                new_check.add_reward_stat(stat, int(value), success=True)
+
+        if failure_stats != "":
+            for reward in failure_stats.split(','):
+                stat, value = reward.split('=')
+                new_check.add_reward_stat(stat, int(value), success=False)
 
         return new_check
+
 
     def get_entity_ability_checks(entity_name: str):
 
@@ -2183,23 +2426,9 @@ class AbilityChecksFactory:
         checks = df.loc[entity_name]
 
         for index, check in checks.iterrows():
-            difficulty = check["Difficulty"]
-            description = check["Description"]
-            success_msg = check["Success"]
-            failure_msg = check["Failure"]
-            rewards = check["Rewards"]
-
-            entity = EntityFactory.get_entity_by_name(entity_name)
-
-            new_check = AbilityCheck(entity,
-                                     index,
-                                     difficulty,
-                                     description=description,
-                                     success=success_msg,
-                                     failure=failure_msg)
-            for reward in rewards.split(','):
-                new_check.add_reward(reward.strip())
-
+            new_check = AbilityChecksFactory.ability_check_from_row(entity_name=entity_name,
+                                                                    ability_name=index,
+                                                                    check=check)
             matches[index] = new_check
 
         return matches
