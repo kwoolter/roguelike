@@ -441,18 +441,16 @@ class FloorView(View):
         # Connect the view to the model
         self.floor = floor
 
-        # Appearance of the view content
-        theme_data = model.ThemeManager.get_floor_colours_by_theme(self.floor.theme)
-        theme = tuple(map(model.text_to_color,theme_data ))
+        # Load colour palette based on floor theme
+        self.theme_palette = model.ThemeManager.get_floor_palette_by_theme(self.floor.theme)
 
         # fg,bg,lit_path,lit_wall,explored_path,explored_wall
-        self.fg, \
-        self.bg, \
-        self.bg_lit_path, \
-        self.bg_lit_wall, \
-        self.bg_explored_path, \
-        self.bg_explored_wall = theme
-
+        self.fg = self.theme_palette.get("FG")
+        self.bg = self.theme_palette.get("BG")
+        self.bg_lit_path = self.theme_palette.get("BG_LIT_PATH")
+        self.bg_lit_wall = self.theme_palette.get("BG_LIT_WALL")
+        self.bg_explored_path = self.theme_palette.get("BG_EXPLORED_PATH")
+        self.bg_explored_wall = self.theme_palette.get("BG_EXPLORED_WALL")
 
         # Create a new console to draw on
         self.con = libtcod.console_new(self.width, self.height)
@@ -540,8 +538,11 @@ class FloorView(View):
 
         # Draw the player
         p = self.floor.player
+        player_tile_bg = self.floor.floor_tile_colours[p.x,p.y]
+        bg= dim_rgb(player_tile_bg,30)
         libtcod.console_set_default_foreground(self.con, p.fg)
-        libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_NONE)
+        libtcod.console_set_default_background(self.con,bg)
+        libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_SET)
 
         # Draw name of current room
         if self._debug is True:

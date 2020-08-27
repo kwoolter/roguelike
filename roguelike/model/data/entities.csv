@@ -52,7 +52,7 @@ Trap,a metal trap,*,Object,yellow,red,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,F
 Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 NPC,a stranger,@,Player,darker_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Player,the player,@,Player,grey,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Player,the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Small Bubbling Potion,a bottle of bubbling potion,P,Potion,sky,fuchsia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Small Green Potion,a bottle of green potion,P,Potion,lightest_grey,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Small Purple Potion,a bottle of purple potion,P,Potion,lightest_grey,dark_purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0

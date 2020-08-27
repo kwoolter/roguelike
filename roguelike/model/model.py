@@ -22,12 +22,16 @@ def dim_rgb(rgb, dc: int):
     :param dc: how much do you want to dim it by?
     :return: a libtcod.Color object with the dimmed RGB colour
     """
-    r, g, b = rgb
-    r = max(0, r - dc)
-    g = max(0, g - dc)
-    b = max(0, b - dc)
-    return libtcod.Color(r, g, b)
+    try:
 
+        r, g, b = rgb
+        r = max(0, r - dc)
+        g = max(0, g - dc)
+        b = max(0, b - dc)
+        return libtcod.Color(r, g, b)
+    except Exception:
+        print(f'problem trying to dim {rgb}')
+        assert False
 
 class EventQueue():
     def __init__(self):
@@ -189,13 +193,6 @@ class Room:
 
 class Floor():
 
-    TUNNEL_THEME = {
-        "default":libtcod.dark_grey,
-        "Dungeon":libtcod.dark_grey,
-        "Desert": libtcod.sepia,
-        "Swamp": libtcod.dark_green,
-    }
-
     EMPTY_TILE = "Empty"
 
     def __init__(self, name: str, width: int = 50, height: int = 50, level: int = 0, theme:str = "default", params = None):
@@ -312,18 +309,10 @@ class Floor():
         print("*"*80)
         print(floor_entities)
 
-        # List of floor tile colours that can be randomly assigned to a Room
-        valid_room_colours = []
-        for c in self.room_colours:
-            lc = text_to_color(c)
-            if lc is not None:
-                # Make the colour even darker!
-                lc = dim_rgb(list(lc), 35)
-                valid_room_colours.append(lc)
-
         # List of floor tile colours that can be randomly assigned to a Tunnel
-        tunnel_colour = text_to_color(ThemeManager.get_tunnel_colour_by_theme(self.theme))
+        tunnel_colour = ThemeManager.get_tunnel_colour_by_theme(self.theme)
         valid_tunnel_colours = [tunnel_colour]
+
         for i in range(0,50,5):
             # Make the colour even darker!
             tunnel_colour = dim_rgb(list(tunnel_colour), 5)
@@ -340,7 +329,7 @@ class Floor():
             new_room = Room(name=ThemeManager.get_random_room_name_by_theme(self.theme),
                             w=random.randint(self.room_min_size, self.room_max_size),
                             h=random.randint(self.room_min_size, self.room_max_size),
-                            bg=dim_rgb(text_to_color(ThemeManager.get_random_room_colour_by_theme(self.theme)),35))
+                            bg=ThemeManager.get_random_room_colour_by_theme(self.theme))
 
             # If we were able to add the room to the map...
             if self.add_map_room(new_room) is True:
@@ -380,7 +369,7 @@ class Floor():
 
         # Randomly use cavern floor layout
         if random.randint(0,10) > 8:
-            self.build_floor_cave(tile_colour= text_to_color(ThemeManager.get_random_room_colour_by_theme(self.theme)))
+            self.build_floor_cave(tile_colour= ThemeManager.get_random_room_colour_by_theme(self.theme))
             self.map_rooms = [self.first_room, self.last_room]
 
         self.entities_added = len(self.entities)

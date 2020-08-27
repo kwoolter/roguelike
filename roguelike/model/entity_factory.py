@@ -20,7 +20,7 @@ def text_to_color(color_text: str) -> libtcod.color.Color:
             print("We didn't end up with a colour!")
             c = None
     except AttributeError:
-        # print(f"{color_text} is not a valid attribute")
+        #print(f"{color_text} is not a valid attribute")
         c = None
 
     return c

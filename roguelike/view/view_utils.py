@@ -261,7 +261,6 @@ class TextEntryBox:
             libtcod.console_blit(self.con, 0, 0, self.width, self.height, self.parent_console, self.xpos, self.ypos)
 
             # Flush the parent console
-            # libtcod.console_flush(self.parent_console)
             libtcod.console_flush(self.parent_console)
 
         return text

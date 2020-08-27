@@ -1,5 +1,4 @@
-﻿Theme,Palette
-default,"white,black,darker_yellow, darkest_yellow, darker_grey,darkest_grey"
-Dungeon,"white,black,darker_yellow, darkest_yellow, darker_grey,darkest_grey"
-Desert,"light_grey,lighter_sepia,lighter_blue,lighter_sepia,dark_sepia,darker_sepia"
-Swamp,"light_lime,light_lime,lighter_lime,lime,dark_chartreuse,darker_chartreuse"
+﻿Theme,FG,BG,BG_LIT_PATH,BG_LIT_WALL,BG_EXPLORED_PATH,BG_EXPLORED_WALL,BG_TUNNEL
+Dungeon,white,black,darker_yellow, darkest_yellow, darker_grey,darkest_grey,dark_grey
+Desert,light_grey,lighter_sepia,lighter_blue,lighter_sepia,dark_sepia,darker_sepia,light_sepia
+Swamp,light_lime,darkest_lime,dark_chartreuse,chartreuse,darker_chartreuse,darkest_chartreuse,dark_green
