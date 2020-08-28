@@ -75,7 +75,8 @@ class Tunnel:
     def print(self):
         print(f'Tunnel running from {self.start_pos} to {self.end_pos} using {self.direction}')
 
-    def get_segments(self)->list:
+    def get_segments_thin(self)->list:
+
         segments = []
 
         start_x, start_y = self.start_pos
@@ -92,38 +93,60 @@ class Tunnel:
 
         return segments
 
-    def get_segments_direct(self)->list:
-
+    def get_segments_fat(self)->list:
         segments = []
 
         start_x, start_y = self.start_pos
         end_x, end_y = self.end_pos
 
-        w = end_x - start_x
-        h = end_y - start_y
+        hy = start_y if self.direction == Tunnel.DIRECTION_H_V else end_y
+        vx = end_x if self.direction == Tunnel.DIRECTION_H_V else start_x
 
-        if w == 0 :
-            dx = 0
-        else:
-            dx = w / abs(w)
+        for x in range(min(start_x, end_x), max(start_x, end_x) + 1):
+            segments.append((x, hy))
+            segments.append((x, hy+1))
 
-
-        if h == 0:
-            dy = 0
-        else:
-            dy = h / w
-
-        x = start_x
-        y = start_y
-        for i in range(abs(w)):
-            segments.append((int(x),int(y)))
-            #segments.append((int(x), int(y-1)))
-            x+=dx
-            y+=dy
-
-
+        for y in range(min(start_y, end_y), max(start_y, end_y) + 1):
+            segments.append((vx, y))
+            segments.append((vx+1, y))
 
         return segments
+
+    def get_segments_direct(self)->list:
+
+        segments = []
+
+        cx, cy = self.start_pos
+        ex, ey = self.end_pos
+
+        segments.append((cx,cy))
+
+        while (cx,cy) != self.end_pos:
+
+            if cx < ex:
+                cx += 1
+            elif cx > ex:
+                cx -= 1
+            segments.append((cx, cy))
+            segments.append((cx, cy+1))
+            segments.append((cx+1, cy))
+
+            if cy < ey:
+                cy += 1
+            elif cy > ey:
+                cy -= 1
+            segments.append((cx, cy))
+            segments.append((cx, cy + 1))
+            segments.append((cx+1, cy))
+
+        return segments
+
+
+    def get_segments(self)->list:
+
+        fn = random.choice([self.get_segments_direct, self.get_segments_fat, self.get_segments_thin])
+        x = set(fn())
+        return list(x)
 
 
 class Room:
@@ -252,6 +275,8 @@ class Floor():
 
         self.events = None
 
+    def is_valid_xy(self, x:int, y:int):
+        return x >= 0 and x < self.width and y >= 0 and y < self.height
 
     @property
     def revealed_entities(self):
@@ -1069,9 +1094,11 @@ class Floor():
 
         # Make floor walkable where tunnels are and store the floor tile colour
         for tunnel in self.map_tunnels:
-            for sx, sy in tunnel.get_segments():
-                self.walkable[sx, sy] = 1
-                self.floor_tile_colours[sx,sy] = list(tunnel.bg)
+            segments = tunnel.get_segments()
+            for sx, sy in segments:
+                if self.is_valid_xy(sx,sy):
+                    self.walkable[sx, sy] = 1
+                    self.floor_tile_colours[sx,sy] = list(tunnel.bg)
 
         # Make floor walkable where rooms are and store any floor tile colours
         for room in self.map_rooms:
