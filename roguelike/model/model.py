@@ -9,11 +9,10 @@ import tcod as libtcod
 from .combat import *
 from .entity_factory import Entity, Player, EntityFactory, Fighter
 from .entity_factory import Inventory
-from .entity_factory import text_to_color
 from .events import Event
 from .game_parameters import GameParameters
-
 from .themes import ThemeManager
+
 
 def dim_rgb(rgb, dc: int):
     """
@@ -388,7 +387,7 @@ class Floor():
         self.build_floor_map()
 
         # Randomly use cavern floor layout
-        if random.randint(0,10) > 8:
+        if random.randint(0,10) > 8 and self.level > 3:
             self.build_floor_cave(tile_colour= ThemeManager.get_random_room_colour_by_theme(self.theme))
             self.map_rooms = [self.first_room, self.last_room]
 
@@ -1103,7 +1102,13 @@ class Floor():
         # Make floor walkable where rooms are and store any floor tile colours
         for room in self.map_rooms:
             x, y, w, h = room.rect
-            self.walkable[x:x + w, y: y + h] = 1
+            self.walkable[x:x + w - 1, y: y + h - 1] = 1
+            # if random.randint(0,10) > 5:
+            #     self.walkable[x, y] = 0
+            #     self.walkable[x + w - 2, y] = 0
+            #     self.walkable[x, y + h - 2] = 0
+            #     self.walkable[x + w - 2, y + h - 2] = 0
+
             self.floor_tile_colours[x:x + w, y: y + h] = list(room.bg)
 
         # Convert walkable to array of bools
@@ -1435,15 +1440,23 @@ class Model():
             self.current_floor.tick()
 
         if self.player.fighter.is_dead == True:
-            self.current_floor.swap_entity(self.player, "Dead Player")
-            self.state = Model.GAME_STATE_GAME_OVER
-            self.events.add_event(Event(type=Event.GAME,
-                                        name=Event.PLAYER_DEAD,
-                                        description=f"You died!"))
 
-            self.events.add_event(Event(type=Event.STATE,
-                                        name=Event.STATE_GAME_OVER,
-                                        description=f"Game Over!"))
+            if self.player.get_property("Resurrect") is True:
+                self.player.heal(20)
+                self.player.set_property("Resurrect", False)
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.GAIN_HEALTH,
+                                            description=f"You fall to the ground but a strange aura surrounds uou!"))
+            else:
+                self.current_floor.swap_entity(self.player, "Dead Player")
+                self.state = Model.GAME_STATE_GAME_OVER
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.PLAYER_DEAD,
+                                            description=f"You died!"))
+
+                self.events.add_event(Event(type=Event.STATE,
+                                            name=Event.STATE_GAME_OVER,
+                                            description=f"Game Over!"))
 
     def set_state(self, new_state):
         """
@@ -1921,7 +1934,8 @@ class ItemUser():
                             "Blue Mushroom": -5}
 
         # What can you swap an entity for?
-        self.entity_swaps = {"Locked Chest":("Silver", "Food", "Small Green Potion", "Helmet", "Weapon Upgrade"),
+        self.entity_swaps = {"Locked Chest":("Silver", "Food", "Small Green Potion",
+                                             "Helmet", "Weapon Upgrade", "Scroll or Resurrection"),
                              "Crate":("Food", "Food", "Copper"),
                              "Barrel":("Food", "Small Red Potion", "Copper", "Key")}
 
@@ -2048,6 +2062,11 @@ class ItemUser():
             probability = int(100 * dexterity/50)
             floor.swap_entities_by_name(ename, self.entity_swaps[ename] , probability)
             effect = "You unlock some locked treasure chests"
+
+        # Enable resurection upon dying
+        elif item.name == "Scroll of Resurrection":
+            effect = "You feel a strange aura surround you"
+            player.set_property("Resurrect", True)
 
         # Attack an enemy
         elif item.category == "Combat":
