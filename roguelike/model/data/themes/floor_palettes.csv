@@ -1,4 +1,7 @@
 ﻿Theme,FG,BG,BG_LIT_PATH,BG_LIT_WALL,BG_EXPLORED_PATH,BG_EXPLORED_WALL,BG_TUNNEL
 Dungeon,white,black,darker_yellow, darkest_yellow, darker_grey,darkest_grey,dark_grey
-Desert,light_grey,light_sepia,lighter_blue,lighter_sepia,dark_sepia,darker_sepia,light_sepia
-Swamp,light_lime,darkest_lime,dark_chartreuse,chartreuse,darker_chartreuse,darkest_chartreuse,dark_green
+Desert,lighter_sepia,desaturated_flame,light_sepia,dark_sepia,darker_sepia,darkest_sepia,lighter_sepia
+Swamp,lighter_chartreuse,desaturated_chartreuse,light_chartreuse,dark_chartreuse,darker_chartreuse,darkest_chartreuse,lighter_chartreuse
+Water,lighter_sky,desaturated_sky,light_sky,dark_sky,darker_sky,darkest_sky,lighter_sky
+Frost,lighter_grey,white,light_grey,grey,dark_grey,darkest_grey,lighter_grey
+Lava,lighter_orange,desaturated_orange,light_orange,dark_orange,darker_orange,darkest_orange,lighter_orange

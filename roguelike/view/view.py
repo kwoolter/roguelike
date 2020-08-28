@@ -475,11 +475,12 @@ class FloorView(View):
             if (x, y) in fov_cells:
 
                 # Get how much we should dim the tile colour based on distance from player
-                a = min(int(self.floor.get_fov_light_attenuation(x, y, 100)), max_l)
+                a = min(int(self.floor.get_fov_light_attenuation(x, y, max_l)), max_l)
 
-                # Lit path
+                # If Lit path...
                 if (x, y) in walkable_cells:
 
+                    # Get the tile colour
                     tile_rgb = list(self.floor.floor_tile_colours[x, y])
                     if tile_rgb == [0, 0, 0]:
                         tile_rgb = list(self.bg_lit_path)
@@ -487,23 +488,14 @@ class FloorView(View):
                     # Dim the tile colour
                     tile_colour = dim_rgb(tile_rgb, 20)
 
-                    col = [tile_colour, self.bg_explored_path]
-                    idx = [0,max_l]
-                    fov_colours = libtcod.color_gen_map(col, idx)
-                    tile_colour = fov_colours[a]
-
+                    # Use linear interpolation to shade from lit path to unlit path based on distance from player
+                    tile_colour = libtcod.color_lerp(tile_colour, self.bg_explored_path, a/max_l)
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
 
                 # Else lit wall
                 else:
-                    tile_rgb = list(self.bg_lit_wall)
-                    tile_colour = dim_rgb(tile_rgb, 10)
-
-                    col = [tile_colour, self.bg_explored_wall]
-                    idx = [0,110]
-                    fov_colours = libtcod.color_gen_map(col, idx)
-                    tile_colour = fov_colours[a]
-
+                    # Use linear interpolation to shade from lit wall to unlit wall based on distance from player
+                    tile_colour = libtcod.color_lerp(self.bg_lit_wall,self.bg_explored_wall, a/max_l)
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
             else:
                 # Unlit path
@@ -521,6 +513,11 @@ class FloorView(View):
                 libtcod.console_set_default_foreground(self.con, e.fg)
                 libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
                 if bg is not None:
+                    libtcod.console_set_char_background(self.con, x, y, bg)
+                # If no background colour for this entity then use the current tile colour with 'shadow'
+                else:
+                    tile_bg = self.floor.floor_tile_colours[x, y]
+                    bg = dim_rgb(tile_bg, a + 30)
                     libtcod.console_set_char_background(self.con, x, y, bg)
             except e:
                 print("Problem drawing {e.name} {e.fg} {e.bg}")
@@ -1896,7 +1893,7 @@ class EventView(View):
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
                             model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.GAIN_HEALTH: (libtcod.green, libtcod.darker_green),
-                            model.Event.LOSE_HEALTH: (libtcod.yellow, libtcod.darkest_yellow),
+                            model.Event.LOSE_HEALTH: (libtcod.yellow, libtcod.dark_amber),
                             model.Event.LEVEL_UP_AVAILABLE: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.PLAYER_DEAD: (libtcod.red, None)
                             }

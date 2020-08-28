@@ -200,6 +200,7 @@ class Floor():
         # Properties of this floor
         self.name = name
         self.theme = random.choice(list(ThemeManager.themes))
+        #self.theme = "Lava"
         self.room_colours = ThemeManager.get_room_colours_by_theme(self.theme)
 
         self.width = width

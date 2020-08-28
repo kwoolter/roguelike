@@ -11,8 +11,11 @@ class Palette:
 
     def add_colours(self, new_colours:dict):
 
-        # Convery all of the text representation of the new colours to Color objects
-        new_colour_rgb = {k:Palette.text_to_color(v) for k,v in new_colours.items()}
+        for c in new_colours.values():
+            assert Palette.text_to_color(c) is not None, f'Do not know colour {c}'
+
+        # Convert all of the text representation of the new colours to Color objects
+        new_colour_rgb = {k:Palette.text_to_color(v) for k,v in new_colours.items() if Palette.text_to_color(v) is not None}
 
         # Add/update the new colours to this Palette
         self.colour_mappings.update(new_colour_rgb)
