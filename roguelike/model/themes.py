@@ -171,12 +171,29 @@ class ThemeManager:
         return palette
 
     @staticmethod
-    def get_tunnel_colour_by_theme(theme_name:str):
-        row  = ThemeManager.floor_palettes.loc[theme_name]
+    def get_tunnel_colours_by_theme(theme_name:str):
+
+        df = ThemeManager.floor_palettes
+
+        assert theme_name in df.index, f'Cannot find {theme_name} in floor palettes'
+
+        # Get the floor palette for the specified theme
+        row = df.loc[theme_name]
+
         palette = Palette(name=theme_name)
         palette.add_colours(row.to_dict())
-        palette.dim(0.8)
-        return palette.get("BG_TUNNEL")
+        bg_tunnel = palette.get("BG_TUNNEL")
+
+        valid_tunnel_colours = [bg_tunnel]
+
+        for i in range(10):
+            # Make the colour even darker!
+            bg_tunnel = Palette.dim_rgb_pct(list(bg_tunnel), 0.95)
+            valid_tunnel_colours.append(bg_tunnel)
+
+        #print(valid_tunnel_colours)
+
+        return valid_tunnel_colours
 
 if __name__ == "__main__":
 
@@ -196,7 +213,7 @@ if __name__ == "__main__":
     print(str(r.colour_mappings))
 
 
-    r = ThemeManager.get_tunnel_colour_by_theme(theme)
+    r = ThemeManager.get_tunnel_colours_by_theme(theme)
     print(r)
 
     print(ThemeManager.themes)

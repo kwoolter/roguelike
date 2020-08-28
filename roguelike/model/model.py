@@ -310,13 +310,7 @@ class Floor():
         print(floor_entities)
 
         # List of floor tile colours that can be randomly assigned to a Tunnel
-        tunnel_colour = ThemeManager.get_tunnel_colour_by_theme(self.theme)
-        valid_tunnel_colours = [tunnel_colour]
-
-        for i in range(0,50,5):
-            # Make the colour even darker!
-            tunnel_colour = dim_rgb(list(tunnel_colour), 5)
-            valid_tunnel_colours.append(tunnel_colour)
+        valid_tunnel_colours = ThemeManager.get_tunnel_colours_by_theme(self.theme)
 
         # Define initial values for the first and last room
         self.last_room = None
