@@ -466,6 +466,8 @@ class FloorView(View):
         fov_cells = self.floor.get_fov_cells()
         walkable_cells = self.floor.get_walkable_cells()
 
+        max_l = 100
+
         # Loop through all of the cells that we have already explored
         for x, y in explored_cells:
 
@@ -473,7 +475,7 @@ class FloorView(View):
             if (x, y) in fov_cells:
 
                 # Get how much we should dim the tile colour based on distance from player
-                a = int(self.floor.get_fov_light_attenuation(x, y, 40))
+                a = min(int(self.floor.get_fov_light_attenuation(x, y, 100)), max_l)
 
                 # Lit path
                 if (x, y) in walkable_cells:
@@ -483,14 +485,25 @@ class FloorView(View):
                         tile_rgb = list(self.bg_lit_path)
 
                     # Dim the tile colour
-                    tile_colour = dim_rgb(tile_rgb, a)
+                    tile_colour = dim_rgb(tile_rgb, 20)
+
+                    col = [tile_colour, self.bg_explored_path]
+                    idx = [0,max_l]
+                    fov_colours = libtcod.color_gen_map(col, idx)
+                    tile_colour = fov_colours[a]
 
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
 
                 # Else lit wall
                 else:
                     tile_rgb = list(self.bg_lit_wall)
-                    tile_colour = dim_rgb(tile_rgb, a)
+                    tile_colour = dim_rgb(tile_rgb, 10)
+
+                    col = [tile_colour, self.bg_explored_wall]
+                    idx = [0,110]
+                    fov_colours = libtcod.color_gen_map(col, idx)
+                    tile_colour = fov_colours[a]
+
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
             else:
                 # Unlit path
@@ -513,11 +526,13 @@ class FloorView(View):
                 print("Problem drawing {e.name} {e.fg} {e.bg}")
                 print(e)
 
-        # Draw all of the entities in the current FOV
+        # Draw all of the entities in the current FOV by Z order
         fov_entities = [e for e in self.floor.entities if e.xy in fov_cells]
         if len(fov_entities) > 0:
             entities = sorted(fov_entities, key=lambda x: x.get_property("Zorder"), reverse=True)
             for e in entities:
+
+                # Check to see if this entity is meant to be draw? If not loop to the next one.
                 if e.name == model.Floor.EMPTY_TILE or (e.bg is None and e.fg is None):
                     continue
 
@@ -529,14 +544,22 @@ class FloorView(View):
                     fg = dim_rgb(e.fg, a * 3)
                     libtcod.console_set_default_foreground(self.con, fg)
                     libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
+
+                    # Use the background colour for the entity is specified
                     if bg is not None:
                         bg = dim_rgb(bg, a)
                         libtcod.console_set_char_background(self.con, x, y, bg)
+                    # If no background colour for this entity then use the current tile colour with 'shadow'
+                    else:
+                        tile_bg = self.floor.floor_tile_colours[x, y]
+                        bg = dim_rgb(tile_bg, a+20)
+                        libtcod.console_set_char_background(self.con, x, y, bg)
+
                 except Exception as e:
                     print("Problem drawing {e.name} {e.fg} {e.bg}")
                     print(e)
 
-        # Draw the player
+        # Draw the player ans a 'shadow' on the floor tile
         p = self.floor.player
         player_tile_bg = self.floor.floor_tile_colours[p.x,p.y]
         bg= dim_rgb(player_tile_bg,30)

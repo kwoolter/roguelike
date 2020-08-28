@@ -1,4 +1,4 @@
 ﻿Theme,FG,BG,BG_LIT_PATH,BG_LIT_WALL,BG_EXPLORED_PATH,BG_EXPLORED_WALL,BG_TUNNEL
 Dungeon,white,black,darker_yellow, darkest_yellow, darker_grey,darkest_grey,dark_grey
-Desert,light_grey,lighter_sepia,lighter_blue,lighter_sepia,dark_sepia,darker_sepia,light_sepia
+Desert,light_grey,light_sepia,lighter_blue,lighter_sepia,dark_sepia,darker_sepia,light_sepia
 Swamp,light_lime,darkest_lime,dark_chartreuse,chartreuse,darker_chartreuse,darkest_chartreuse,dark_green

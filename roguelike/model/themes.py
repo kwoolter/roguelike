@@ -11,27 +11,33 @@ class Palette:
 
     def add_colours(self, new_colours:dict):
 
+        # Convery all of the text representation of the new colours to Color objects
         new_colour_rgb = {k:Palette.text_to_color(v) for k,v in new_colours.items()}
 
+        # Add/update the new colours to this Palette
         self.colour_mappings.update(new_colour_rgb)
 
     def get(self, property_name: str):
         return self.colour_mappings.get(property_name)
 
     def dim(self, pct):
+        """
+        Dim all of the colours in the palette
+        :param pct: Percentage that you want to dim them by
+        """
         self.colour_mappings = {k: Palette.dim_rgb_pct(v,pct) for k,v in self.colour_mappings.items()}
 
     @staticmethod
     def text_to_color(color_text: str) -> libtcod.color.Color:
         """
-
-        :param color_text:
-        :return:
+        Convert a libtcod text representation of a colour to a Color object
+        :param color_text: the text that specifies the colour e.g. 'red'
+        :return: the Color object that represents the colour specified by the text
         """
         try:
             c = eval(f'libtcod.{color_text.lower()}')
             if isinstance(c, libtcod.color.Color) is False:
-                print("We didn't end up with a colour!")
+                print(f"We didn't end up with a colour from text {color_text}!")
                 c = None
         except AttributeError:
             # print(f"{color_text} is not a valid attribute")
@@ -67,6 +73,12 @@ class Palette:
         b = int(min(max(0, b * pct), 255))
 
         return libtcod.Color(r, g, b)
+
+    @staticmethod
+    def dim_hsl(colour, amt : int):
+
+        return libtcod.color_scale_HSV(colour,1.0,amt)
+
 
 class ThemeManager:
 

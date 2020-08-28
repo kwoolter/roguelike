@@ -1223,7 +1223,7 @@ class Floor():
 
     def get_fov_light_attenuation(self, ox: int, oy:int, factor:float = 1.0):
         px, py = self.player.xy
-        return ((px-ox)**2 + (py-oy)**2) * factor/ self.fov_radius2
+        return factor * ((px-ox)**2 + (py-oy)**2) / self.fov_radius2
 
     def get_revealed_entities(self):
         return self.revealed_entities
