@@ -221,8 +221,8 @@ class Floor():
 
         # Properties of this floor
         self.name = name
-        self.theme = random.choice(list(ThemeManager.themes))
-        #self.theme = "Lava"
+        self.theme = random.choice(list(ThemeManager.available_themes))
+        #self.theme = "Dungeon"
         self.room_colours = ThemeManager.get_room_colours_by_theme(self.theme)
 
         self.width = width
@@ -1729,7 +1729,7 @@ class Model():
             self.current_floor.add_player(self.player)
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.GAME_NEW_FLOOR,
-                                        description=f"{self.name}: Dungeon Level {self.dungeon_level} Ready!"))
+                                        description=f"{self.name}: Level {self.dungeon_level} Ready! {self.current_floor.theme} level."))
 
             # Let the Player know if they can level up now!
             player_level = game_parameters["Game"]["Player"]["Level"]

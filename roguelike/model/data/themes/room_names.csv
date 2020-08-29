@@ -1,7 +1,14 @@
 ﻿Theme,Room Name
+Desert,the abandoned Bazaar
+Desert,the Bedouin Camp
+Desert,the dunes of eternity
+Desert,the Forgotten Oasis
+Desert,the shifting sands
+Desert,the Shrine of the Snake God
+Desert,the Temple of the Djinn
+Desert,the Tomb of Sands
 Dungeon,a dank cell
 Dungeon,a stone chamber
-Dungeon,the Room of Lost Manuscripts
 Dungeon,the Alchemist's Workshop
 Dungeon,the Altar of Shadows
 Dungeon,the Annex of the Dead
@@ -31,6 +38,7 @@ Dungeon,the Mausoleum of the Forgotten Prince
 Dungeon,the Merchant's Quarter
 Dungeon,the Ossuary
 Dungeon,the Pit of Rats
+Dungeon,the Room of Lost Manuscripts
 Dungeon,the Room of Scrolls
 Dungeon,the Sanctum of the Snake God
 Dungeon,the Shrine of Relics
@@ -47,27 +55,28 @@ Dungeon,the Torture Room
 Dungeon,the Weaponry
 Dungeon,the Wine Cellar
 Dungeon,the Wizard's Laboratory
-Swamp,the floating island
+Frost,a chilly room
+Frost,a frosty room
+Frost,an icy chamber
+Frost,the shrine of crystals
+Frost,the snow fields
+Lava,the fiery forge
+Lava,the furnace
+Lava,the shrine of fire nymphs
+Lava,the Temple of Eternal Flame
+Lava,the workshop
 Swamp,the bog pit
 Swamp,the burial mound
+Swamp,the floating island
 Swamp,the foetid pool
-Swamp,the waters of the undead
-Swamp,the rotten shallows
 Swamp,the lost pathway
-Desert,the Temple of the Djinn
-Desert,the Shrine of the Snake God
-Desert,the Tomb of Sands
-Desert,the shifting sands
-Desert,the dunes of eternity
-Desert,the Forgotten Oasis
-Desert,the Bedouin Camp
-Desert,the abandoned Bazaar
-Frost,a frosty room
-Frost,a chilly room
-Frost,an icy chamber
+Swamp,the rotten shallows
+Swamp,the waters of the undead
+Water,a catchwater
 Water,a culvert
 Water,a wet cellar
-Water,a catchwater
-Lava,the furnace
-Lava,the fiery forge
-Lava,the workshop
+Water,the flooded wreck
+Water,the kelp fields
+Water,the sea cave
+Water,the Sea God's Shrine
+Water,the sunken ruins

@@ -1,5 +1,5 @@
 ﻿Theme,FG,BG,BG_LIT_PATH,BG_LIT_WALL,BG_EXPLORED_PATH,BG_EXPLORED_WALL,BG_TUNNEL
-Dungeon,white,black,darker_yellow, darkest_yellow, darker_grey,darkest_grey,dark_grey
+Dungeon,white,black,darker_yellow, darkest_yellow, dark_grey,darkest_grey,lightest_grey
 Desert,lighter_sepia,desaturated_flame,light_sepia,dark_sepia,darker_sepia,darkest_sepia,lighter_sepia
 Swamp,lighter_chartreuse,desaturated_chartreuse,light_chartreuse,dark_chartreuse,darker_chartreuse,darkest_chartreuse,lighter_chartreuse
 Water,lighter_sky,desaturated_sky,light_sky,dark_sky,darker_sky,darkest_sky,lighter_sky

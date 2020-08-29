@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 import random
 import tcod as libtcod
+import copy
 
 class Palette:
 
@@ -28,7 +29,8 @@ class Palette:
         Dim all of the colours in the palette
         :param pct: Percentage that you want to dim them by
         """
-        self.colour_mappings = {k: Palette.dim_rgb_pct(v,pct) for k,v in self.colour_mappings.items()}
+        self.colour_mappings = {k: self.dim_hsl(v,pct) for k, v in self.colour_mappings.items()}
+
 
     @staticmethod
     def text_to_color(color_text: str) -> libtcod.color.Color:
@@ -80,24 +82,33 @@ class Palette:
     @staticmethod
     def dim_hsl(colour, amt : int):
 
-        return libtcod.color_scale_HSV(colour,1.0,amt)
+        new_colour = copy.deepcopy(colour)
+        libtcod.color_scale_HSV(new_colour, 1.0, amt)
+        return new_colour
 
 
 class ThemeManager:
 
-    ROOM_NAMES_BY_THEME = {}
-    FLOOR_COLOURS_BY_THEME = {}
+    ROOM_COLOUR_DIM_COEF = 0.6
+    FLOOR_COLOUR_DIM_COEF = 0.6
+    TUNNEL_COLOUR_DIM_COEF = 0.95
+
     
     room_names = None
     room_palettes = None
     floor_palettes = None
-    themes = set()
+    available_themes = set()
 
     def __init__(self):
         pass
 
     @staticmethod
     def load_room_names(file_name:str):
+        """
+        Load in the contents of a specified csv file containing Room names by theme
+        Args:
+            file_name: the file that you want to load
+        """
         # Create path for the file that we are going to load
         data_folder = Path(__file__).resolve().parent
         file_to_open = data_folder / "data" / "themes" / file_name
@@ -107,10 +118,19 @@ class ThemeManager:
         df = ThemeManager.room_names
         df.set_index("Theme", drop=True, inplace=True)
 
-        ThemeManager.themes = ThemeManager.themes.union(set(df.index))
+        # Add the themes that we found in the file to the set of available themes
+        ThemeManager.available_themes = ThemeManager.available_themes.union(set(df.index))
 
     @staticmethod
-    def get_room_names_by_theme(theme_name : str):
+    def get_room_names_by_theme(theme_name : str)->list:
+        """
+        Return a list of available Room names given a specified theme name
+        Args:
+            theme_name: the name of the theme that you are interested in
+
+        Returns: the list of available Room names that we found
+
+        """
         df = ThemeManager.room_names
 
         assert theme_name in df.index, f'Cannot find {theme_name} in room name index'
@@ -119,7 +139,7 @@ class ThemeManager:
         return list(rows)
 
     @staticmethod
-    def get_random_room_name_by_theme(theme_name:str):
+    def get_random_room_name_by_theme(theme_name:str)->str:
         return random.choice(ThemeManager.get_room_names_by_theme(theme_name))
 
     @staticmethod
@@ -133,29 +153,37 @@ class ThemeManager:
         df = ThemeManager.room_palettes
         df.set_index("Theme", drop=True, inplace=True)
 
-        ThemeManager.themes = ThemeManager.themes.union(set(df.index))
+        # Add the themes that we found in the file to the set of available themes
+        ThemeManager.available_themes = ThemeManager.available_themes.union(set(df.index))
 
     @staticmethod
-    def get_room_colours_by_theme(theme_name : str):
+    def get_room_colours_by_theme(theme_name : str)->list:
+        """
+        Get the list of Room colours for the specified theme
+        Args:
+            theme_name: the name of the theme that you are interested in
 
+        Returns: the list of colours that we found
+
+        """
         df = ThemeManager.room_palettes
 
         assert theme_name in df.index, f'Cannot find theme {theme_name} in room colours index'
 
         rows = df.loc[theme_name,"Room Colour"]
 
+        # Build a list of colours based on those we loaded in but each one is dimmed
         dimmed_colours = []
         for colour_text in list(rows):
             colour = Palette.text_to_color(colour_text)
-            dimmed_colours.append(Palette.dim_rgb_pct(colour, 0.8))
+            dimmed_colours.append(Palette.dim_hsl(colour, ThemeManager.ROOM_COLOUR_DIM_COEF))
+
         return dimmed_colours
 
     @staticmethod
     def get_random_room_colour_by_theme(theme_name:str):
 
         assert theme_name in ThemeManager.room_palettes.index, f'{theme_name} not in room colour themes'
-
-        print(ThemeManager.get_room_colours_by_theme(theme_name))
 
         return random.choice(ThemeManager.get_room_colours_by_theme(theme_name))
 
@@ -169,10 +197,18 @@ class ThemeManager:
         df = ThemeManager.floor_palettes
         df.set_index("Theme", drop=True, inplace=True)
 
-        ThemeManager.themes = ThemeManager.themes.union(set(df.index))
+        ThemeManager.available_themes = ThemeManager.available_themes.union(set(df.index))
 
     @staticmethod
-    def get_floor_palette_by_theme(theme_name : str):
+    def get_floor_palette_by_theme(theme_name : str)->Palette:
+        """
+        Create Palette object for the specified theme name
+        Args:
+            theme_name: the name of the theme that you are interested in
+
+        Returns: a Palette object containing the colours for the specified theme
+
+        """
         df = ThemeManager.floor_palettes
 
         assert theme_name in df.index, f'Cannot find {theme_name} in floor colours'
@@ -181,32 +217,36 @@ class ThemeManager:
 
         palette = Palette(name=theme_name)
         palette.add_colours(row.to_dict())
-        palette.dim(0.6)
+
+        # Dim all of the colours in the Palette by a coefficient
+        palette.dim(ThemeManager.FLOOR_COLOUR_DIM_COEF)
 
         return palette
 
     @staticmethod
-    def get_tunnel_colours_by_theme(theme_name:str):
+    def get_tunnel_colours_by_theme(theme_name:str, k:int = 10):
+        """
+        Create a list of colours for tunnels starting with a base colour that we get from the Floor palette
+        for the specified theme and then dimming it
+        Args:
+            theme_name: the theme we want to use as a base
+            k: how many colours do we want to generate
 
-        df = ThemeManager.floor_palettes
+        Returns:list of generated colours
 
-        assert theme_name in df.index, f'Cannot find {theme_name} in floor palettes'
-
+        """
         # Get the floor palette for the specified theme
-        row = df.loc[theme_name]
-
-        palette = Palette(name=theme_name)
-        palette.add_colours(row.to_dict())
+        palette = ThemeManager.get_floor_palette_by_theme(theme_name)
         bg_tunnel = palette.get("BG_TUNNEL")
 
+        # Start building a list of valid tunnel colours
         valid_tunnel_colours = [bg_tunnel]
 
-        for i in range(10):
+        # Create k more colours by dimming the original by a specified coefficient
+        for i in range(k):
             # Make the colour even darker!
-            bg_tunnel = Palette.dim_rgb_pct(list(bg_tunnel), 0.95)
+            bg_tunnel = Palette.dim_hsl(bg_tunnel, ThemeManager.TUNNEL_COLOUR_DIM_COEF)
             valid_tunnel_colours.append(bg_tunnel)
-
-        #print(valid_tunnel_colours)
 
         return valid_tunnel_colours
 
@@ -231,5 +271,5 @@ if __name__ == "__main__":
     r = ThemeManager.get_tunnel_colours_by_theme(theme)
     print(r)
 
-    print(ThemeManager.themes)
+    print(ThemeManager.available_themes)
     
