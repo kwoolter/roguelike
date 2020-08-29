@@ -243,4 +243,3 @@ The process for adding new types of `Entity` to the game is as follows:-
 
 ## `libtcod` pre-defined colours
 * https://libtcod.github.io/docs/html2/color.html?c=false&cpp=false&cs=false&py=true&lua=false
-* https://i.imgur.com/taWlWoW.png
