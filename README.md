@@ -3,7 +3,28 @@ kwoolter :monkey: :copyright: 2020
 ## Overview
 This game is a rogue-like game that uses the `libtcod` library and is loosely based on the python rogue-like tutorial.
 
-### Controls
+## Screenshots
+
+<table>
+<tr>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/new_character2.JPG" alt="new character">
+</td>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/floor1.JPG" alt="exploring">
+</td>
+</tr>
+<tr>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/inventory2.JPG" alt="inventory">
+</td>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/shop2.JPG" alt="character">
+</td>
+</tr>
+</table>
+
+## Controls
 
 * `F1` help on controls available from current screen
 
@@ -54,6 +75,8 @@ Shop Screen
 Game Over Screen
 * `ENTER` - continue to Game Ready Screen 
 
+## Background
+
 ### What is a rogue-like game?
 
 * https://en.wikipedia.org/wiki/Roguelike
@@ -77,11 +100,14 @@ Features:
 * Random enemies in each room that scale as you go deeper
 * Random items scattered across the floor with probability governed by game rules
 * Potions and Scrolls have randomised effects
+* Random colour palettes and room names for dungeon levels
 * DnD-like classes, abilities, monsters and combat rules
 * DnD-like armour, weapons and other items
 * DnD-like ability checks
 * Inventory and Shop features
 * Perma-death
+
+# The Game Design
 
 ## Package Structure
 Overview:
@@ -118,27 +144,6 @@ Overview:
 * `numpy` - floor maps and properties.  Also used by `tcod` library for FOV calculations
 * `pandas` - used for loading in `csv` files that hold the game data e.g. entities, combat items, etc.
 * `pygame` - only used for the `Rect` class
-
-## Screenshots
-
-<table>
-<tr>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/new_character2.JPG" alt="new character">
-</td>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/floor1.JPG" alt="exploring">
-</td>
-</tr>
-<tr>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/inventory2.JPG" alt="inventory">
-</td>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/shop2.JPG" alt="character">
-</td>
-</tr>
-</table>
 
 # How Does The Game's Difficulty Scale?
 ## Basic Concept
