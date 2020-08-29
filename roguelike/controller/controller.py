@@ -120,6 +120,7 @@ class Controller():
             move = action.get('move')
             use = action.get('use')
             debug = action.get('debug')
+            zoom = action.get('zoom')
             help = action.get('help')
             save = action.get('save')
             load = action.get('load')
@@ -129,6 +130,10 @@ class Controller():
 
             if help is True:
                 self.help()
+
+            elif zoom is not None:
+                if self.view.font_zoom(zoom) is True:
+                    self.view.initialise(self.model)
 
             # If we are in PLAYING mode
             elif self.mode == Controller.GAME_MODE_PLAYING:
@@ -374,6 +379,12 @@ class Controller():
 
         elif key.vk == libtcod.KEY_F5:
             return {'debug':True}
+
+        elif key.vk == libtcod.KEY_PAGEUP:
+            return {'zoom':True}
+
+        elif key.vk == libtcod.KEY_PAGEDOWN:
+            return {'zoom':False}
 
         elif self.mode == Controller.GAME_MODE_START:
             return self.handle_start_menu_keys(key)

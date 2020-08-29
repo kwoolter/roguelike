@@ -27,6 +27,7 @@ This game is a rogue-like game that uses the `libtcod` library and is loosely ba
 ## Controls
 
 * `F1` help on controls available from current screen
+* `Page Up` and `Page Down` - change font size
 
 Game Ready Screen
 * `N` create a new character

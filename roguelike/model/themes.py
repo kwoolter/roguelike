@@ -5,13 +5,22 @@ import tcod as libtcod
 import copy
 
 class Palette:
+    """
+    Class for holding the palette of colours for various features on a Floor
+    """
 
     def __init__(self, name:str):
         self.name = name
         self.colour_mappings = {}
 
     def add_colours(self, new_colours:dict):
+        """
+        As a dictionary of floor features to colours to this Palette.
+        The colours must be in the list of pre-defined libtcod colours e.g. "red", "blue"
+        :param new_colours: the new colours that you want to add.  Format is feature:colour text e.f. "FG":"red"
+        """
 
+        # Check to make sure all of the new colours exist
         for c in new_colours.values():
             assert Palette.text_to_color(c) is not None, f'Do not know colour {c}'
 
@@ -22,11 +31,16 @@ class Palette:
         self.colour_mappings.update(new_colour_rgb)
 
     def get(self, property_name: str):
+        """
+        Get the colour for a specified Floor property
+        :param property_name: the property that you want the colour for e.g. "FG"
+        :return: the Color object that the property maps to
+        """
         return self.colour_mappings.get(property_name)
 
     def dim(self, pct):
         """
-        Dim all of the colours in the palette
+        Dim all of the colours in the palette by asjusting L value of HSL representation
         :param pct: Percentage that you want to dim them by
         """
         self.colour_mappings = {k: self.dim_hsl(v,pct) for k, v in self.colour_mappings.items()}
@@ -81,7 +95,12 @@ class Palette:
 
     @staticmethod
     def dim_hsl(colour, amt : int):
-
+        """
+        Dim a colour object by adjusting the L attribute of HSL representation
+        :param colour: the colour that you want to adjust
+        :param amt: the coefficient you want to adjust it by. 1.0 means unchanged
+        :return: the new colour
+        """
         new_colour = copy.deepcopy(colour)
         libtcod.color_scale_HSV(new_colour, 1.0, amt)
         return new_colour
@@ -93,7 +112,6 @@ class ThemeManager:
     FLOOR_COLOUR_DIM_COEF = 0.6
     TUNNEL_COLOUR_DIM_COEF = 0.95
 
-    
     room_names = None
     room_palettes = None
     floor_palettes = None

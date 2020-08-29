@@ -47,6 +47,9 @@ class MainFrame(View):
     CONSOLE_MESSAGE_PANEL_HEIGHT = 13
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
 
+    CONSOLE_FONT_SIZES = [8, 10, 12, 14,16, 18, 20]
+    CONSOLE_FONT_NAME = "cp437"
+
     def __init__(self, width: int = 50, height: int = 50):
 
         super().__init__(width=width, height=height)
@@ -54,6 +57,7 @@ class MainFrame(View):
         self._mode = None
         self._old_mode = None
         self.mode = MainFrame.MODE_PLAYING
+        self.font_size = 12
 
         # Components
         self.game = None
@@ -116,7 +120,7 @@ class MainFrame(View):
 
     def initialise(self, model: model.Model):
 
-        self.set_mode(MainFrame.MODE_PLAYING)
+        #self.set_mode(MainFrame.MODE_PLAYING)
         self.game = model
 
         # Create the Game title Banner text
@@ -125,32 +129,7 @@ class MainFrame(View):
             self.game_name += f'{c} '
         self.game_name += chr(205) * 2 + chr(206) + " "
 
-        font_file_specs = {
-            "arial10x10.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
-            "dejavu_wide16x16_gs_tc.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
-            "dundalk12x12_gs_tc.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
-            "polyducks_12x12.png": libtcod.FONT_LAYOUT_ASCII_INROW,
-            "terminal8x12_gs_ro.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW
-        }
-
-        font_file = "polyducks_12x12.png"
-        # font_file = "dejavu_wide16x16_gs_tc.png"
-        # font_file = "arial10x10.png"
-        # font_file = "dundalk12x12_gs_tc.png"
-        # font_file = "terminal8x12_gs_ro.png"
-
-        # Create path for the file that we are going to load
-        data_folder = Path(__file__).resolve().parent
-        file_to_open = data_folder / "fonts" / font_file
-        print(file_to_open)
-        print(font_file)
-
-        # Failed using Path so just hacked it!!!
-        file_to_open = ".\\roguelike\\view\\fonts\\" + font_file
-
-        libtcod.console_set_custom_font(file_to_open,
-                                        font_file_specs[font_file]
-                                        )
+        self.set_font()
 
         # Initialise the root console
         libtcod.console_init_root(self.width,
@@ -186,6 +165,42 @@ class MainFrame(View):
         instructions += f"|d:{cy - 21}|l:2|R:{cx + 22}"
         frame_template = Boxes.turtle_to_box(instructions)
         self.frame1 = Boxes.array_to_border(frame_template, border_type=ShopView.BORDER_TYPE2)
+
+    def font_zoom(self, zoom_in:bool = True)->bool:
+
+        font_sizes = MainFrame.CONSOLE_FONT_SIZES
+        current_font_size = self.font_size
+
+        idx = font_sizes.index(self.font_size)
+
+        if zoom_in is True:
+            idx+=1
+            if idx < len(font_sizes):
+                self.font_size = font_sizes[idx]
+
+        elif zoom_in is False:
+            idx-=1
+            if idx >= 0:
+                self.font_size = font_sizes[idx]
+
+        if self.font_size != current_font_size:
+            self.set_font()
+
+        return self.font_size != current_font_size
+
+
+    def set_font(self):
+
+        # Built the font file name that we want to load using current font size
+        font_file = f'{MainFrame.CONSOLE_FONT_NAME}_{self.font_size}x{self.font_size}.png'
+
+        # Create path for the file that we are going to load and load it
+        data_folder = Path(__file__).resolve().parent
+        file_to_open = str(data_folder / "fonts" / font_file)
+
+        libtcod.console_set_custom_font(file_to_open,
+                                        libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW
+                                        )
 
     def set_mode(self, new_mode: str):
         self.mode = new_mode

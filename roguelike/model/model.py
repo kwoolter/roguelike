@@ -1953,7 +1953,7 @@ class ItemUser():
 
         # What can you swap an entity for?
         self.entity_swaps = {"Locked Chest":("Silver", "Food", "Small Green Potion",
-                                             "Helmet", "Weapon Upgrade", "Scroll or Resurrection"),
+                                             "Helmet", "Weapon Upgrade", "Scroll of Resurrection"),
                              "Crate":("Food", "Food", "Copper"),
                              "Barrel":("Food", "Small Red Potion", "Copper", "Key")}
 
@@ -2102,9 +2102,14 @@ class ItemUser():
             if item_at_tile is not None and item_at_tile.name in swaps:
                 new_entity = EntityFactory.get_entity_by_name(random.choice(swaps[item_at_tile.name]))
                 floor.swap_entity(item_at_tile, new_entity)
-                effect = f'You use {item.description}' \
-                         f' on {item_at_tile.description}' \
-                         f' and reveal {new_entity.description}'
+                if new_entity is not None:
+                    effect = f'You use {item.description}' \
+                             f' on {item_at_tile.description}' \
+                             f' and reveal {new_entity.description}'
+                else:
+                    effect = f'You use {item.description}' \
+                             f' on {item_at_tile.description}' \
+                             f' and nothing happens'
             else:
                 success=False
                 effect=f"Can't use {item.description} right now"
