@@ -13,4 +13,5 @@ from . combat import CombatEquipmentFactory
 from . combat import CombatClass
 from . combat import CombatClassFactory
 from . themes import ThemeManager
+from . themes import Palette
 from . entity_factory import text_to_color

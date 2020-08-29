@@ -2,6 +2,7 @@ import math
 from pathlib import Path
 
 import roguelike.model as model
+from roguelike.model import Palette
 from .view_utils import *
 
 class View():
@@ -368,11 +369,12 @@ class MainFrame(View):
             stat_value = self.game.player.get_property(stat)
             status += f'{stat}={stat_value} '
 
-        so = ScreenString(text=status, fg=libtcod.lightest_grey, alignment=libtcod.LEFT)
-        so.render(0, x=x, y=y)
+        libtcod.console_set_default_foreground(0,libtcod.lightest_grey)
+        libtcod.console_print(0,x,y,f'{status:<{self.width}}')
 
         y +=1
 
+        # Draw the HP bar
         HP_status_bar_width = 48
         hp_pct = hp / max_hp
         full_bar_text = chr(195) + chr(196) * HP_status_bar_width + chr(180)
@@ -383,27 +385,16 @@ class MainFrame(View):
         libtcod.console_set_default_background(0, libtcod.darkest_grey)
         libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=full_bar_text)
 
-        '''
-        if hp_pct < 0.25:
-            fg = libtcod.dark_red
-            bg = libtcod.darkest_red
-        elif hp_pct < 0.5:
-            fg = libtcod.dark_yellow
-            bg=libtcod.darkest_yellow
-        else:
-            fg = libtcod.dark_green
-            bg = libtcod.darkest_green
-        '''
-
-        fg = libtcod.Color(int(255 * (1 - hp_pct)), int(255 * hp_pct), 10)
-        bg = dim_rgb(fg, 100)
+        # Calculate colour of HP bar by linear interpolation between Red and Green
+        fg = libtcod.color_lerp((255,0,0),(0,255,0),hp_pct)
+        bg = Palette.dim_hsl(fg,0.5)
 
         if hp > 0:
             libtcod.console_set_default_foreground(0,fg)
             libtcod.console_set_default_background(0, bg)
             libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
 
-        libtcod.console_set_default_foreground(0, dim_rgb(fg,-50))
+        libtcod.console_set_default_foreground(0, Palette.dim_hsl(fg,1.5))
         libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=hp_text)
 
         libtcod.console_flush()
@@ -486,7 +477,7 @@ class FloorView(View):
                         tile_rgb = list(self.bg_lit_path)
 
                     # Dim the tile colour
-                    tile_colour = dim_rgb(tile_rgb, 20)
+                    tile_colour = dim_rgb(tile_rgb, 0)
 
                     # Use linear interpolation to shade from lit path to unlit path based on distance from player
                     tile_colour = libtcod.color_lerp(tile_colour, self.bg_explored_path, a/max_l)
@@ -517,7 +508,7 @@ class FloorView(View):
                 # If no background colour for this entity then use the current tile colour with 'shadow'
                 else:
                     tile_bg = self.floor.floor_tile_colours[x, y]
-                    bg = dim_rgb(tile_bg, a + 30)
+                    bg = Palette.dim_hsl(tile_bg, 0.8)
                     libtcod.console_set_char_background(self.con, x, y, bg)
             except e:
                 print("Problem drawing {e.name} {e.fg} {e.bg}")
@@ -549,12 +540,13 @@ class FloorView(View):
                     # If no background colour for this entity then use the current tile colour with 'shadow'
                     else:
                         tile_bg = self.floor.floor_tile_colours[x, y]
-                        bg = dim_rgb(tile_bg, a+20)
+                        bg = dim_rgb(tile_rgb, a+20)
+                        #bg = Palette.dim_hsl(tile_bg, int(1-a/80))
                         libtcod.console_set_char_background(self.con, x, y, bg)
 
-                except Exception as e:
-                    print("Problem drawing {e.name} {e.fg} {e.bg}")
-                    print(e)
+                except Exception as ex:
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+                    print(ex)
 
         # Draw the player ans a 'shadow' on the floor tile
         p = self.floor.player
@@ -1416,7 +1408,7 @@ class CharacterView(View):
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
-        self.other_stats = ('XP', 'Level', 'HP', "SightRange")
+        self.other_stats = ('XP', 'Level', 'HP', "HPPerLevel","SightRange")
         self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
 
         # Components
@@ -1540,27 +1532,29 @@ class CharacterView(View):
 
         y += 2
 
+        right_shift = 6
         ac = self.character.fighter.get_defence("AC")
-        text = f'AC: {ac}'
+        text = f'AC:{ac:>3}'
         so = ScreenString(text,
                           fg=self.fg,
                           bg=self.bg,
-                          alignment=libtcod.CENTER)
+                          alignment=libtcod.RIGHT)
 
-        so.render(self.con, int(cx * 3 / 2), y)
+        so.render(self.con, int(cx * 3 / 2)+right_shift, y)
         y += 1
 
         for i, stat in enumerate(self.other_stats):
             stat_value = cc.properties.get(stat)
             if stat is not None:
-                text = f'{stat}: {stat_value}'
+                text = f'{stat}:{stat_value:>3}'
 
                 so = ScreenString(text,
                                   fg=self.fg,
                                   bg=self.bg,
-                                  alignment=libtcod.CENTER)
+                                  alignment=libtcod.RIGHT)
 
-                so.render(self.con, int(cx * 3 / 2), y)
+                so.render(self.con, int(cx * 3 / 2)+right_shift, y)
+
                 y += 1
 
         # Draw a divider

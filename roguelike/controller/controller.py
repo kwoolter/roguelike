@@ -215,12 +215,12 @@ class Controller():
                     dx, dy = move
                     self.view.character_creation_view.change_selection(dy)
                 elif select:
-                    if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
-                        name = self.view.character_creation_view.character_name
-                        class_name = self.view.character_creation_view.get_selected_class()
-                        self.model.add_player(self.model.generate_player(name, class_name))
-                        self.view.character_creation_view.initialise(self.model)
-                        self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
+                    #if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
+                    name = self.view.character_creation_view.character_name
+                    class_name = self.view.character_creation_view.get_selected_class()
+                    self.model.add_player(self.model.generate_player(name, class_name))
+                    self.view.character_creation_view.initialise(self.model)
+                    self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
 
                 # else:
                 #     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
