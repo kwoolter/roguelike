@@ -165,6 +165,8 @@ class Controller():
                     self.set_mode(Controller.GAME_MODE_PAUSED)
                 elif wait:
                     player_turn = False
+                elif debug:
+                    self.model.debug()
 
                 if player_turn is False:
                     # Tick the model
@@ -369,6 +371,9 @@ class Controller():
         # Common Keys for all modes
         if key.vk == libtcod.KEY_F1:
             return {'help': True}
+
+        elif key.vk == libtcod.KEY_F5:
+            return {'debug':True}
 
         elif self.mode == Controller.GAME_MODE_START:
             return self.handle_start_menu_keys(key)

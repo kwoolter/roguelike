@@ -210,7 +210,7 @@ class Room:
         return (self.x + random.randint(margin,self.width-margin-1), self.y + random.randint(margin,self.height-margin-1))
 
     def print(self):
-        print(f'Room {self.name} located at {self.rect}')
+        print(f'Room {self.name} located at {self.rect}, colour:{self.bg}')
 
 
 class Floor():
@@ -337,6 +337,9 @@ class Floor():
         # List of floor tile colours that can be randomly assigned to a Tunnel
         valid_tunnel_colours = ThemeManager.get_tunnel_colours_by_theme(self.theme)
 
+        # List of room names that we can randomly assign to a room
+        room_names = ThemeManager.get_room_names_by_theme(self.theme)
+
         # Define initial values for the first and last room
         self.last_room = None
         self.first_room = None
@@ -344,8 +347,16 @@ class Floor():
 
         for i in range(self.room_count):
 
+            # If we ran out of room names then reload!
+            if len(room_names) == 0:
+                room_names = ThemeManager.get_room_names_by_theme(self.theme)
+
+            # Get a random room name and remove it from the list so it cannot be reused
+            room_name = random.choice(room_names)
+            room_names.remove(room_name)
+
             # Create a new room of random name, size and tile colour
-            new_room = Room(name=ThemeManager.get_random_room_name_by_theme(self.theme),
+            new_room = Room(name=room_name,
                             w=random.randint(self.room_min_size, self.room_max_size),
                             h=random.randint(self.room_min_size, self.room_max_size),
                             bg=ThemeManager.get_random_room_colour_by_theme(self.theme))
@@ -544,7 +555,7 @@ class Floor():
             self.add_player(self.player)
 
         # Get list of all rooms on this floor but exclude the first and last rooms
-        available_rooms = self.map_rooms[1:-1]
+        available_rooms = self.map_rooms[1:-2]
 
         # Add different stuff to random rooms across the floor
         for ename, eprob, emax in entities:
@@ -1102,7 +1113,7 @@ class Floor():
         # Make floor walkable where rooms are and store any floor tile colours
         for room in self.map_rooms:
             x, y, w, h = room.rect
-            self.walkable[x:x + w - 1, y: y + h - 1] = 1
+            self.walkable[x:x + w, y: y + h] = 1
             # if random.randint(0,10) > 5:
             #     self.walkable[x, y] = 0
             #     self.walkable[x + w - 2, y] = 0
@@ -1434,6 +1445,13 @@ class Model():
 
     def print(self):
         self.current_floor.print()
+
+    def debug(self):
+        self.player.print()
+        self.print()
+        r = self.current_floor.get_current_room()
+        if r is not None:
+            self.current_floor.get_current_room().print()
 
     def tick(self):
         if self.state == Model.GAME_STATE_PLAYING:

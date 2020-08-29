@@ -166,6 +166,9 @@ class Player(Entity):
     def combat_class(self):
         return self.fighter.combat_class
 
+    def print(self):
+        print(f'{self.name} at {self.xy}')
+
     def get_property(self, property_name: str):
         value = self.properties.get(property_name)
         if value is None:
