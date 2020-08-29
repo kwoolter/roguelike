@@ -510,9 +510,9 @@ class FloorView(View):
                     tile_bg = self.floor.floor_tile_colours[x, y]
                     bg = dim_rgb(tile_bg, 10)
                     libtcod.console_set_char_background(self.con, x, y, bg)
-            except e:
-                print("Problem drawing {e.name} {e.fg} {e.bg}")
-                print(e)
+            except Exception as ex:
+                print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+                print(ex)
 
         # Draw all of the entities in the current FOV by Z order
         fov_entities = [e for e in self.floor.entities if e.xy in fov_cells]
