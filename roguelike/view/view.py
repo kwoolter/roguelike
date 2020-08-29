@@ -508,7 +508,7 @@ class FloorView(View):
                 # If no background colour for this entity then use the current tile colour with 'shadow'
                 else:
                     tile_bg = self.floor.floor_tile_colours[x, y]
-                    bg = Palette.dim_hsl(tile_bg, 0.8)
+                    bg = dim_rgb(tile_bg, 10)
                     libtcod.console_set_char_background(self.con, x, y, bg)
             except e:
                 print("Problem drawing {e.name} {e.fg} {e.bg}")
@@ -540,18 +540,17 @@ class FloorView(View):
                     # If no background colour for this entity then use the current tile colour with 'shadow'
                     else:
                         tile_bg = self.floor.floor_tile_colours[x, y]
-                        bg = dim_rgb(tile_rgb, a+20)
-                        #bg = Palette.dim_hsl(tile_bg, int(1-a/80))
+                        bg = dim_rgb(tile_bg, a+10)
                         libtcod.console_set_char_background(self.con, x, y, bg)
 
                 except Exception as ex:
                     print(f"Problem drawing {e.name} {e.fg} {e.bg}")
                     print(ex)
 
-        # Draw the player ans a 'shadow' on the floor tile
+        # Draw the player and a 'shadow' on the floor tile
         p = self.floor.player
         player_tile_bg = self.floor.floor_tile_colours[p.x,p.y]
-        bg= dim_rgb(player_tile_bg,30)
+        bg= dim_rgb(player_tile_bg,20)
         libtcod.console_set_default_foreground(self.con, p.fg)
         libtcod.console_set_default_background(self.con,bg)
         libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_SET)
