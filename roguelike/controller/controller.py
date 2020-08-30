@@ -124,6 +124,7 @@ class Controller():
             help = action.get('help')
             save = action.get('save')
             load = action.get('load')
+            examine = action.get('examine')
 
             if debug is True:
                 self.model.print()
@@ -160,6 +161,8 @@ class Controller():
                     self.model.take_item()
                 elif use:
                     self.model.use_item()
+                elif examine:
+                    self.model.check_item()
                 elif inventory:
                     self.set_mode(Controller.GAME_MODE_INVENTORY)
                 elif shop:
@@ -251,6 +254,8 @@ class Controller():
                             self.model.drop_item(e)
                         elif use:
                             self.model.use_item(e)
+                        elif examine:
+                            self.model.check_item(e)
 
                     else:
                         pass
@@ -445,6 +450,8 @@ class Controller():
             return {'take stairs': True}
         elif key.vk == libtcod.KEY_SPACE:
             return {'pickup': True}
+        elif key_char == 'x':
+            return {'examine': True}
         elif key_char == 'z':
             return {'wait': True}
         elif key_char == 'u' or key_char == 'q':
@@ -485,8 +492,11 @@ class Controller():
             return {'equip': True}
         elif key_char == 'f':
             return {'drop': True}
+        elif key_char == 'x':
+            return {'examine': True}
         elif key_char == 'u' or key_char == 'q':
             return {'use': True}
+
         elif key.vk == libtcod.KEY_ESCAPE or key_char == 'r':
             # Exit the menu
             return {'exit': True}

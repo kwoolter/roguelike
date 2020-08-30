@@ -187,15 +187,20 @@ class ThemeManager:
     @staticmethod
     def get_random_history(theme:str)->str:
 
-        text = "Empty"
         templates = {
             "Room":(["Dungeon Rooms"],["of"],["Historic Figure Names"]),
-            "Place":(["Town"],["of"],["Region"]),
-            "Person":(["Character Male", "Character Female"],["of"],["Town","Region"]),
-            "Battle":(["Historic Figure Names"],["and the battle of","and the siege of"],["Town", "Region"]),
-            "Treasure":(["Treasures"],["of"],["Historic Figure Names","Region","Town"])
-
+            "Place":(["Town","Wonders"],["in"],["Region"]),
+            "Person":(["Character Male", "Character Female", "Fantasy Male","Fantasy Female"],["of"],["Town","Region","Wonders"]),
+            "Quest":(["Historic Figure Names"],
+                     ["and the battle of","and the Siege of","and the Quest for","and the journey to", "and the destruction of"],
+                     ["Town", "Region", "Treasures", "Wonders", "Place"]),
+            "Treasure":(["Treasures"],["of"],["Historic Figure Names","Region","Town","Wonders" ]),
+            "Book":(["Quest", "Place", "Historic Figure Names", "Treasure"],["by"],["Person"])
         }
+
+        ng_sets = libtcod.namegen_get_sets()
+
+        assert theme in templates, f'Cannot find {theme} in history templates'
 
         template = templates.get(theme)
         aa, conjs, bb = template
@@ -203,25 +208,24 @@ class ThemeManager:
         conj = random.choice(conjs)
         b = random.choice(bb)
 
-        a_text = libtcod.namegen_generate(a)
-        b_text = libtcod.namegen_generate(b)
+        if a in templates:
+            a_text = ThemeManager.get_random_history(a)
+        elif a in ng_sets:
+            a_text = libtcod.namegen_generate(a).title()
+        else:
+            assert False, f'Can not resolve theme {a}'
+
+        if b in templates:
+            b_text = ThemeManager.get_random_history(b)
+        elif b in ng_sets:
+            b_text = libtcod.namegen_generate(b).title()
+        else:
+            assert False, f'Cannot resolve theme {b}'
 
         text = f'{a_text} {conj} {b_text}'
 
         return text
 
-        room_type = libtcod.namegen_generate("Dungeon Rooms")
-        historic = libtcod.namegen_generate("Historic Figure Names")
-        author = libtcod.namegen_generate("Character Male")
-        region = libtcod.namegen_generate("Region")
-        town = libtcod.namegen_generate("Town")
-        treasure = libtcod.namegen_generate("Treasures")
-
-        room = f'Room:{room_type} of the {historic}'
-        item =  f'Item:{treasure} of the {historic}'
-        place = f'Place:{town} of {region}'
-        battle = f'{historic}'
-        return  f'{room}\n{item}\n{place}'
 
     @staticmethod
     def get_room_colours_by_theme(theme_name : str)->list:
@@ -326,10 +330,10 @@ if __name__ == "__main__":
 
     theme = "Desert"
 
-    things = ["Room","Place","Person", "Battle","Treasure"]
+    things = ["Room","Place","Person", "Quest","Treasure", "Book"]
 
     for thing in things:
-        print(thing, "="*40)
+        print(f'\n{thing:=^60}')
         for i in range(10):
             r = ThemeManager.get_random_history(thing)
             print(r)

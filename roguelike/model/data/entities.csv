@@ -135,3 +135,6 @@ Emerald,a green emerald gemstone,.,Object,dark_green,,2,TRUE,TRUE,FALSE,TRUE,TRU
 Sapphire,a blue sapphire gemstone,.,Object,blue,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
 Amethyst,an amethyst gemstone,.,Object,light_fuchsia,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
 Onyx,a black onyx gemstone,.,Object,black,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
+Book,an old book,?,Object,lightest_sepia,darkest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Tome,an ancient tome,?,Object,lightest_sepia,darkest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Writings,some old writings,?,Object,lightest_sepia,darkest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0

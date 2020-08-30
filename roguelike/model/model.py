@@ -354,6 +354,7 @@ class Floor():
             # Get a random room name and remove it from the list so it cannot be reused
             room_name = random.choice(room_names)
             room_names.remove(room_name)
+            room_name = ThemeManager.get_random_history("Room")
 
             # Create a new room of random name, size and tile colour
             new_room = Room(name=room_name,
@@ -871,8 +872,8 @@ class Floor():
     def run_ability_check(self, e:Entity):
         """
         See if there any ability checks for the specified object and run them
-        :param e:
-        :return:
+        :param e: the Entity that you want to perform a check on
+        :return: did the check succeed of Fail?
         """
 
         success = False
@@ -940,6 +941,14 @@ class Floor():
                                                     name=Event.EFFECT_ITEM_DISCOVERY,
                                                     description=f'You find {check.success_reward.description}'))
 
+                for k,v in check.success_misc.items():
+                    if k == "History":
+                        text = ThemeManager.get_random_history(v)
+                        self.events.add_event(
+                            Event(type=Event.GAME,
+                                  name=Event.ACTION_FOUND_LORE,
+                                  description=f"[Lore] {v}:'{text}'"))
+
                 # Update any stats with any rewards
                 for stat, value in check.success_stats.items():
                     if stat == "HP":
@@ -963,6 +972,8 @@ class Floor():
                                   description=f"You gain {value} XP"))
                     else:
                         print(f'get reward {stat}={value} but did nothing!')
+
+
 
 
             # If ability check failed...
@@ -1374,6 +1385,7 @@ class Model():
 
         # Load game data from specified files
         ThemeManager.load_room_names("room_names.csv")
+        ThemeManager.load_history_data("rogue_history.cfg")
         ThemeManager.load_room_colour_palettes("room_palettes.csv")
         ThemeManager.load_floor_colour_palettes("floor_palettes.csv")
         GameParameters.load("game_parameters.csv")
@@ -1817,6 +1829,28 @@ class Model():
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"You can't drop {old_item.description} here"))
+
+        return success
+
+    def check_item(self, selected_item : Entity = None)->bool:
+        """
+
+        :param selected_item:
+        :return:
+        """
+        success = False
+
+        # If the item is not checkable then fail
+        if selected_item.get_property("IsCheckable") == False:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"Nothing of interest"))
+
+        else:
+
+            success = self.current_floor.run_ability_check(selected_item)
+
+
 
         return success
 
@@ -2342,6 +2376,9 @@ class AbilityCheck:
         self.success_stats = {}
         self.failure_stats = {}
 
+        self.success_misc = {}
+        self.failure_misc = {}
+
     def __str__(self):
         txt = f'{self.difficulty.upper()}:{self.difficulty_value} Check: {self.entity.name} versus {self.ability} ability - {len(self.success_rewards)} rewards:'
         for reward in self.success_rewards:
@@ -2458,12 +2495,20 @@ class AbilityChecksFactory:
         if success_stats != "":
             for reward in success_stats.split(','):
                 stat, value = reward.split('=')
-                new_check.add_reward_stat(stat, int(value), success=True)
+
+                if stat[0] == "#":
+                    new_check.success_misc[stat[1:]] = value
+                else:
+                    new_check.add_reward_stat(stat, int(value), success=True)
 
         if failure_stats != "":
             for reward in failure_stats.split(','):
                 stat, value = reward.split('=')
-                new_check.add_reward_stat(stat, int(value), success=False)
+
+                if stat[0] == "#":
+                    new_check.failure_misc[stat[1:]] = value
+                else:
+                    new_check.add_reward_stat(stat, int(value), success=False)
 
         return new_check
 

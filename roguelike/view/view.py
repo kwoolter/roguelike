@@ -1897,6 +1897,7 @@ class EventView(View):
                             model.Event.ACTION_FAILED: (libtcod.yellow, None),
                             model.Event.ACTION_ATTACK: (libtcod.light_red, None),
                             model.Event.ACTION_FOUND_ITEM: (libtcod.light_azure, None),
+                            model.Event.ACTION_FOUND_LORE: (libtcod.lightest_sepia, libtcod.darkest_sepia),
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
                             model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),

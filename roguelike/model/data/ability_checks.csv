@@ -14,7 +14,7 @@ Locked Chest,DEX,Hard,10,You try and pick the lock of {entity} using your {abili
 Locked Chest,STR,Hard,10,You try and break {entity} using your {ability},You break open {entity},"Key,Food,Small Blue Potion,Helmet",XP=10,You cannot open {entity},,
 Nature Item,WIS,Medium,10,You examine something that you notice on the floor,Using your {ability} of nature you find a useful item,"Healing Herbs,Blue Mushroom,Red Mushroom",XP=10,Nothing of use,Empty,
 Nature Trap,WIS,Medium,10,You examine something that you notice on the floor,Using your {ability} of nature you identify a poisonous liquid and avoid it,Empty,XP=10,There is a green liquid that burns you as you touch it,Empty,HP=-5
-NPC,CHA,Medium,10,You approach {entity} and talk to them,Using your {ability} you charm {entity}.  They give you something and then dissappear,"Map, Silver,Key,,Weapon Upgrade",XP=10,{entity} is not interested in you and walks away,Empty,
+NPC,CHA,Medium,10,You approach {entity} and talk to them,Using your {ability} you charm {entity}.  They give you something and then dissappear,"Map, Silver,Key,Weapon Upgrade",XP=10,{entity} is not interested in you and walks away,Empty,
 Plaque,INT,Medium,10,You carefully examine {entity},You read some inscriptions on {entity} and gain some esoteric knowledge,,XP=20,You notice some inscriptions on {entity} but they are worn with age and you cannot read them,,
 Rock,STR,Easy,10,You try and lift {entity} using your {ability},With a heave you lift {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to lift {entity} ,,
 Shrine,INT,Medium,10,You approach {entity},You pray at {entity} and it has a healing effect on you,,"XP=10,HP=5",You pray at {entity} but the gods are silent,,
@@ -23,3 +23,6 @@ Tomb,INT,Medium,10,You carefully examine {entity},You read some ancient writings
 Tomb,STR,Hard,10,You carefully examine {entity},Using your {ability} you lift {entity} to reveal what is inside,"Helmet, Dagger, Copper, Copper, Trap",XP=10,{entity} is very heavy and won't move,,
 Trap,DEX,Medium,10,You try and disable {entity} using your {ability},You disable {entity},"Silver,Silver, Copper, Copper, Copper, Gold,Weapon Upgrade",XP=10,You fail to disable {entity} and trigger it,Empty,HP=-5
 Trap,WIS,Medium,10,You carefully observe {entity},Your {ability} tells you it is probably best not to mess with such things,Trap,XP=10,You start to tinker with {entity} but trigger it accidentally,Empty,HP=-5
+Book,INT,Easy,10,You open {entity} and look through the pages,You read {entity},,"XP=10,#History=Book",You cannot decypher the language written in {entity},,
+Tome,INT,Easy,10,You open {entity} and look through the pages,You read {entity},,"XP=10,#History=Quest",You cannot decypher the language written in {entity},,
+Writings,INT,Easy,10,You carefully look at {entity},You read {entity},,"XP=10,#History=Treasure",You cannot decypher the language written in {entity},,
