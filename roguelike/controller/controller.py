@@ -352,7 +352,7 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
             keys_help = 'N=Change name|C=change class|Enter/Space=Confirm|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_PLAYING:
-            keys_help = '^v<> / WASD=Move/attack|G/Space=Get item|U/Q=use equipped item|Z=wait|I/R=show inventory|C=show character sheet|Enter/X=take stairs|Esc=Pause'
+            keys_help = '^v<> / WASD=Move/attack/examine|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|Enter=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
             keys_help = 'Esc=continue|Q=quit the game'
         elif self.mode == Controller.GAME_MODE_INVENTORY:
@@ -446,7 +446,7 @@ class Controller():
             return {'move': (-1, 0)}
         elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
-        elif key.vk == libtcod.KEY_ENTER or key_char == 'x':
+        elif key.vk == libtcod.KEY_ENTER:
             return {'take stairs': True}
         elif key.vk == libtcod.KEY_SPACE:
             return {'pickup': True}
@@ -488,7 +488,7 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        elif key_char == 'e':
+        elif key.vk == libtcod.KEY_ENTER or key_char == 'e':
             return {'equip': True}
         elif key_char == 'f':
             return {'drop': True}
@@ -497,7 +497,7 @@ class Controller():
         elif key_char == 'u' or key_char == 'q':
             return {'use': True}
 
-        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'r':
+        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'i':
             # Exit the menu
             return {'exit': True}
 

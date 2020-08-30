@@ -188,14 +188,18 @@ class ThemeManager:
     def get_random_history(theme:str)->str:
 
         templates = {
-            "Room":(["Dungeon Rooms"],["of"],["Historic Figure Names"]),
+            "Room":(["Dungeon Rooms"],None,[None]),
+            "Floor": (["Dungeon Floors"], ["of"], ["Historic Figure Names Male","Historic Figure Names Female","Region", "Town"]),
             "Place":(["Town","Wonders"],["in"],["Region"]),
-            "Person":(["Character Male", "Character Female", "Fantasy Male","Fantasy Female"],["of"],["Town","Region","Wonders"]),
-            "Quest":(["Historic Figure Names"],
+            "Person":(["Character Male", "Character Female", "Fantasy Male","Fantasy Female"],["of"],["Town","Region","Wonders","Place"]),
+            "Quest":(["Historic Figure Names Male", "Historic Figure Names Female"],
                      ["and the battle of","and the Siege of","and the Quest for","and the journey to", "and the destruction of"],
                      ["Town", "Region", "Treasures", "Wonders", "Place"]),
-            "Treasure":(["Treasures"],["of"],["Historic Figure Names","Region","Town","Wonders" ]),
-            "Book":(["Quest", "Place", "Historic Figure Names", "Treasure"],["by"],["Person"])
+            "PvP":(["Historic Figure Names Male","Historic Figure Names Female","Person"],
+                   ["and the murder of","and the death of","and the marriage of","and the betrayal of", "and the hunt for","and the alliance with","and the usurping of","and the tormnent of"],
+                   ["Historic Figure Names Male","Historic Figure Names Female", "Person"]),
+            "Treasure":(["Treasures"],["of"],["Historic Figure Names Male","Historic Figure Names Female","Region","Town","Wonders" ]),
+            "Book":(["Quest", "Place", "Historic Figure Names Male","Historic Figure Names Female", "Treasure","PvP"],["by"],["Person"])
         }
 
         ng_sets = libtcod.namegen_get_sets()
@@ -205,24 +209,33 @@ class ThemeManager:
         template = templates.get(theme)
         aa, conjs, bb = template
         a = random.choice(aa)
-        conj = random.choice(conjs)
+
+        if conjs is None:
+            conj = ""
+        else:
+            conj = " "+random.choice(conjs)+" "
+
         b = random.choice(bb)
 
-        if a in templates:
+        if a is None:
+            a_text =""
+        elif a in templates:
             a_text = ThemeManager.get_random_history(a)
         elif a in ng_sets:
             a_text = libtcod.namegen_generate(a).title()
         else:
             assert False, f'Can not resolve theme {a}'
 
-        if b in templates:
+        if b is None:
+            b_text =""
+        elif b in templates:
             b_text = ThemeManager.get_random_history(b)
         elif b in ng_sets:
             b_text = libtcod.namegen_generate(b).title()
         else:
             assert False, f'Cannot resolve theme {b}'
 
-        text = f'{a_text} {conj} {b_text}'
+        text = f'{a_text}{conj}{b_text}'
 
         return text
 
@@ -330,7 +343,7 @@ if __name__ == "__main__":
 
     theme = "Desert"
 
-    things = ["Room","Place","Person", "Quest","Treasure", "Book"]
+    things = ["Room","Place","Person", "Quest","Treasure", "Book","PvP"]
 
     for thing in things:
         print(f'\n{thing:=^60}')

@@ -44,10 +44,11 @@ Game Playing Screen
 * Arrow keys - move and attack enemy
 * `G` or `SPACE` get an item
 * `Q` or `U` use item currently equipped in Item slot
+* `X` examine item on floor
 * `Z` skip turn
 * `C` character screen
 * `R` inventory screen
-* `ENTER` or `X` travel down stairs
+* `ENTER` travel down stairs
 * `Esc` pause game
 
 Game Paused Screen
@@ -57,6 +58,7 @@ Game Paused Screen
 Inventory Screen
 * `E` equip an item
 * `Q` or `U` use an item
+* `X` examine an item
 * `F` drop an item
 * `Esc` or `R` exit screen
 

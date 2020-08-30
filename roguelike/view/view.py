@@ -666,7 +666,7 @@ class MessagePanel(View):
                                          x, y,
                                          flag=libtcod.BKGND_SET,
                                          alignment=libtcod.LEFT,
-                                         fmt=line)
+                                         fmt=f'{line:<{self.width-2}}')
 
                 # Move to the next line in the message panel
                 y += 1

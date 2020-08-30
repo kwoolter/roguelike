@@ -1743,7 +1743,8 @@ class Model():
             if self.dungeon_level > len(self.floors):
 
                 # Create a new floor and initialise it
-                self.current_floor = Floor(f'The Floor {self.dungeon_level}',
+                floor_name = ThemeManager.get_random_history("Floor")
+                self.current_floor = Floor(floor_name,
                                            50, 50,
                                            level=self.dungeon_level,
                                            params=game_parameters)
@@ -1759,7 +1760,7 @@ class Model():
             self.current_floor.add_player(self.player)
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.GAME_NEW_FLOOR,
-                                        description=f"{self.name}: Level {self.dungeon_level} Ready! {self.current_floor.theme} level."))
+                                        description=f"{self.current_floor.theme}:{self.current_floor.name} on level {self.dungeon_level} ready!"))
 
             # Let the Player know if they can level up now!
             player_level = game_parameters["Game"]["Player"]["Level"]
@@ -1840,16 +1841,28 @@ class Model():
         """
         success = False
 
+        if selected_item is None:
+            # First see if there is anything at the current location.  If not then fail.
+            e = self.current_floor.get_entity_at_pos(self.player.xy)
+            if e is None:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"There is nothing here!"))
+
+                return success
+            else:
+                selected_item = e
+
+
         # If the item is not checkable then fail
         if selected_item.get_property("IsCheckable") == False:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
-                                        description=f"Nothing of interest"))
+                                        description=f"{selected_item.description} is nothing of interest"))
 
         else:
 
             success = self.current_floor.run_ability_check(selected_item)
-
 
 
         return success
