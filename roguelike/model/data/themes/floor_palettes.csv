@@ -3,5 +3,5 @@ Dungeon,white,black,darker_yellow, darkest_yellow, dark_grey,darkest_grey,lighte
 Desert,lighter_sepia,desaturated_flame,light_sepia,dark_sepia,darker_sepia,darkest_sepia,lighter_sepia
 Swamp,lighter_chartreuse,desaturated_chartreuse,light_chartreuse,dark_chartreuse,darker_chartreuse,darkest_chartreuse,lighter_chartreuse
 Water,lighter_sky,desaturated_sky,light_sky,dark_sky,darker_sky,darkest_sky,lighter_sky
-Frost,lighter_grey,white,light_grey,grey,dark_grey,darkest_grey,lighter_grey
+Frost,lighter_grey,white,light_grey,grey,dark_grey,darkest_grey,lightest_grey
 Lava,lighter_orange,desaturated_orange,light_orange,dark_orange,darker_orange,darkest_orange,lighter_orange
