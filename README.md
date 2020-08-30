@@ -103,7 +103,8 @@ Features:
 * Random enemies in each room that scale as you go deeper
 * Random items scattered across the floor with probability governed by game rules
 * Potions and Scrolls have randomised effects
-* Random colour palettes and room names for dungeon levels
+* Random colour palettes and random room and dungeon level names
+* Random Lore generation
 * DnD-like classes, abilities, monsters and combat rules
 * DnD-like armour, weapons and other items
 * DnD-like ability checks
@@ -143,7 +144,7 @@ Overview:
 
 ## Dependencies
 * Python 3
-* `tcod` - creating and writing to consoles, keyboard events, colours, field of view (FOV) calculations, etc.
+* `tcod` - creating and writing to consoles, keyboard events, colours, field of view (FOV) calculations, random name generation, etc.
 * `numpy` - floor maps and properties.  Also used by `tcod` library for FOV calculations
 * `pandas` - used for loading in `csv` files that hold the game data e.g. entities, combat items, etc.
 * `pygame` - only used for the `Rect` class
