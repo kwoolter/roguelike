@@ -3,6 +3,7 @@ from pathlib import Path
 import random
 import tcod as libtcod
 import copy
+import textwrap
 
 class Palette:
     """
@@ -188,56 +189,62 @@ class ThemeManager:
     def get_random_history(theme:str)->str:
 
         templates = {
-            "Room":(["Dungeon Rooms"],None,[None]),
-            "Floor": (["Dungeon Floors"], ["of"], ["Historic Figure Names Male","Historic Figure Names Female","Region", "Town"]),
-            "Place":(["Town","Wonders"],["in"],["Region"]),
-            "Person":(["Character Male", "Character Female", "Fantasy Male","Fantasy Female"],["of"],["Town","Region","Wonders","Place"]),
+            "Room":(["Dungeon Rooms"],None),
+            "Floor": (["Dungeon Floors"], [" of "], ["Historic Figure Names Male","Historic Figure Names Female","Region", "Town"]),
+            "Place":(["Town","Wonders"],[" in "],["Region"]),
+            "Person":(["Character Male", "Character Female", "Fantasy Male","Fantasy Female"],[" of "],["Town","Region","Wonders","Place"]),
             "Quest":(["Historic Figure Names Male", "Historic Figure Names Female"],
-                     ["and the battle of","and the Siege of","and the Quest for","and the journey to", "and the destruction of"],
+                     [" and the battle of "," and the Siege of "," and the Quest for "," and the journey to ", " and the destruction of "," and the decimation of "," and how they found "," and how they discovered "],
                      ["Town", "Region", "Treasures", "Wonders", "Place"]),
             "PvP":(["Historic Figure Names Male","Historic Figure Names Female","Person"],
-                   ["and the murder of","and the death of","and the marriage of","and the betrayal of", "and the hunt for","and the alliance with","and the usurping of","and the tormnent of"],
+                   [" and the murder of "," and the death of "," and the marriage of "," and the betrayal of ", " and the hunt for "," and the alliance with "," and the usurping of "," and the torment of "],
                    ["Historic Figure Names Male","Historic Figure Names Female", "Person"]),
-            "Treasure":(["Treasures"],["of"],["Historic Figure Names Male","Historic Figure Names Female","Region","Town","Wonders" ]),
-            "Book":(["Quest", "Place", "Historic Figure Names Male","Historic Figure Names Female", "Treasure","PvP"],["by"],["Person"])
+            "Treasure":(["Treasures"],[" of "],["Historic Figure Names Male","Historic Figure Names Female","Region","Town","Wonders" ]),
+            "Book":(["'"],
+                    ["The missing pages of ","The forgotten passages of ","The ancient Lore of ", "The lessons of ","A cautionary tale of ", "The Tale of ","The Saga of ","An allegory of ","The writings of ", "The story of ","The book of "],
+                    ["Quest", "Place", "Historic Figure Names Male","Historic Figure Names Female", "Treasure","PvP"],
+                    ["'"],
+                    [" by "],
+                    ["Person"])
         }
 
-        ng_sets = libtcod.namegen_get_sets()
 
         assert theme in templates, f'Cannot find {theme} in history templates'
 
+        # See what name generate sets we have loaded
+        ng_sets = libtcod.namegen_get_sets()
+
+        # Get the name of teh template that we want to expand
         template = templates.get(theme)
-        aa, conjs, bb = template
-        a = random.choice(aa)
 
-        if conjs is None:
-            conj = ""
-        else:
-            conj = " "+random.choice(conjs)+" "
+        text = ""
 
-        b = random.choice(bb)
+        # Loop through each segment in the template
+        for aa in template:
 
-        if a is None:
-            a_text =""
-        elif a in templates:
-            a_text = ThemeManager.get_random_history(a)
-        elif a in ng_sets:
-            a_text = libtcod.namegen_generate(a).title()
-        else:
-            assert False, f'Can not resolve theme {a}'
+            # If None segment keep looping to the next one
+            if aa is None:
+                continue
+            # Otherwise...
+            else:
+                # Pick a random item from the segment
+                a = random.choice(aa)
 
-        if b is None:
-            b_text =""
-        elif b in templates:
-            b_text = ThemeManager.get_random_history(b)
-        elif b in ng_sets:
-            b_text = libtcod.namegen_generate(b).title()
-        else:
-            assert False, f'Cannot resolve theme {b}'
+                # If the segment a template?  If so recursive call to expand the template
+                if a in templates:
+                    a_text = ThemeManager.get_random_history(a)
+                # If it is in out name generation sets that we loaded then generate a name of this type
+                elif a in ng_sets:
+                    a_text = libtcod.namegen_generate(a).title()
+                # Else just use the segment text itself!
+                else:
+                    a_text=a
 
-        text = f'{a_text}{conj}{b_text}'
+                # Add whatever text we ended up with to our full text
+                text += a_text
 
-        return text
+        # Tidy up by removing any duplicate whitespace
+        return " ".join(text.split())
 
 
     @staticmethod
@@ -343,7 +350,7 @@ if __name__ == "__main__":
 
     theme = "Desert"
 
-    things = ["Room","Place","Person", "Quest","Treasure", "Book","PvP"]
+    things = ["Floor","Room","Place","Person", "Quest","Treasure", "Book","PvP"]
 
     for thing in things:
         print(f'\n{thing:=^60}')
