@@ -175,6 +175,55 @@ class ThemeManager:
         ThemeManager.available_themes = ThemeManager.available_themes.union(set(df.index))
 
     @staticmethod
+    def load_history_data(file_name:str):
+        # Create path for the file that we are going to load
+        data_folder = Path(__file__).resolve().parent
+        file_to_open = data_folder / "data" / "themes" / file_name
+
+
+        libtcod.namegen_parse(str(file_to_open))
+
+
+    @staticmethod
+    def get_random_history(theme:str)->str:
+
+        text = "Empty"
+        templates = {
+            "Room":(["Dungeon Rooms"],["of"],["Historic Figure Names"]),
+            "Place":(["Town"],["of"],["Region"]),
+            "Person":(["Character Male", "Character Female"],["of"],["Town","Region"]),
+            "Battle":(["Historic Figure Names"],["and the battle of","and the siege of"],["Town", "Region"]),
+            "Treasure":(["Treasures"],["of"],["Historic Figure Names","Region","Town"])
+
+        }
+
+        template = templates.get(theme)
+        aa, conjs, bb = template
+        a = random.choice(aa)
+        conj = random.choice(conjs)
+        b = random.choice(bb)
+
+        a_text = libtcod.namegen_generate(a)
+        b_text = libtcod.namegen_generate(b)
+
+        text = f'{a_text} {conj} {b_text}'
+
+        return text
+
+        room_type = libtcod.namegen_generate("Dungeon Rooms")
+        historic = libtcod.namegen_generate("Historic Figure Names")
+        author = libtcod.namegen_generate("Character Male")
+        region = libtcod.namegen_generate("Region")
+        town = libtcod.namegen_generate("Town")
+        treasure = libtcod.namegen_generate("Treasures")
+
+        room = f'Room:{room_type} of the {historic}'
+        item =  f'Item:{treasure} of the {historic}'
+        place = f'Place:{town} of {region}'
+        battle = f'{historic}'
+        return  f'{room}\n{item}\n{place}'
+
+    @staticmethod
     def get_room_colours_by_theme(theme_name : str)->list:
         """
         Get the list of Room colours for the specified theme
@@ -273,8 +322,19 @@ if __name__ == "__main__":
     ThemeManager.load_room_names("room_names.csv")
     ThemeManager.load_room_colour_palettes("room_palettes.csv")
     ThemeManager.load_floor_colour_palettes("floor_palettes.csv")
+    ThemeManager.load_history_data("rogue_history.cfg")
 
     theme = "Desert"
+
+    things = ["Room","Place","Person", "Battle","Treasure"]
+
+    for thing in things:
+        print(thing, "="*40)
+        for i in range(10):
+            r = ThemeManager.get_random_history(thing)
+            print(r)
+    assert False
+
 
     r = ThemeManager.get_room_colours_by_theme(theme)
     print(r)
