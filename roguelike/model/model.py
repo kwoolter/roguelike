@@ -1146,14 +1146,26 @@ class Floor():
             for sx, sy in segments:
                 if self.is_valid_xy(sx,sy):
 
+                    # get the current colour at this position
+                    c = self.floor_tile_colours[sx,sy]
+                    current_colour = dim_rgb(c,0)
+
+                    # Calculate the l0 distance from the start of teh tunnel
                     start_l0, end_l0 = tunnel.get_segment_distances((sx,sy))
                     total_l0 = start_l0 + end_l0
                     from_start_pct = start_l0/total_l0
                     from_end_pct = end_l0/total_l0
 
                     self.walkable[sx, sy] = 1
-                    self.floor_tile_colours[sx,sy] = list(tunnel.bg)
-                    self.floor_tile_colours[sx, sy] = libtcod.color_lerp(tunnel.start_bg, tunnel.end_bg, from_start_pct)
+                    #self.floor_tile_colours[sx,sy] = list(tunnel.bg)
+                    new_colour = libtcod.color_lerp(tunnel.start_bg, tunnel.end_bg, from_start_pct)
+                    if current_colour != libtcod.black:
+                        blended_colour = libtcod.color_lerp(current_colour,new_colour,0.5)
+                    else:
+                        blended_colour = new_colour
+
+
+                    self.floor_tile_colours[sx, sy] = list(blended_colour)
 
         # Make floor walkable where rooms are and store any floor tile colours
         for room in self.map_rooms:

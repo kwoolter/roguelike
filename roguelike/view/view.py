@@ -194,6 +194,8 @@ class MainFrame(View):
         # Built the font file name that we want to load using current font size
         font_file = f'{MainFrame.CONSOLE_FONT_NAME}_{self.font_size}x{self.font_size}.png'
 
+        font_file = "terminal12x12_gs_ro.png"
+
         # Create path for the file that we are going to load and load it
         data_folder = Path(__file__).resolve().parent
         file_to_open = str(data_folder / "fonts" / font_file)
