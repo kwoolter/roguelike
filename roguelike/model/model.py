@@ -1150,7 +1150,7 @@ class Floor():
                     c = self.floor_tile_colours[sx,sy]
                     current_colour = dim_rgb(c,0)
 
-                    # Calculate the l0 distance from the start of teh tunnel
+                    # Calculate the l0 distance from the start of the tunnel
                     start_l0, end_l0 = tunnel.get_segment_distances((sx,sy))
                     total_l0 = start_l0 + end_l0
                     from_start_pct = start_l0/total_l0

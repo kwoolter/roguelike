@@ -1,0 +1,5 @@
+# Ideas TO DO
+
+[OF] Better weapon and armour upgrade system
+[OF] Spell book of reusable spells for Wizard and Cleric
+[KW] errr nothing yet
