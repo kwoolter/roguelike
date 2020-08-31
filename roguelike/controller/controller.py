@@ -446,7 +446,7 @@ class Controller():
             return {'move': (-1, 0)}
         elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
-        elif key.vk == libtcod.KEY_ENTER:
+        elif key.vk == libtcod.KEY_ENTER or key_char == 'v':
             return {'take stairs': True}
         elif key.vk == libtcod.KEY_SPACE:
             return {'pickup': True}
@@ -497,7 +497,7 @@ class Controller():
         elif key_char == 'u' or key_char == 'q':
             return {'use': True}
 
-        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'i':
+        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'i' or key_char == 'r':
             # Exit the menu
             return {'exit': True}
 
@@ -533,7 +533,7 @@ class Controller():
     def handle_character_view_keys(self, key):
         key_char = chr(key.c)
 
-        if key_char == 'l' or key_char == 'e':
+        if key_char == 'l' or key_char == 'e' or key.vk == libtcod.KEY_SPACE:
             return {'level-up': True}
 
         elif key.vk == libtcod.KEY_ENTER and key.lalt:

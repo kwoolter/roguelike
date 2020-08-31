@@ -48,7 +48,7 @@ Game Playing Screen
 * `Z` skip turn
 * `C` character screen
 * `R` inventory screen
-* `ENTER` travel down stairs
+* `ENTER` or `V` travel down stairs
 * `Esc` pause game
 
 Game Paused Screen
@@ -64,7 +64,7 @@ Inventory Screen
 
 Character Screen
 * Arrow keys or `WASD` - change selected ability
-* `L` or `E` level-up and increase selected ability
+* `L`, `E` or `SPACE` level-up and increase selected ability
 * `Esc` exit screen
 
 Shop Screen
