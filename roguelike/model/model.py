@@ -66,6 +66,9 @@ class Tunnel:
         self.fg = fg
         self.bg = bg
 
+        self.start_bg = self.bg
+        self.end_bg = self.bg
+
         if direction is None:
             self.direction = random.choice(Tunnel.DIRECTIONS)
         else:
@@ -146,6 +149,17 @@ class Tunnel:
         fn = random.choice([self.get_segments_direct, self.get_segments_fat, self.get_segments_thin])
         x = set(fn())
         return list(x)
+
+    def get_segment_distances(self, segment:tuple):
+
+        seg_x,seg_y = segment
+        start_x, start_y = self.start_pos
+        end_x, end_y = self.end_pos
+
+        l0_start = abs(seg_x - start_x) + abs(seg_y - start_y)
+        l0_end = abs(seg_x - end_x) + abs(seg_y - end_y)
+
+        return l0_start, l0_end
 
 
 class Room:
@@ -378,6 +392,10 @@ class Floor():
                     new_tunnel = Tunnel(start_pos=self.last_room.center,
                                         end_pos=new_room.center,
                                         bg=random_tunnel_colour)
+
+                    new_tunnel.start_bg = self.last_room.bg
+                    new_tunnel.end_bg = new_room.bg
+
                     self.map_tunnels.append(new_tunnel)
 
                 # Make the new room the last room
@@ -1124,10 +1142,18 @@ class Floor():
         # Make floor walkable where tunnels are and store the floor tile colour
         for tunnel in self.map_tunnels:
             segments = tunnel.get_segments()
+
             for sx, sy in segments:
                 if self.is_valid_xy(sx,sy):
+
+                    start_l0, end_l0 = tunnel.get_segment_distances((sx,sy))
+                    total_l0 = start_l0 + end_l0
+                    from_start_pct = start_l0/total_l0
+                    from_end_pct = end_l0/total_l0
+
                     self.walkable[sx, sy] = 1
                     self.floor_tile_colours[sx,sy] = list(tunnel.bg)
+                    self.floor_tile_colours[sx, sy] = libtcod.color_lerp(tunnel.start_bg, tunnel.end_bg, from_start_pct)
 
         # Make floor walkable where rooms are and store any floor tile colours
         for room in self.map_rooms:
