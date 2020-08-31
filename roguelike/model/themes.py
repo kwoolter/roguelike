@@ -177,31 +177,46 @@ class ThemeManager:
 
     @staticmethod
     def load_history_data(file_name:str):
+        """
+        Use libtcod library to load in the name generation configuration
+        :param file_name: the name of the config file that you want to load
+        """
         # Create path for the file that we are going to load
         data_folder = Path(__file__).resolve().parent
         file_to_open = data_folder / "data" / "themes" / file_name
-
 
         libtcod.namegen_parse(str(file_to_open))
 
 
     @staticmethod
     def get_random_history(theme:str)->str:
+        """
+        A method for generating some random Lore based on the specified theme
+        :param theme: the theme of Lore that you want to generate e.g. Room, Person
+        :return: a string with the generated name
+        """
 
+        # Templates for generating different types of Lore themes
         templates = {
             "Room":(["Dungeon Rooms"],None),
             "Floor": (["Dungeon Floors"], [" of "], ["Historic Figure Names Male","Historic Figure Names Female","Region", "Town"]),
             "Place":(["Town","Wonders"],[" in "],["Region"]),
             "Person":(["Character Male", "Character Female", "Fantasy Male","Fantasy Female"],[" of "],["Town","Region","Wonders","Place"]),
             "Quest":(["Historic Figure Names Male", "Historic Figure Names Female"],
-                     [" and the battle of "," and the Siege of "," and the Quest for "," and the journey to ", " and the destruction of "," and the decimation of "," and how they found "," and how they discovered "],
+                     [" and the battle of "," and the Siege of "," and the Quest for "," and the journey to ",
+                      " and the destruction of "," and the decimation of "," and how they found ",
+                      " and how they discovered "],
                      ["Town", "Region", "Treasures", "Wonders", "Place"]),
             "PvP":(["Historic Figure Names Male","Historic Figure Names Female","Person"],
-                   [" and the murder of "," and the death of "," and the marriage of "," and the betrayal of ", " and the hunt for "," and the alliance with "," and the usurping of "," and the torment of "],
+                   [" and the murder of "," and the death of "," and the unmarriage of "," and the betrayal of ",
+                    " and the hunt for "," and the alliance with "," and the usurping of "," and the torment of ",
+                    ", the loyal servant of ", ", the sworn enemy of "],
                    ["Historic Figure Names Male","Historic Figure Names Female", "Person"]),
             "Treasure":(["Treasures"],[" of "],["Historic Figure Names Male","Historic Figure Names Female","Region","Town","Wonders" ]),
             "Book":(["'"],
-                    ["The missing pages of ","The forgotten passages of ","The ancient Lore of ", "The lessons of ","A cautionary tale of ", "The Tale of ","The Saga of ","An allegory of ","The writings of ", "The story of ","The book of "],
+                    ["The missing pages of ","The forgotten passages of ","The ancient Lore of ", "The lessons of ",
+                     "A cautionary tale of ", "The Tale of ","The Saga of ","An allegory of ","The writings of ",
+                     "The story of ","The book of "],
                     ["Quest", "Place", "Historic Figure Names Male","Historic Figure Names Female", "Treasure","PvP"],
                     ["'"],
                     [" by "],
@@ -214,7 +229,7 @@ class ThemeManager:
         # See what name generate sets we have loaded
         ng_sets = libtcod.namegen_get_sets()
 
-        # Get the name of teh template that we want to expand
+        # Get the name of the template that we want to expand
         template = templates.get(theme)
 
         text = ""

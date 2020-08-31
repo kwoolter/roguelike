@@ -126,12 +126,18 @@ Overview:
 * `entity_factory.py` - contains `Entity`, `EntityFactory`, `Player`, `Fighter`, `Inventory` classes
 * `combat.py` - contains `CombatEquipment`, `CombatEquipmentFactory`, `CombatClass`, `CombatClassFactory` classes
 * `events.py` - all of the event names used in the game
+* `themes.py` - module for managing colour themes and random name generation
 * `data` directory - data files for the game
     * `entities.csv` - all of the game objects and their properties
     * `combat_equipment.csv`- more properties for entities that are armour or weapons
     * `combat_classes.csv` - the different types of fighter classes and their abilities
     * `game_parameters.csv` - the rules of how the game scales in difficulty
     * `ability_checks.csv` - which items can you perform an ability check on and what are the outcomes for success and failure
+    * `themes` directory - data files for colour themes and random name generation
+        * `floor_palettes.csv` - colour palettes for different themes
+        * `room_palettes.csv` - room colours for different themes
+        * `rogue_history.cfg` - config file for name generation using `libtcod.namegen_generate()` functionality 
+        * `room_names.csv` - not used anymore as switch to random name generation using `libtcod` library
 
 ### `view` package
 * `view.py` - main module that contains `MainFrame`, `FloorView` and other UI View related classes
