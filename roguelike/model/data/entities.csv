@@ -1,140 +1,140 @@
 Name,Description,Char,Category,FG,BG,Zorder,IsTransparent,IsWalkable,IsInteractable,IsCollectable,IsStackable,IsEquippable,IsCheckable,IsEnemy,Value
 Axe,a hand axe,!,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
-Dagger,a small dagger,(,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,3
-Fireball Scroll,a magic fireball scroll,~,Combat,red,orange,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
-Hands,bare hands,@,Combat,pink,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,0
-Lightning Scroll,a magic lightning scroll,~,Combat,black,yellow,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
-Poison Scroll,a magic poison scroll,~,Combat,pink,darker_magenta,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
-Spear,a wooden spear,I,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,0
-Sword,a short sword,\,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
-War Hammer,a mighty War Hammer,T,Combat,darkest_grey,,4,TRUE,TRUE,FALSE,TRUE,,TRUE,FALSE,FALSE,32
-Goblin,an evil Goblin,g,Enemy,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Orc,a small green Orc,o,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Spider,a large spider,*,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Rat,a rat,x,Enemy,darker_orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Scorpion,a scorpion,s,Enemy,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Venomous Snake,a venomous snake,s,Enemy,dark_sea,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Troll,a large Troll,T,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Bronze Ring,a plain bronze ring,o,Equipment,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
-Buckler,a small buckler,O,Equipment,copper,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
-Gold Crown,a golden crown,~,Equipment,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
-Gold Ring,a gold ring,o,Equipment,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
-Helmet,a metal helmet,^,Equipment,black,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,15
-Iron Crown,an iron crown,~,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,15
-Leather Armour,a leather tunic,#,Equipment,orange,dark_red,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,12
-Robe of Learning,a glittering robe,#,Equipment,lighter_azure,white,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,15
-Tunic of Dexterity,a shiny smooth tunic,#,Equipment,red,silver,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,25
-Leather Boots,a pair of old leather boots,b,Equipment,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
-Metal Shield,a metal shield,O,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
-Plate Armour,plate chest armour,#,Equipment,gold,silver,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
-Plate Boots,plate armour boots,b,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
-Robe,a ragged cloth robe,#,Equipment,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1
-Sandals,a pair of leather sandals,b,Equipment,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1
-Scale Armour,scale chest armour,#,Equipment,gold,brass,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,30
-Scale Boots,scale boots,b,Equipment,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,30
-Shield,a small leather shield,O,Equipment,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,5
-Chest,a wooden chest,C,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Corpse,a rotting corpse,%,Object,red,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Down Stairs,some stairs leading down,v,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Food,a simple meal,+,Object,light_red,lighter_grey,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,5
-Gold,a gold coin,$,Object,yellow,gold,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Silver,a silver coin,$,Object,white,silver,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Copper,a copper coin,$,Object,light_orange,copper,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Key,a small key,?,Object,copper,,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,15
-Locked Chest,a locked wooden chest,X,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Hidden Exit,a hidden secret passageway,+,Object,black,darkest_yellow,4,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Locked Down Stairs,a locked entrance,v,Object,red,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Pillar,a stone pillar,+,Object,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Room,a room,O,Object,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Shop,a shop,S,Object,grey,black,9,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Hidden Trap,a hidden trap, ,Object,,,2,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Trap,a metal trap,*,Object,yellow,red,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-NPC,a stranger,@,Player,darker_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Player,the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Small Bubbling Potion,a bottle of bubbling potion,P,Potion,sky,fuchsia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Small Green Potion,a bottle of green potion,P,Potion,lightest_grey,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Small Purple Potion,a bottle of purple potion,P,Potion,lightest_grey,dark_purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Small Red Potion,a bottle of red potion,P,Potion,lightest_grey,dark_red,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Small Blue Potion,a bottle of blue potion,P,Potion,lightest_grey,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Healing Scroll,a magic healing scroll,+,Equipment,red,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,15
-Scroll of Greed,an ornate scroll,~,Scroll,white,purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Scroll of Revelation,a dark scroll,~,Scroll,white,black,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Scroll of Secrets,a mysterious scroll,~,Scroll,white,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Scroll of Teleportation,a green scroll,~,Scroll,white,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Scroll of XYZ,a tattered scroll,~,Scroll,black,sepia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
-Scroll of Resurrection,a golden scroll,~,Equipment,gold,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,100
-Map,an old map,M,Object,black,sepia,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,10
-Giant Centipede,a giant centipede,S,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Giant Rat,a giant rat,X,Enemy,darker_orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Giant Spider,a giant spider,*,Enemy,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Goblin Boss,a goblin boss,G,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Orc War Chief,an orc war chief,O,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Ogre,an ogre,O,Enemy,dark_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Club,a wooden club,|,Combat,light_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,100
-Mace,a mace,!,Combat,lightest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,500
 Battleaxe,a battleaxe,!,Combat,copper,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1500
-Quarterstaff,a quarterstaff,|,Combat,light_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,500
-Longsword,a longsword,\,Combat,lightest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1500
-Scimitar,a scimitar,{,Combat,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1000
-Greataxe,a great axe,!,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,3000
+Club,a wooden club,|,Combat,light_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,100
+Club+1,a wooden club +1,|,Combat,lighter_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,150
+Club+1+1,a wooden club +2,|,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,200
+Dagger,a small dagger,(,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,3
 Dagger+1,a small dagger +1,(,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,500
 Dagger+1+1,a small dagger +2,(,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,2000
-Weapon Upgrade,a weapon upgrade,+,Object,light_amber,flame,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,2000
+Fireball Scroll,a magic fireball scroll,~,Combat,red,orange,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Greataxe,a great axe,!,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,3000
+Hands,bare hands,@,Combat,pink,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,0
+Lightning Scroll,a magic lightning scroll,~,Combat,black,yellow,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Longsword,a longsword,\,Combat,lightest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1500
+Mace,a mace,!,Combat,lightest_grey,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,500
+Poison Scroll,a magic poison scroll,~,Combat,pink,darker_magenta,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Quarterstaff,a quarterstaff,|,Combat,light_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,500
+Scimitar,a scimitar,{,Combat,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1000
+Spear,a wooden spear,I,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,0
+Sword,a short sword,\,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
+Sword+1,a sword +1,\,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,150
+Sword+1+1,a sword +2,\,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,200
+War Hammer,a mighty War Hammer,T,Combat,darkest_grey,,4,TRUE,TRUE,FALSE,TRUE,,TRUE,FALSE,FALSE,32
 Bugbear,a bugbear,b,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Bugbear Chief,a bugbear chief,B,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Carrion Crawler,a carrion crawler,~,Enemy,red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Cyclops,a cyclops,o,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Gargoyle,a gargoyle,V,Enemy,lightest_grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Ghoul,a ghoul,{,Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Ghast,a ghast,},Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Stone Giant,a stone giant,G,Enemy,dark_grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Ghoul,a ghoul,{,Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Giant Centipede,a giant centipede,S,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Giant Rat,a giant rat,X,Enemy,darker_orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Giant Spider,a giant spider,*,Enemy,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Gnoll,a gnoll,g,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Gnoll Pack Lord,a gnoll pack lord,g,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Gnome,a gnome,g,Enemy,white,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Goblin,an evil Goblin,g,Enemy,lighter_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Goblin Boss,a goblin boss,G,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Guardian Naga,a guardian naga,S,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Harpy,a harpy,V,Enemy,copper,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Hogoblin,a hogoblin,h,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Hogoblin Captain,a hogoblin captain,H,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Kobold,a kobold,k,Enemy,orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Lich,a lich,L,Enemy,blue,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Torgolodyte,a torgolodyte,t,Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Manticore,a manticore,m,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Medusa,a medusa,M,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Mimic,a mimic,X,Enemy,red,dark_red,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
-Guardian Naga,a guardian naga,S,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Ogre,an ogre,O,Enemy,dark_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Orc,a small green Orc,o,Enemy,green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Orc War Chief,an orc war chief,O,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Rat,a rat,x,Enemy,darker_orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Salamander,a salamander,s,Enemy,crimson,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Scorpion,a scorpion,s,Enemy,black,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Skeleton,a skeleton,@,Enemy,white,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Spider,a large spider,*,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Stone Giant,a stone giant,G,Enemy,dark_grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Torgolodyte,a torgolodyte,t,Enemy,grey,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Troll,a large Troll,T,Enemy,dark_green,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Venomous Snake,a venomous snake,s,Enemy,dark_sea,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Wraith,a wraith,W,Enemy,grey,black,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
+Bronze Ring,a plain bronze ring,o,Equipment,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
+Buckler,a small buckler,O,Equipment,copper,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
+Gold Crown,a golden crown,~,Equipment,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
+Gold Ring,a gold ring,o,Equipment,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
+Healing Scroll,a magic healing scroll,+,Equipment,red,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,15
+Helmet,a metal helmet,^,Equipment,black,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,15
+Iron Crown,an iron crown,~,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,15
+Leather Armour,a leather tunic,#,Equipment,orange,dark_red,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,12
+Leather Boots,a pair of old leather boots,b,Equipment,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,10
+Metal Shield,a metal shield,O,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
+Plate Armour,plate chest armour,#,Equipment,gold,silver,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
+Plate Boots,plate armour boots,b,Equipment,silver,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,20
 Protection Ring,a ring of protection,o,Equipment,cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,150
-Club+1,a wooden club +1,|,Combat,lighter_sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,150
-Club+1+1,a wooden club +2,|,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,200
-Sword+1,a sword +1,\,Combat,lightest_cyan,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,150
-Sword+1+1,a sword +2,\,Combat,gold,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,200
-Crate,a wooden crate,C,Object,red,dark_red,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Robe,a ragged cloth robe,#,Equipment,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1
+Robe of Learning,a glittering robe,#,Equipment,lighter_azure,white,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,15
+Sandals,a pair of leather sandals,b,Equipment,sepia,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1
+Scale Armour,scale chest armour,#,Equipment,gold,brass,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,30
+Scale Boots,scale boots,b,Equipment,brass,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,30
+Scroll of Resurrection,a golden scroll,~,Equipment,gold,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,100
+Shield,a small leather shield,O,Equipment,dark_red,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,5
+Tunic of Dexterity,a shiny smooth tunic,#,Equipment,red,silver,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,25
+Altar,a stone altar,-,Object,darker_yellow,darker_cyan,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Amethyst,an amethyst gemstone,.,Object,light_fuchsia,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
 Barrel,an oak barrel,O,Object,red,dark_red,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Nature Item,a nature item,?,Object,darkest_green,,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Empty,an empty tile, ,Object,,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
-Healing Herbs,some healing herbs,+,Object,dark_green,,2,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,10
-Red Mushroom,a red mushroom,+,Object,dark_red,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
 Blue Mushroom,a blue mushroom,+,Object,dark_blue,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Book,an old book,?,Object,darker_sepia,lightest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
 Boulder,a large boulder,O,Object,grey,,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Rock,a small rock,o,Object,grey,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Box,a strong wooden box,:,Object,sepia,dark_sepia,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Casket,an ornate casket,%,Object,brass,gold,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Chest,a wooden chest,C,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Copper,a copper coin,$,Object,light_orange,copper,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Corpse,a rotting corpse,%,Object,red,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Crate,a wooden crate,C,Object,red,dark_red,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Down Stairs,some stairs leading down,v,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Emerald,a green emerald gemstone,.,Object,dark_green,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
+Empty,an empty tile, ,Object,,,9,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Floorboard,a loose floorboard,|,Object,,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Food,a simple meal,+,Object,light_red,lighter_grey,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,5
+Gold,a gold coin,$,Object,yellow,gold,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Healing Herbs,some healing herbs,+,Object,dark_green,,2,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,10
+Hidden Exit,a hidden secret passageway,+,Object,black,darkest_yellow,4,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Hidden Trap,a hidden trap, ,Object,,,2,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Key,a small key,?,Object,copper,,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,15
+Lever,a rusty metal lever,\,Object,brass,,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Locked Chest,a locked wooden chest,X,Object,red,dark_red,4,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Locked Down Stairs,a locked entrance,v,Object,red,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Map,an old map,M,Object,black,sepia,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,10
+Nature Item,a nature item,?,Object,darkest_green,,4,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Nature Trap,a nature trap,?,Object,dark_sea,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Onyx,a black onyx gemstone,.,Object,black,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
+Pillar,a stone pillar,+,Object,darkest_grey,darkest_yellow,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Plaque,an inscribed plaque,~,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Red Mushroom,a red mushroom,+,Object,dark_red,,2,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,10
+Rock,a small rock,o,Object,grey,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Room,a room,O,Object,grey,black,9,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Ruby,a dark red ruby gemstone,.,Object,dark_red,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,50
+Sapphire,a blue sapphire gemstone,.,Object,blue,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
+Shop,a shop,S,Object,grey,black,9,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Shrine,a small shrine,*,Object,dark_red,darker_red,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Silver,a silver coin,$,Object,white,silver,4,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Tile,a cracked tile,+,Object,,,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
 Tomb,a tomb stone,+,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Plaque,an inscribed plaque,~,Object,grey,darker_grey,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Shrine,a small shrine,*,Object,dark_red,darker_red,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Altar,a stone altar,-,Object,darker_yellow,darker_cyan,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Casket,an ornate casket,%,Object,brass,gold,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Box,a strong wooden box,:,Object,sepia,dark_sepia,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Lever,a rusty metal lever,\,Object,brass,,2,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Ruby,a dark red ruby gemstone,.,Object,dark_red,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,50
-Emerald,a green emerald gemstone,.,Object,dark_green,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
-Sapphire,a blue sapphire gemstone,.,Object,blue,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
-Amethyst,an amethyst gemstone,.,Object,light_fuchsia,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
-Onyx,a black onyx gemstone,.,Object,black,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
-Book,an old book,?,Object,darker_sepia,lightest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
 Tome,an ancient tome,?,Object,dark_sepia,lightest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Trap,a metal trap,*,Object,yellow,red,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Weapon Upgrade,a weapon upgrade,+,Object,light_amber,flame,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,2000
 Writings,some old writings,?,Object,darkest_sepia,lightest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+NPC,a stranger,@,Player,darker_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
+Player,the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Small Blue Potion,a bottle of blue potion,P,Potion,lightest_grey,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Small Bubbling Potion,a bottle of bubbling potion,P,Potion,sky,fuchsia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Small Green Potion,a bottle of green potion,P,Potion,lightest_grey,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Small Purple Potion,a bottle of purple potion,P,Potion,lightest_grey,dark_purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Small Red Potion,a bottle of red potion,P,Potion,lightest_grey,dark_red,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Scroll of Greed,an ornate scroll,~,Scroll,white,purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Scroll of Revelation,a dark scroll,~,Scroll,white,black,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Scroll of Secrets,a mysterious scroll,~,Scroll,white,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Scroll of Teleportation,a green scroll,~,Scroll,white,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Scroll of XYZ,a tattered scroll,~,Scroll,black,sepia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0

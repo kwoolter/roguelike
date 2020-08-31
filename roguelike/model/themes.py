@@ -109,9 +109,9 @@ class Palette:
 
 class ThemeManager:
 
-    ROOM_COLOUR_DIM_COEF = 0.6
+    ROOM_COLOUR_DIM_COEF = 0.65
     FLOOR_COLOUR_DIM_COEF = 0.6
-    TUNNEL_COLOUR_DIM_COEF = 0.95
+    TUNNEL_COLOUR_DIM_COEF = 0.9
 
     room_names = None
     room_palettes = None

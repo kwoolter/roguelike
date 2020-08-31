@@ -746,12 +746,20 @@ class Floor():
         """
         See if there is an Entity object occupying a specified xy position on the Floor
         :param pos: the xy position that you want to check
-        :return: the Entity at the specified position if one was found otherwise None
+        :return: the Entity at the specified position if one was found otherwise None.  if more then one found sort by Z order
         """
+        found = []
         for e in self.entities:
             if e.xy == pos and (include_player is True or e is not self.player):
-                return e
-        return None
+                found.append(e)
+
+        if len(found)>0:
+            found.sort(key=lambda x: x.get_property("Zorder"),reverse=False)
+            e = found[0]
+        else:
+            e = None
+
+        return e
 
     def remove_entity(self, old_entity : Entity):
         if old_entity in self.entities:
