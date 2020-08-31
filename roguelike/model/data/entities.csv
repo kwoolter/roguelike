@@ -52,7 +52,7 @@ Trap,a metal trap,*,Object,yellow,red,2,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,F
 Up Stairs,some stairs leading up,^,Object,yellow,black,3,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Dead Player,the corpse of the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 NPC,a stranger,@,Player,darker_yellow,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,0
-Player,the player,@,Player,grey,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
+Player,the player,@,Player,white,,0,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,0
 Small Bubbling Potion,a bottle of bubbling potion,P,Potion,sky,fuchsia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Small Green Potion,a bottle of green potion,P,Potion,lightest_grey,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Small Purple Potion,a bottle of purple potion,P,Potion,lightest_grey,dark_purple,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
@@ -64,6 +64,7 @@ Scroll of Revelation,a dark scroll,~,Scroll,white,black,4,TRUE,TRUE,TRUE,TRUE,TR
 Scroll of Secrets,a mysterious scroll,~,Scroll,white,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Scroll of Teleportation,a green scroll,~,Scroll,white,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Scroll of XYZ,a tattered scroll,~,Scroll,black,sepia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Scroll of Resurrection,a golden scroll,~,Equipment,gold,white,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,100
 Map,an old map,M,Object,black,sepia,2,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,10
 Giant Centipede,a giant centipede,S,Enemy,dark_red,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
 Giant Rat,a giant rat,X,Enemy,darker_orange,,1,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,0
@@ -134,3 +135,6 @@ Emerald,a green emerald gemstone,.,Object,dark_green,,2,TRUE,TRUE,FALSE,TRUE,TRU
 Sapphire,a blue sapphire gemstone,.,Object,blue,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,75
 Amethyst,an amethyst gemstone,.,Object,light_fuchsia,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
 Onyx,a black onyx gemstone,.,Object,black,,2,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,25
+Book,an old book,?,Object,darker_sepia,lightest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Tome,an ancient tome,?,Object,dark_sepia,lightest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0
+Writings,some old writings,?,Object,darkest_sepia,lightest_sepia,2,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,0

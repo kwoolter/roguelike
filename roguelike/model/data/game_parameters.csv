@@ -242,3 +242,9 @@ Venomous Snake,Count,Room,Level,,,,,,,L5-medium-uncommon
 Venomous Snake,Probability,Room,Level,,,,,,,L5-medium-uncommon
 Wraith,Count,Room,Level,,,,,,,L15-medium-uncommon
 Wraith,Probability,Room,Level,,,,,,,L15-medium-uncommon
+Book,Count,Floor,Level,0.3,0.5,10,0,0,2,
+Book,Probability,Floor,Level,4,5,5,-5,0,50,
+Tome,Count,Floor,Level,0.3,0.5,10,0,0,2,
+Tome,Probability,Floor,Level,4,5,5,-5,0,50,
+Writings,Count,Floor,Level,0.3,0.5,10,0,0,2,
+Writings,Probability,Floor,Level,4,5,5,-5,0,50,

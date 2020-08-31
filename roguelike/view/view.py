@@ -2,6 +2,7 @@ import math
 from pathlib import Path
 
 import roguelike.model as model
+from roguelike.model import Palette
 from .view_utils import *
 
 class View():
@@ -46,6 +47,9 @@ class MainFrame(View):
     CONSOLE_MESSAGE_PANEL_HEIGHT = 13
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
 
+    CONSOLE_FONT_SIZES = [8, 10, 12, 14,16, 18, 20]
+    CONSOLE_FONT_NAME = "cp437"
+
     def __init__(self, width: int = 50, height: int = 50):
 
         super().__init__(width=width, height=height)
@@ -53,6 +57,7 @@ class MainFrame(View):
         self._mode = None
         self._old_mode = None
         self.mode = MainFrame.MODE_PLAYING
+        self.font_size = 12
 
         # Components
         self.game = None
@@ -115,7 +120,7 @@ class MainFrame(View):
 
     def initialise(self, model: model.Model):
 
-        self.set_mode(MainFrame.MODE_PLAYING)
+        #self.set_mode(MainFrame.MODE_PLAYING)
         self.game = model
 
         # Create the Game title Banner text
@@ -124,32 +129,7 @@ class MainFrame(View):
             self.game_name += f'{c} '
         self.game_name += chr(205) * 2 + chr(206) + " "
 
-        font_file_specs = {
-            "arial10x10.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
-            "dejavu_wide16x16_gs_tc.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
-            "dundalk12x12_gs_tc.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD,
-            "polyducks_12x12.png": libtcod.FONT_LAYOUT_ASCII_INROW,
-            "terminal8x12_gs_ro.png": libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW
-        }
-
-        font_file = "polyducks_12x12.png"
-        # font_file = "dejavu_wide16x16_gs_tc.png"
-        # font_file = "arial10x10.png"
-        # font_file = "dundalk12x12_gs_tc.png"
-        # font_file = "terminal8x12_gs_ro.png"
-
-        # Create path for the file that we are going to load
-        data_folder = Path(__file__).resolve().parent
-        file_to_open = data_folder / "fonts" / font_file
-        print(file_to_open)
-        print(font_file)
-
-        # Failed using Path so just hacked it!!!
-        file_to_open = ".\\roguelike\\view\\fonts\\" + font_file
-
-        libtcod.console_set_custom_font(file_to_open,
-                                        font_file_specs[font_file]
-                                        )
+        self.set_font()
 
         # Initialise the root console
         libtcod.console_init_root(self.width,
@@ -185,6 +165,42 @@ class MainFrame(View):
         instructions += f"|d:{cy - 21}|l:2|R:{cx + 22}"
         frame_template = Boxes.turtle_to_box(instructions)
         self.frame1 = Boxes.array_to_border(frame_template, border_type=ShopView.BORDER_TYPE2)
+
+    def font_zoom(self, zoom_in:bool = True)->bool:
+
+        font_sizes = MainFrame.CONSOLE_FONT_SIZES
+        current_font_size = self.font_size
+
+        idx = font_sizes.index(self.font_size)
+
+        if zoom_in is True:
+            idx+=1
+            if idx < len(font_sizes):
+                self.font_size = font_sizes[idx]
+
+        elif zoom_in is False:
+            idx-=1
+            if idx >= 0:
+                self.font_size = font_sizes[idx]
+
+        if self.font_size != current_font_size:
+            self.set_font()
+
+        return self.font_size != current_font_size
+
+
+    def set_font(self):
+
+        # Built the font file name that we want to load using current font size
+        font_file = f'{MainFrame.CONSOLE_FONT_NAME}_{self.font_size}x{self.font_size}.png'
+
+        # Create path for the file that we are going to load and load it
+        data_folder = Path(__file__).resolve().parent
+        file_to_open = str(data_folder / "fonts" / font_file)
+
+        libtcod.console_set_custom_font(file_to_open,
+                                        libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_ASCII_INROW
+                                        )
 
     def set_mode(self, new_mode: str):
         self.mode = new_mode
@@ -368,11 +384,12 @@ class MainFrame(View):
             stat_value = self.game.player.get_property(stat)
             status += f'{stat}={stat_value} '
 
-        so = ScreenString(text=status, fg=libtcod.lightest_grey, alignment=libtcod.LEFT)
-        so.render(0, x=x, y=y)
+        libtcod.console_set_default_foreground(0,libtcod.lightest_grey)
+        libtcod.console_print(0,x,y,f'{status:<{self.width}}')
 
         y +=1
 
+        # Draw the HP bar
         HP_status_bar_width = 48
         hp_pct = hp / max_hp
         full_bar_text = chr(195) + chr(196) * HP_status_bar_width + chr(180)
@@ -383,27 +400,16 @@ class MainFrame(View):
         libtcod.console_set_default_background(0, libtcod.darkest_grey)
         libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=full_bar_text)
 
-        '''
-        if hp_pct < 0.25:
-            fg = libtcod.dark_red
-            bg = libtcod.darkest_red
-        elif hp_pct < 0.5:
-            fg = libtcod.dark_yellow
-            bg=libtcod.darkest_yellow
-        else:
-            fg = libtcod.dark_green
-            bg = libtcod.darkest_green
-        '''
-
-        fg = libtcod.Color(int(255 * (1 - hp_pct)), int(255 * hp_pct), 10)
-        bg = dim_rgb(fg, 100)
+        # Calculate colour of HP bar by linear interpolation between Red and Green
+        fg = libtcod.color_lerp((255,0,0),(0,255,0),hp_pct)
+        bg = Palette.dim_hsl(fg,0.5)
 
         if hp > 0:
             libtcod.console_set_default_foreground(0,fg)
             libtcod.console_set_default_background(0, bg)
             libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
 
-        libtcod.console_set_default_foreground(0, dim_rgb(fg,-50))
+        libtcod.console_set_default_foreground(0, Palette.dim_hsl(fg,1.5))
         libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=hp_text)
 
         libtcod.console_flush()
@@ -441,18 +447,16 @@ class FloorView(View):
         # Connect the view to the model
         self.floor = floor
 
-        # Appearance of the view content
-        theme_data = model.ThemeManager.get_floor_colours_by_theme(self.floor.theme)
-        theme = tuple(map(model.text_to_color,theme_data ))
+        # Load colour palette based on floor theme
+        self.theme_palette = model.ThemeManager.get_floor_palette_by_theme(self.floor.theme)
 
         # fg,bg,lit_path,lit_wall,explored_path,explored_wall
-        self.fg, \
-        self.bg, \
-        self.bg_lit_path, \
-        self.bg_lit_wall, \
-        self.bg_explored_path, \
-        self.bg_explored_wall = theme
-
+        self.fg = self.theme_palette.get("FG")
+        self.bg = self.theme_palette.get("BG")
+        self.bg_lit_path = self.theme_palette.get("BG_LIT_PATH")
+        self.bg_lit_wall = self.theme_palette.get("BG_LIT_WALL")
+        self.bg_explored_path = self.theme_palette.get("BG_EXPLORED_PATH")
+        self.bg_explored_wall = self.theme_palette.get("BG_EXPLORED_WALL")
 
         # Create a new console to draw on
         self.con = libtcod.console_new(self.width, self.height)
@@ -468,6 +472,8 @@ class FloorView(View):
         fov_cells = self.floor.get_fov_cells()
         walkable_cells = self.floor.get_walkable_cells()
 
+        max_l = 100
+
         # Loop through all of the cells that we have already explored
         for x, y in explored_cells:
 
@@ -475,24 +481,27 @@ class FloorView(View):
             if (x, y) in fov_cells:
 
                 # Get how much we should dim the tile colour based on distance from player
-                a = int(self.floor.get_fov_light_attenuation(x, y, 40))
+                a = min(int(self.floor.get_fov_light_attenuation(x, y, max_l)), max_l)
 
-                # Lit path
+                # If Lit path...
                 if (x, y) in walkable_cells:
 
+                    # Get the tile colour
                     tile_rgb = list(self.floor.floor_tile_colours[x, y])
                     if tile_rgb == [0, 0, 0]:
                         tile_rgb = list(self.bg_lit_path)
 
                     # Dim the tile colour
-                    tile_colour = dim_rgb(tile_rgb, a)
+                    tile_colour = dim_rgb(tile_rgb, 0)
 
+                    # Use linear interpolation to shade from lit path to unlit path based on distance from player
+                    tile_colour = libtcod.color_lerp(tile_colour, self.bg_explored_path, a/max_l)
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
 
                 # Else lit wall
                 else:
-                    tile_rgb = list(self.bg_lit_wall)
-                    tile_colour = dim_rgb(tile_rgb, a)
+                    # Use linear interpolation to shade from lit wall to unlit wall based on distance from player
+                    tile_colour = libtcod.color_lerp(self.bg_lit_wall,self.bg_explored_wall, a/max_l)
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
             else:
                 # Unlit path
@@ -511,15 +520,22 @@ class FloorView(View):
                 libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
                 if bg is not None:
                     libtcod.console_set_char_background(self.con, x, y, bg)
-            except e:
-                print("Problem drawing {e.name} {e.fg} {e.bg}")
-                print(e)
+                # If no background colour for this entity then use the current tile colour with 'shadow'
+                else:
+                    tile_bg = self.floor.floor_tile_colours[x, y]
+                    bg = dim_rgb(tile_bg, 10)
+                    libtcod.console_set_char_background(self.con, x, y, bg)
+            except Exception as ex:
+                print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+                print(ex)
 
-        # Draw all of the entities in the current FOV
+        # Draw all of the entities in the current FOV by Z order
         fov_entities = [e for e in self.floor.entities if e.xy in fov_cells]
         if len(fov_entities) > 0:
             entities = sorted(fov_entities, key=lambda x: x.get_property("Zorder"), reverse=True)
             for e in entities:
+
+                # Check to see if this entity is meant to be draw? If not loop to the next one.
                 if e.name == model.Floor.EMPTY_TILE or (e.bg is None and e.fg is None):
                     continue
 
@@ -531,17 +547,28 @@ class FloorView(View):
                     fg = dim_rgb(e.fg, a * 3)
                     libtcod.console_set_default_foreground(self.con, fg)
                     libtcod.console_put_char(self.con, x, y, e.char, libtcod.BKGND_NONE)
+
+                    # Use the background colour for the entity is specified
                     if bg is not None:
                         bg = dim_rgb(bg, a)
                         libtcod.console_set_char_background(self.con, x, y, bg)
-                except Exception as e:
-                    print("Problem drawing {e.name} {e.fg} {e.bg}")
-                    print(e)
+                    # If no background colour for this entity then use the current tile colour with 'shadow'
+                    else:
+                        tile_bg = self.floor.floor_tile_colours[x, y]
+                        bg = dim_rgb(tile_bg, a+10)
+                        libtcod.console_set_char_background(self.con, x, y, bg)
 
-        # Draw the player
+                except Exception as ex:
+                    print(f"Problem drawing {e.name} {e.fg} {e.bg}")
+                    print(ex)
+
+        # Draw the player and a 'shadow' on the floor tile
         p = self.floor.player
+        player_tile_bg = self.floor.floor_tile_colours[p.x,p.y]
+        bg= dim_rgb(player_tile_bg,20)
         libtcod.console_set_default_foreground(self.con, p.fg)
-        libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_NONE)
+        libtcod.console_set_default_background(self.con,bg)
+        libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_SET)
 
         # Draw name of current room
         if self._debug is True:
@@ -639,7 +666,7 @@ class MessagePanel(View):
                                          x, y,
                                          flag=libtcod.BKGND_SET,
                                          alignment=libtcod.LEFT,
-                                         fmt=line)
+                                         fmt=f'{line:<{self.width-2}}')
 
                 # Move to the next line in the message panel
                 y += 1
@@ -1395,7 +1422,7 @@ class CharacterView(View):
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
-        self.other_stats = ('XP', 'Level', 'HP', "SightRange")
+        self.other_stats = ('XP', 'Level', 'HP', "HPPerLevel","SightRange")
         self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
 
         # Components
@@ -1519,27 +1546,29 @@ class CharacterView(View):
 
         y += 2
 
+        right_shift = 6
         ac = self.character.fighter.get_defence("AC")
-        text = f'AC: {ac}'
+        text = f'AC:{ac:>3}'
         so = ScreenString(text,
                           fg=self.fg,
                           bg=self.bg,
-                          alignment=libtcod.CENTER)
+                          alignment=libtcod.RIGHT)
 
-        so.render(self.con, int(cx * 3 / 2), y)
+        so.render(self.con, int(cx * 3 / 2)+right_shift, y)
         y += 1
 
         for i, stat in enumerate(self.other_stats):
             stat_value = cc.properties.get(stat)
             if stat is not None:
-                text = f'{stat}: {stat_value}'
+                text = f'{stat}:{stat_value:>3}'
 
                 so = ScreenString(text,
                                   fg=self.fg,
                                   bg=self.bg,
-                                  alignment=libtcod.CENTER)
+                                  alignment=libtcod.RIGHT)
 
-                so.render(self.con, int(cx * 3 / 2), y)
+                so.render(self.con, int(cx * 3 / 2)+right_shift, y)
+
                 y += 1
 
         # Draw a divider
@@ -1868,11 +1897,12 @@ class EventView(View):
                             model.Event.ACTION_FAILED: (libtcod.yellow, None),
                             model.Event.ACTION_ATTACK: (libtcod.light_red, None),
                             model.Event.ACTION_FOUND_ITEM: (libtcod.light_azure, None),
+                            model.Event.ACTION_FOUND_LORE: (libtcod.lightest_sepia, libtcod.darkest_sepia),
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),
                             model.Event.ACTION_EQUIP: (libtcod.light_sky, None),
                             model.Event.ACTION_GAIN_XP: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.GAIN_HEALTH: (libtcod.green, libtcod.darker_green),
-                            model.Event.LOSE_HEALTH: (libtcod.yellow, libtcod.darkest_yellow),
+                            model.Event.LOSE_HEALTH: (libtcod.yellow, libtcod.dark_amber),
                             model.Event.LEVEL_UP_AVAILABLE: (libtcod.light_sky, libtcod.darkest_blue),
                             model.Event.PLAYER_DEAD: (libtcod.red, None)
                             }

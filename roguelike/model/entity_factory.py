@@ -20,7 +20,7 @@ def text_to_color(color_text: str) -> libtcod.color.Color:
             print("We didn't end up with a colour!")
             c = None
     except AttributeError:
-        # print(f"{color_text} is not a valid attribute")
+        #print(f"{color_text} is not a valid attribute")
         c = None
 
     return c
@@ -165,6 +165,9 @@ class Player(Entity):
     @property
     def combat_class(self):
         return self.fighter.combat_class
+
+    def print(self):
+        print(f'{self.name} at {self.xy}')
 
     def get_property(self, property_name: str):
         value = self.properties.get(property_name)

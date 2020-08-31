@@ -120,15 +120,21 @@ class Controller():
             move = action.get('move')
             use = action.get('use')
             debug = action.get('debug')
+            zoom = action.get('zoom')
             help = action.get('help')
             save = action.get('save')
             load = action.get('load')
+            examine = action.get('examine')
 
             if debug is True:
                 self.model.print()
 
             if help is True:
                 self.help()
+
+            elif zoom is not None:
+                if self.view.font_zoom(zoom) is True:
+                    self.view.initialise(self.model)
 
             # If we are in PLAYING mode
             elif self.mode == Controller.GAME_MODE_PLAYING:
@@ -155,6 +161,8 @@ class Controller():
                     self.model.take_item()
                 elif use:
                     self.model.use_item()
+                elif examine:
+                    self.model.check_item()
                 elif inventory:
                     self.set_mode(Controller.GAME_MODE_INVENTORY)
                 elif shop:
@@ -165,6 +173,8 @@ class Controller():
                     self.set_mode(Controller.GAME_MODE_PAUSED)
                 elif wait:
                     player_turn = False
+                elif debug:
+                    self.model.debug()
 
                 if player_turn is False:
                     # Tick the model
@@ -213,12 +223,12 @@ class Controller():
                     dx, dy = move
                     self.view.character_creation_view.change_selection(dy)
                 elif select:
-                    if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
-                        name = self.view.character_creation_view.character_name
-                        class_name = self.view.character_creation_view.get_selected_class()
-                        self.model.add_player(self.model.generate_player(name, class_name))
-                        self.view.character_creation_view.initialise(self.model)
-                        self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
+                    #if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
+                    name = self.view.character_creation_view.character_name
+                    class_name = self.view.character_creation_view.get_selected_class()
+                    self.model.add_player(self.model.generate_player(name, class_name))
+                    self.view.character_creation_view.initialise(self.model)
+                    self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
 
                 # else:
                 #     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
@@ -244,6 +254,8 @@ class Controller():
                             self.model.drop_item(e)
                         elif use:
                             self.model.use_item(e)
+                        elif examine:
+                            self.model.check_item(e)
 
                     else:
                         pass
@@ -340,7 +352,7 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
             keys_help = 'N=Change name|C=change class|Enter/Space=Confirm|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_PLAYING:
-            keys_help = '^v<> / WASD=Move/attack|G/Space=Get item|U/Q=use equipped item|Z=wait|I/R=show inventory|C=show character sheet|Enter/X=take stairs|Esc=Pause'
+            keys_help = '^v<> / WASD=Move/attack/examine|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|Enter=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
             keys_help = 'Esc=continue|Q=quit the game'
         elif self.mode == Controller.GAME_MODE_INVENTORY:
@@ -369,6 +381,15 @@ class Controller():
         # Common Keys for all modes
         if key.vk == libtcod.KEY_F1:
             return {'help': True}
+
+        elif key.vk == libtcod.KEY_F5:
+            return {'debug':True}
+
+        elif key.vk == libtcod.KEY_PAGEUP:
+            return {'zoom':True}
+
+        elif key.vk == libtcod.KEY_PAGEDOWN:
+            return {'zoom':False}
 
         elif self.mode == Controller.GAME_MODE_START:
             return self.handle_start_menu_keys(key)
@@ -425,10 +446,12 @@ class Controller():
             return {'move': (-1, 0)}
         elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
-        elif key.vk == libtcod.KEY_ENTER or key_char == 'x':
+        elif key.vk == libtcod.KEY_ENTER:
             return {'take stairs': True}
         elif key.vk == libtcod.KEY_SPACE:
             return {'pickup': True}
+        elif key_char == 'x':
+            return {'examine': True}
         elif key_char == 'z':
             return {'wait': True}
         elif key_char == 'u' or key_char == 'q':
@@ -465,13 +488,16 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        elif key_char == 'e':
+        elif key.vk == libtcod.KEY_ENTER or key_char == 'e':
             return {'equip': True}
         elif key_char == 'f':
             return {'drop': True}
+        elif key_char == 'x':
+            return {'examine': True}
         elif key_char == 'u' or key_char == 'q':
             return {'use': True}
-        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'r':
+
+        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'i':
             # Exit the menu
             return {'exit': True}
 

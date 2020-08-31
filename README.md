@@ -3,9 +3,31 @@ kwoolter :monkey: :copyright: 2020
 ## Overview
 This game is a rogue-like game that uses the `libtcod` library and is loosely based on the python rogue-like tutorial.
 
-### Controls
+## Screenshots
+
+<table>
+<tr>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/new_character2.JPG" alt="new character">
+</td>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/floor1.JPG" alt="exploring">
+</td>
+</tr>
+<tr>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/inventory2.JPG" alt="inventory">
+</td>
+<td>
+<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/shop2.JPG" alt="character">
+</td>
+</tr>
+</table>
+
+## Controls
 
 * `F1` help on controls available from current screen
+* `Page Up` and `Page Down` - change font size
 
 Game Ready Screen
 * `N` create a new character
@@ -22,10 +44,11 @@ Game Playing Screen
 * Arrow keys - move and attack enemy
 * `G` or `SPACE` get an item
 * `Q` or `U` use item currently equipped in Item slot
+* `X` examine item on floor
 * `Z` skip turn
 * `C` character screen
 * `R` inventory screen
-* `ENTER` or `X` travel down stairs
+* `ENTER` travel down stairs
 * `Esc` pause game
 
 Game Paused Screen
@@ -35,6 +58,7 @@ Game Paused Screen
 Inventory Screen
 * `E` equip an item
 * `Q` or `U` use an item
+* `X` examine an item
 * `F` drop an item
 * `Esc` or `R` exit screen
 
@@ -53,6 +77,8 @@ Shop Screen
 
 Game Over Screen
 * `ENTER` - continue to Game Ready Screen 
+
+## Background
 
 ### What is a rogue-like game?
 
@@ -77,11 +103,15 @@ Features:
 * Random enemies in each room that scale as you go deeper
 * Random items scattered across the floor with probability governed by game rules
 * Potions and Scrolls have randomised effects
+* Random colour palettes and random room and dungeon level names
+* Random Lore generation
 * DnD-like classes, abilities, monsters and combat rules
 * DnD-like armour, weapons and other items
 * DnD-like ability checks
 * Inventory and Shop features
 * Perma-death
+
+# The Game Design
 
 ## Package Structure
 Overview:
@@ -96,12 +126,18 @@ Overview:
 * `entity_factory.py` - contains `Entity`, `EntityFactory`, `Player`, `Fighter`, `Inventory` classes
 * `combat.py` - contains `CombatEquipment`, `CombatEquipmentFactory`, `CombatClass`, `CombatClassFactory` classes
 * `events.py` - all of the event names used in the game
+* `themes.py` - module for managing colour themes and random name generation
 * `data` directory - data files for the game
     * `entities.csv` - all of the game objects and their properties
     * `combat_equipment.csv`- more properties for entities that are armour or weapons
     * `combat_classes.csv` - the different types of fighter classes and their abilities
     * `game_parameters.csv` - the rules of how the game scales in difficulty
     * `ability_checks.csv` - which items can you perform an ability check on and what are the outcomes for success and failure
+    * `themes` directory - data files for colour themes and random name generation
+        * `floor_palettes.csv` - colour palettes for different themes
+        * `room_palettes.csv` - room colours for different themes
+        * `rogue_history.cfg` - config file for name generation using `libtcod.namegen_generate()` functionality 
+        * `room_names.csv` - not used anymore as switch to random name generation using `libtcod` library
 
 ### `view` package
 * `view.py` - main module that contains `MainFrame`, `FloorView` and other UI View related classes
@@ -114,31 +150,10 @@ Overview:
 
 ## Dependencies
 * Python 3
-* `tcod` - creating and writing to consoles, keyboard events, colours, field of view (FOV) calculations, etc.
+* `tcod` - creating and writing to consoles, keyboard events, colours, field of view (FOV) calculations, random name generation, etc.
 * `numpy` - floor maps and properties.  Also used by `tcod` library for FOV calculations
 * `pandas` - used for loading in `csv` files that hold the game data e.g. entities, combat items, etc.
 * `pygame` - only used for the `Rect` class
-
-## Screenshots
-
-<table>
-<tr>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/new_character2.JPG" alt="new character">
-</td>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/floor1.JPG" alt="exploring">
-</td>
-</tr>
-<tr>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/inventory2.JPG" alt="inventory">
-</td>
-<td>
-<img height=325 width=250 src="https://raw.githubusercontent.com/kwoolter/roguelike/master/roguelike/view/screenshots/shop2.JPG" alt="character">
-</td>
-</tr>
-</table>
 
 # How Does The Game's Difficulty Scale?
 ## Basic Concept
@@ -237,4 +252,3 @@ The process for adding new types of `Entity` to the game is as follows:-
 
 ## `libtcod` pre-defined colours
 * https://libtcod.github.io/docs/html2/color.html?c=false&cpp=false&cs=false&py=true&lua=false
-* https://i.imgur.com/taWlWoW.png
