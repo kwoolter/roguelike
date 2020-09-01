@@ -1953,10 +1953,16 @@ class JournalView(View):
     def process_event(self, new_event: model.Event):
         pass
 
-    def change_selection(self, d: int):
+    def change_selection(self, d: int, relative = True):
 
-        self.selected_item += d
-        self.selected_item = min(max(0, self.selected_item), len(self.game.journal.journal_entries) - 1)
+        if relative is True:
+
+            self.selected_item += d
+            self.selected_item = min(max(0, self.selected_item), len(self.game.journal.get_journal_levels()) - 1)
+
+        else:
+            levels = self.game.journal.get_journal_levels()
+            self.selected_item = levels.index(d)
 
     def draw(self):
 
@@ -1990,6 +1996,67 @@ class JournalView(View):
 
         # Draw a divider
         divider.render(self.con, 0, y)
+
+        y += 1
+
+        journal_entries = journal.get_journal_levels()
+        level = journal_entries[self.selected_item]
+        journal_entry = journal.get_journal_for_level(level)
+
+        if journal_entry is None:
+            return
+
+        entry_name = journal_entry.get("Name")
+
+        text = f"Level {level}:{entry_name}"
+        t = textwrap.wrap(text, self.width - 4)
+        for tt in t:
+            y += 1
+            so = ScreenString(tt,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+
+        y+=1
+        self.con.default_fg = self.fg
+        self.con.hline(1, y, self.width - 2)
+
+        for k, v in journal_entry.items():
+
+            if k == "Name":
+                continue
+
+            y+=1
+
+            text = f" { k.title() :-^20} "
+
+            so = ScreenString(text,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+
+            for vv in v:
+
+                text = f" {vv.capitalize()} "
+                t = textwrap.wrap(text, self.width - 4)
+                for tt in t:
+                    y += 1
+                    so = ScreenString(tt,
+                                      fg=self.fg,
+                                      bg=self.bg,
+                                      alignment=libtcod.CENTER)
+
+                    so.render(self.con, cx, y)
+
+            y+=1
+            self.con.default_fg = self.fg
+            self.con.hline(1, y, self.width - 2)
+
+
 
 
 
