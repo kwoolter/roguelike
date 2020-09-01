@@ -31,10 +31,7 @@ class GameParameters:
             ename, metric = index
             df.loc[(ename, metric), :] = df.loc[(template_name, metric)].values
 
-
-        print(df.head())
-
-        #assert False
+        #print(df.head())
 
 
     @staticmethod

@@ -48,6 +48,7 @@ Game Playing Screen
 * `Z` skip turn
 * `C` character screen
 * `R` inventory screen
+* `J` journal screen
 * `ENTER` or `V` travel down stairs
 * `Esc` pause game
 
