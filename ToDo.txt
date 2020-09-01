@@ -15,9 +15,11 @@
 [OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves
 
 # Ideas DONE!
+01/09/2020
 [KW] Warlock class with CHA based abilities
 [KW] Floor colours - add colour boundary around a room so that exits are highlighted
 [KW] Journal that summarises what you did or found on each level e.g. Lore.  Takes events and converts to journal logs.
 [KW] Configurable number of allowable attempts at an ability check
 
-
+02/09/2020
+- Added stairs up gp back up to prior level but you don't get and completion rewards for exting again

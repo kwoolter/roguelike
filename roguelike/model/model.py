@@ -243,6 +243,7 @@ class Floor():
         self.height = height
         self.level = level
         self.rect = rect.Rect(0, 0, width, height)
+        self.completed = False
 
         self._debug = False
 
@@ -637,10 +638,8 @@ class Floor():
             # Replace anything that is already there!
             if e is not None:
                 self.remove_entity(e)
+            self.entities.append(new_entity)
 
-            # Not allowing to go back up a level at the moment unless in debug mode
-            if self._debug is True:
-                self.entities.append(new_entity)
 
         # In the last room add some stairs to the next level down
         ename = "Down Stairs"
@@ -1761,30 +1760,33 @@ class Model():
             # Print the stats for the Floor that you just completed
             if self.current_floor is not None:
 
+                if self.current_floor.completed is False:
 
-                self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.GAME_FLOOR_COMPLETED,
-                                            description=f"{self.current_floor.name} completed:"))
+                    self.current_floor.completed = True
 
-                # Report how well the Player did on this Floor
-                stats = self.current_floor.get_stats()
-                for stat in stats:
                     self.events.add_event(Event(type=Event.GAME,
                                                 name=Event.GAME_FLOOR_COMPLETED,
-                                                description=f"  * {stat}"))
+                                                description=f"{self.current_floor.name} completed:"))
 
-                # Reward the player with some XP
-                xp = self.current_floor.get_XP_reward()
-                self.player.fighter.add_XP(self.current_floor.get_XP_reward())
-                self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_GAIN_XP,
-                                            description=f"{xp} XP awarded"))
+                    # Report how well the Player did on this Floor
+                    stats = self.current_floor.get_stats()
+                    for stat in stats:
+                        self.events.add_event(Event(type=Event.GAME,
+                                                    name=Event.GAME_FLOOR_COMPLETED,
+                                                    description=f"  * {stat}"))
 
-                # Heal the player
-                self.player.heal(10)
-                self.events.add_event(Event(type=Event.GAME,
-                                            name=Event.ACTION_SUCCEEDED,
-                                            description=f"You rest from your adventuring and heal your wounds"))
+                    # Reward the player with some XP
+                    xp = self.current_floor.get_XP_reward()
+                    self.player.fighter.add_XP(self.current_floor.get_XP_reward())
+                    self.events.add_event(Event(type=Event.GAME,
+                                                name=Event.ACTION_GAIN_XP,
+                                                description=f"{xp} XP awarded"))
+
+                    # Heal the player
+                    self.player.heal(10)
+                    self.events.add_event(Event(type=Event.GAME,
+                                                name=Event.ACTION_SUCCEEDED,
+                                                description=f"You rest from your adventuring and heal your wounds"))
 
             # Increase the dungeon level
             self.dungeon_level += 1
