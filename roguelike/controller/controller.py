@@ -14,6 +14,7 @@ class Controller():
     GAME_MODE_PLAYING = "playing"
     GAME_MODE_PAUSED = "paused"
     GAME_MODE_GAME_OVER = "game over"
+    GAME_MODE_JOURNAL = "journal"
     GAME_MODE_SHOP = "shop"
 
     def __init__(self, name:str):
@@ -60,6 +61,10 @@ class Controller():
 
             elif new_mode == Controller.GAME_MODE_SHOP:
                 self.view.set_mode(view.MainFrame.MODE_SHOP_SCREEN)
+                self.model.set_mode(model.Model.GAME_STATE_PAUSED)
+
+            elif new_mode == Controller.GAME_MODE_JOURNAL:
+                self.view.set_mode(view.MainFrame.MODE_JOURNAL_SCREEN)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
             elif new_mode == Controller.GAME_MODE_CHARACTER_CREATION:
@@ -150,6 +155,7 @@ class Controller():
                 inventory = action.get('show_inventory')
                 character = action.get('show_character')
                 shop = action.get('enter_shop')
+                journal = action.get('show_journal')
                 pause = action.get('pause')
 
                 if move:
@@ -169,6 +175,8 @@ class Controller():
                     self.set_mode(Controller.GAME_MODE_INVENTORY)
                 elif shop:
                     self.set_mode(Controller.GAME_MODE_SHOP)
+                elif journal:
+                    self.set_mode(Controller.GAME_MODE_JOURNAL)
                 elif character:
                     self.set_mode(Controller.GAME_MODE_CHARACTER)
                 elif pause:
@@ -420,6 +428,9 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
             return self.handle_create_character_view_keys(key)
 
+        elif self.mode == Controller.GAME_MODE_JOURNAL:
+            return self.handle_journal_view_keys(key)
+
         elif self.mode == Controller.GAME_MODE_GAME_OVER:
             return self.handle_game_over_keys(key)
 
@@ -468,6 +479,8 @@ class Controller():
             return {'show_inventory': True}
         elif key_char == 'c':
             return {'show_character': True}
+        elif key_char == 'j':
+            return {'show_journal': True}
         elif key_char == 'f':
             return {'drop_inventory': True}
 
@@ -578,6 +591,19 @@ class Controller():
             return {'select': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
+            return {'exit': True}
+
+        return {}
+
+    def handle_journal_view_keys(self, key):
+        key_char = chr(key.c)
+
+        # Movement keys
+        if key.vk == libtcod.KEY_UP or key_char == 'w':
+            return {'move': (0, -1)}
+        elif key.vk == libtcod.KEY_DOWN or key_char == 's':
+            return {'move': (0, 1)}
+        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'j':
             return {'exit': True}
 
         return {}

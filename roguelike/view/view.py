@@ -41,6 +41,7 @@ class MainFrame(View):
     MODE_INVENTORY_SCREEN = "inventory"
     MODE_CHARACTER_SCREEN = "character"
     MODE_SHOP_SCREEN = "shop"
+    MODE_JOURNAL_SCREEN = "journal"
     MODE_CHARACTER_CREATION_SCREEN = "character creation"
     MODE_PAUSED = "game paused"
     MODE_GAME_OVER = "game over"
@@ -103,6 +104,13 @@ class MainFrame(View):
                                   border_bg=libtcod.light_sepia,
                                   border_fg=libtcod.gold)
 
+        self.journal_view = JournalView(width=int(self.width - 2),
+                                            height=50,
+                                            fg=libtcod.dark_sepia,
+                                            bg=libtcod.lightest_sepia,
+                                            border_bg=libtcod.sepia,
+                                            border_fg=libtcod.gold)
+
         self.text_entry = TextEntryBox()
         self.frame1 = None
 
@@ -155,6 +163,9 @@ class MainFrame(View):
         self.character_view.change_selection(0)
 
         self.character_creation_view.initialise(self.game)
+
+        self.journal_view.initialise(self.game)
+        self.journal_view.change_selection(0)
 
         w = self.width
         h = self.height
@@ -227,6 +238,8 @@ class MainFrame(View):
             self.character_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_SHOP_SCREEN:
             self.shop_view.process_event(new_event)
+        elif self.mode == MainFrame.MODE_JOURNAL_SCREEN:
+            self.journal_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_PLAYING:
             self.floor_view.process_event(new_event)
 
@@ -280,6 +293,22 @@ class MainFrame(View):
                                  0, 0,
                                  self.character_view.width,
                                  self.character_view.height,
+                                 0,
+                                 bx, by,
+                                 ffade=1, bfade=1)
+
+        # If we are in JOURNAL mode then draw the character screen
+        elif self.mode == MainFrame.MODE_JOURNAL_SCREEN:
+            # Redraw the character view
+            self.journal_view.draw()
+            bx = int((self.width - self.journal_view.width) / 2)
+            by = int((self.height - self.journal_view.height) / 2)
+            by = 1
+            # Blit the character panel
+            libtcod.console_blit(self.journal_view.con,
+                                 0, 0,
+                                 self.journal_view.width,
+                                 self.journal_view.height,
                                  0,
                                  bx, by,
                                  ffade=1, bfade=1)
@@ -1887,6 +1916,79 @@ class ItemPickerView(View):
 
             so.render(self.con, 3, y)
             y += 1
+
+
+class JournalView(View):
+    BORDER_TYPE1 = "type1"
+    BORDER_TYPE2 = "type2"
+
+    def __init__(self, width: int, height: int,
+                 fg=libtcod.white, bg=libtcod.black,
+                 border_fg=libtcod.white, border_bg=libtcod.black):
+
+        super().__init__(width=width, height=height)
+
+        # Properties
+        self.fg = fg
+        self.bg = bg
+        self.border_fg = border_fg
+        self.border_bg = border_bg
+        self.heading_fg = libtcod.dark_orange
+        self.border_type = JournalView.BORDER_TYPE2
+        self.border = None
+
+        # Components
+        self.con = None
+        self.game = None
+        self.character = None
+        self.selected_item = -1
+
+    def initialise(self, game: model.Model):
+
+        self.game = game
+
+        self.con = libtcod.console_new(self.width, self.height)
+        self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+    def process_event(self, new_event: model.Event):
+        pass
+
+    def change_selection(self, d: int):
+
+        self.selected_item += d
+        self.selected_item = min(max(0, self.selected_item), len(self.game.journal.journal_entries) - 1)
+
+    def draw(self):
+
+        journal = self.game.journal
+
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+
+        cx, cy = self.center
+
+        # Draw the border
+        bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
+        bo.render(self.con, 0, 0)
+
+        # Create a box divider
+        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
+        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
+
+        y = 2
+        text = f"{journal.name}"
+
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y += 2
+
+
 
 
 class EventView(View):
