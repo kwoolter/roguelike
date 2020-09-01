@@ -2041,7 +2041,7 @@ class JournalView(View):
 
             for vv in v:
 
-                text = f" {vv.capitalize()} "
+                text = f"{vv}"
                 t = textwrap.wrap(text, self.width - 4)
                 for tt in t:
                     y += 1

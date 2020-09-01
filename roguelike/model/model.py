@@ -905,7 +905,7 @@ class Floor():
         success = False
 
         # See of there any ability checks for the specified Entity
-        checks = AbilityChecksFactory.get_entity_ability_checks(e.name)
+        checks = AbilityChecksFactory.get_entity_ability_checks(e)
 
         # If there are more than one type of check for this entity...
         if len(checks) > 1:
@@ -936,7 +936,7 @@ class Floor():
             print(str(check))
             # Make this entity non-checkable going forward!
             # You get one go at attempting the check!
-            e.set_property("IsCheckable", False)
+            #e.set_property("IsCheckable", False)
 
             # Get the ability modifier that is appropriate for the ability check
             ability_modifier = self.player.fighter.get_property_modifier(check.ability)
@@ -967,6 +967,7 @@ class Floor():
                                                     name=Event.EFFECT_ITEM_DISCOVERY,
                                                     description=f'You find {check.success_reward.description}'))
 
+                # Go through other rewards...
                 for k,v in check.success_misc.items():
                     if k == "History":
                         text = ThemeManager.get_random_history(v)
@@ -998,9 +999,6 @@ class Floor():
                                   description=f"You gain {value} XP"))
                     else:
                         print(f'get reward {stat}={value} but did nothing!')
-
-
-
 
             # If ability check failed...
             else:
@@ -2486,6 +2484,10 @@ class AbilityCheck:
         self.max_attempts = max_attempts
         self.attempts_remaining = self.max_attempts
 
+        # Start recording how many attempts we have made on this entity
+        if self.entity.get_property("Attempts") is None:
+            self.entity.set_property("Attempts", self.max_attempts)
+
         if self.difficulty in AbilityCheck.difficulty_levels:
             self.difficulty_value = AbilityCheck.difficulty_levels[self.difficulty]
         else:
@@ -2521,21 +2523,41 @@ class AbilityCheck:
 
 
     def attempt(self, ability_modifier: int = 0):
-        self.attempts_remaining -= 1
+        """
+        Attempt an ability check
+        :param ability_modifier: the value of the relevant modifier for the check
+        :return: True = success, you passed the check. False - you failed
+        """
+        success = False
         self.success_reward = None
         self.failure_reward = None
 
-        if self.difficulty_value <= (random.randint(1, 20) + ability_modifier):
-            success = True
-            if len(self.success_rewards) > 0:
-                reward_name = random.choice(self.success_rewards)
-                self.success_reward = EntityFactory.get_entity_by_name(reward_name)
+        # See how many attempts we have at a check on this entity?
+        self.attempts_remaining  = self.entity.get_property("Attempts")
+        if self.attempts_remaining < 1:
 
+            self.entity.set_property("IsCheckable",False)
+
+        # Attempt the check...
         else:
-            success = False
-            if len(self.failure_rewards) > 0:
-                reward_name = random.choice(self.failure_rewards)
-                self.failure_reward = EntityFactory.get_entity_by_name(reward_name)
+
+            # did we pass the check?
+            if self.difficulty_value <= (random.randint(1, 20) + ability_modifier):
+                success = True
+                if len(self.success_rewards) > 0:
+                    reward_name = random.choice(self.success_rewards)
+                    self.success_reward = EntityFactory.get_entity_by_name(reward_name)
+
+            # We failed the check...
+            else:
+                success = False
+                if len(self.failure_rewards) > 0:
+                    reward_name = random.choice(self.failure_rewards)
+                    self.failure_reward = EntityFactory.get_entity_by_name(reward_name)
+
+        # Decrement the number of remaining check attempts available
+        self.attempts_remaining -= 1
+        self.entity.set_property("Attempts", self.attempts_remaining)
 
         return success
 
@@ -2582,7 +2604,7 @@ class AbilityChecksFactory:
 
 
     @staticmethod
-    def ability_check_from_row(entity_name:str, ability_name:str, check)->AbilityCheck:
+    def ability_check_from_row(entity:Entity, ability_name:str, check)->AbilityCheck:
 
         difficulty = check["Difficulty"]
         description = check["Description"]
@@ -2593,8 +2615,6 @@ class AbilityChecksFactory:
         success_stats = check["SuccessStats"]
         failure_stats = check["FailureStats"]
         max_attempts = check["MaxAttempts"]
-
-        entity = EntityFactory.get_entity_by_name(entity_name)
 
         new_check = AbilityCheck(entity=entity,
                                  ability=ability_name,
@@ -2633,7 +2653,7 @@ class AbilityChecksFactory:
         return new_check
 
 
-    def get_entity_ability_checks(entity_name: str):
+    def get_entity_ability_checks(entity: str):
 
         assert AbilityChecksFactory.ability_checks is not None, "No ability checks have been loaded!"
 
@@ -2641,10 +2661,10 @@ class AbilityChecksFactory:
 
         df = AbilityChecksFactory.ability_checks
 
-        checks = df.loc[entity_name]
+        checks = df.loc[entity.name]
 
         for index, check in checks.iterrows():
-            new_check = AbilityChecksFactory.ability_check_from_row(entity_name=entity_name,
+            new_check = AbilityChecksFactory.ability_check_from_row(entity=entity,
                                                                     ability_name=index,
                                                                     check=check)
             matches[index] = new_check
