@@ -11,10 +11,9 @@
 [KW] Remove old room names file and logic now we are using randomly generated
 [KW] Room and Floor names have themes based on the Floor theme e.g. Swamp, Desert, etc
 [KW] buy an ability upgrade in the shop
-[KW] Warlock class with WIS based abilities
-[KW] Ase A* algo for monster movements towards player
+[KW] Use A* algo for monster movements towards player
 [KW] Journal that summarises what you did or found on each level e.g. Lore.  Takes events and converts to journal logs.
 
 
 # Ideas DONE!
-TODO
+[KW] Warlock class with CHA based abilities

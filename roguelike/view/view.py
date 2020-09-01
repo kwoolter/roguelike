@@ -1,4 +1,5 @@
 import math
+import random
 from pathlib import Path
 
 import roguelike.model as model
@@ -380,11 +381,11 @@ class MainFrame(View):
         ac = self.game.player.fighter.get_defence("AC")
         hp = self.game.player.get_property("HP")
         max_hp = self.game.player.fighter.get_max_HP()
-        status = f'F={self.game.dungeon_level} AC={ac} '
-        stats = ["DEX", "INT", "XP", "Level"]
+        status = f'F={self.game.dungeon_level}{chr(179)}AC={ac}'
+        stats = ["STR","DEX","INT","WIS","CHA", "XP", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
-            status += f'{stat}={stat_value} '
+            status += f'{chr(179)}{stat[0]}={stat_value}'
 
         libtcod.console_set_default_foreground(0,libtcod.lightest_grey)
         libtcod.console_print(0,x,y,f'{status:<{self.width}}')
@@ -1696,8 +1697,8 @@ class CreateCharacterView(View):
         self.character_view.border_type = CharacterView.BORDER_TYPE1
         self.character_view.initialise(self.game)
 
-        available_classes = model.CombatClassFactory.get_playable_classes()
-        self.class_picker.initialise("Choose Combat Class:", available_classes)
+        self.available_classes = model.CombatClassFactory.get_playable_classes()
+        self.class_picker.initialise("Choose Combat Class:", self.available_classes)
 
         self.text_entry = TextEntryBox(width=20, parent=self.con)
 
@@ -1882,9 +1883,9 @@ class ItemPickerView(View):
             so = ScreenString(text,
                               fg=fg,
                               bg=bg,
-                              alignment=libtcod.CENTER)
+                              alignment=libtcod.LEFT)
 
-            so.render(self.con, cx, y)
+            so.render(self.con, 3, y)
             y += 1
 
 

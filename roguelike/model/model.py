@@ -1441,7 +1441,8 @@ class Model():
         CombatEquipmentFactory.load("combat_equipment.csv")
 
         if self.player is None:
-            self.add_player(self.generate_player(name="Keith", class_name="Rogue"))
+            name = ThemeManager.get_random_history("Name")
+            self.add_player(self.generate_player(name=name, class_name="Rogue"))
 
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)

@@ -16,6 +16,7 @@ Locked Chest,STR,Hard,10,You try and break {entity} using your {ability},You bre
 Nature Item,WIS,Medium,10,You examine something that you notice on the floor,Using your {ability} of nature you find a useful item,"Healing Herbs,Blue Mushroom,Red Mushroom",XP=10,Nothing of use,Empty,
 Nature Trap,WIS,Medium,10,You examine something that you notice on the floor,Using your {ability} of nature you identify a poisonous liquid and avoid it,Empty,XP=10,There is a green liquid that burns you as you touch it,Empty,HP=-5
 NPC,CHA,Medium,10,You approach {entity} and talk to them,Using your {ability} you charm {entity}.  They give you something and then dissappear,"Map, Silver,Key,Weapon Upgrade",XP=10,{entity} is not interested in you and walks away,Empty,
+NPC,WIS,Medium,10,You approach {entity} and talk to them,Impressed by your {ability} the stranger shares some knowledge and then dissappears,Empty,"XP=10,#History=Treasure",{entity} looks at you disdainfull then and walks away,Empty,
 Plaque,INT,Medium,10,You carefully examine {entity},You read some inscriptions on {entity} and gain some esoteric knowledge,,"XP=20,#History=Place",You notice some inscriptions on {entity} but they are worn with age and you cannot read them,,
 Rock,STR,Easy,10,You try and lift {entity} using your {ability},With a heave you lift {entity},"Silver,Silver, Copper, Copper, Copper, Gold",XP=10,You fail to lift {entity} ,,
 Shrine,INT,Medium,10,You approach {entity},You pray at {entity} and it has a healing effect on you,,"XP=10,HP=5",You pray at {entity} but the gods are silent,,

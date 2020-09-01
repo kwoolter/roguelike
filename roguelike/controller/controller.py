@@ -3,6 +3,7 @@ import roguelike.view as view
 import tcod as libtcod
 import numpy as np
 import pickle
+import random
 
 class Controller():
 
@@ -214,11 +215,17 @@ class Controller():
                 edit_name = action.get('edit_name')
                 edit_class = action.get('edit_class')
                 select = action.get("select")
+                randomize = action.get("randomize")
 
                 if edit_name:
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_NAME_PICK
                 elif edit_class:
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_CLASS_PICK
+                elif randomize:
+                    name = model.ThemeManager.get_random_history("Name")
+                    class_name = random.choice(model.CombatClassFactory.get_playable_classes())
+                    self.model.add_player(self.model.generate_player(name, class_name))
+                    self.view.character_creation_view.initialise(self.model)
                 elif move:
                     dx, dy = move
                     self.view.character_creation_view.change_selection(dy)
@@ -350,7 +357,7 @@ class Controller():
         if self.mode == Controller.GAME_MODE_START:
             keys_help = 'N=Create New Character|Enter=Start'
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
-            keys_help = 'N=Change name|C=change class|Enter/Space=Confirm|Esc=Exit'
+            keys_help = 'N=Change name|C=change class|R=Randomise|Enter/Space=Confirm|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_PLAYING:
             keys_help = '^v<> / WASD=Move/attack/examine|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|Enter=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
@@ -560,6 +567,8 @@ class Controller():
             return {'edit_name': True}
         elif key_char == "c":
             return {'edit_class': True}
+        elif key_char == "r":
+            return {'randomize': True}
         elif key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
