@@ -2046,11 +2046,18 @@ class Journal:
         self.name = f'The Journal of {self.model.player.name} the {self.model.player.combat_class_name}'
         self.event_names = [Event.ACTION_GAIN_XP, Event.LOSE_HEALTH, Event.ACTION_KILL, Event.ACTION_FOUND_LORE, Event.LEVEL_UP]
 
+        level_key = self.model.current_floor.level
+        level_name = self.model.current_floor.name
+
+        if level_key not in self.journal_entries:
+            self.journal_entries[level_key] = {}
+            self.journal_entries[level_key]["Name"] = level_name
+
     def process_event(self, new_event: Event):
 
-        if new_event.name in self.event_names:
+        print(f'{__class__}: Event {new_event.name}')
 
-            print(f'{__class__}: Event {new_event}')
+        if new_event.name in self.event_names:
 
             level_key = self.model.current_floor.level
             level_name = self.model.current_floor.name
@@ -2064,8 +2071,12 @@ class Journal:
 
             self.journal_entries[level_key][new_event.name].append(new_event.description)
 
+
+    def get_journal_levels(self):
+        return list(self.journal_entries.keys())
+
     def get_journal_for_level(self, level:int):
-        
+
         return self.journal_entries.get(level)
 
     def print(self):

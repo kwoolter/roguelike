@@ -66,6 +66,7 @@ class Controller():
             elif new_mode == Controller.GAME_MODE_JOURNAL:
                 self.view.set_mode(view.MainFrame.MODE_JOURNAL_SCREEN)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
+                self.view.journal_view.change_selection(self.model.dungeon_level, relative = False)
 
             elif new_mode == Controller.GAME_MODE_CHARACTER_CREATION:
                 self.view.set_mode(view.MainFrame.MODE_CHARACTER_CREATION_SCREEN)
@@ -303,6 +304,12 @@ class Controller():
                         print(f'Selling {self.view.shop_view.get_selected_sell_item().description}: success={success}')
 
 
+            # If we are in CHARACTER mode
+            elif self.mode == Controller.GAME_MODE_JOURNAL:
+                if move:
+                    dx, dy = move
+                    self.view.journal_view.change_selection(dy)
+
             # If we are in GAME PAUSED mode
             elif self.mode == Controller.GAME_MODE_PAUSED:
                 play = action.get("play")
@@ -368,13 +375,15 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
             keys_help = 'N=Change name|C=change class|R=Randomise|Enter/Space=Confirm|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_PLAYING:
-            keys_help = '^v<> / WASD=Move/attack/examine|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|Enter=take stairs|Esc=Pause'
+            keys_help = '^v<> / WASD=Move/attack/examine|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|J=show journal|Enter=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
             keys_help = 'Esc=continue|Q=quit the game'
         elif self.mode == Controller.GAME_MODE_INVENTORY:
             keys_help = '^v<> / WASD=Change selected item|E=equip selected item|F=drop selected item|U/Q=use equipped item|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_CHARACTER:
             keys_help = '^v / WA=Change selected ability|L/E=level-up selected ability|Esc=Exit'
+        elif self.mode == Controller.GAME_MODE_JOURNAL:
+            keys_help = '^v / WA=Change selected level|Esc/J=Exit'
         elif self.mode == Controller.GAME_MODE_SHOP:
             keys_help = '^v / WA=Change selected item|B/E=change to BUY tab|Q/V=change to SELL tab|' \
                         '<> / AD=change selected buy item category|Enter/Space=Buy or sell selected item|Esc=Exit'
