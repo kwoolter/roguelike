@@ -30,6 +30,7 @@ class Event():
     ACTION_FAILED = "action failed"
     ACTION_SUCCEEDED = "action succeeded"
     ACTION_ATTACK = "attack"
+    ACTION_KILL = "kill"
     ACTION_EQUIP = "equip"
     ACTION_TAKE_ITEM = "take_item"
     ACTION_FOUND_ITEM = "found_item"

@@ -99,6 +99,7 @@ class Controller():
                     self.set_mode(Controller.GAME_MODE_SHOP)
 
                 self.view.process_event(event)
+                self.model.process_event(event)
 
                 event = self.model.get_next_event()
 

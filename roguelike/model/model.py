@@ -11,7 +11,7 @@ from .entity_factory import Entity, Player, EntityFactory, Fighter
 from .entity_factory import Inventory
 from .events import Event
 from .game_parameters import GameParameters
-from .themes import ThemeManager
+from .themes import ThemeManager, Palette
 
 
 def dim_rgb(rgb, dc: int):
@@ -879,7 +879,7 @@ class Floor():
 
                     self.events.add_event(
                         Event(type=Event.GAME,
-                              name=Event.ACTION_SUCCEEDED,
+                              name=Event.ACTION_KILL,
                               description=f"{attacker.description.capitalize()} kills {target.description}."))
 
                     self.events.add_event(
@@ -1157,26 +1157,26 @@ class Floor():
                     from_end_pct = end_l0/total_l0
 
                     self.walkable[sx, sy] = 1
-                    #self.floor_tile_colours[sx,sy] = list(tunnel.bg)
+
                     new_colour = libtcod.color_lerp(tunnel.start_bg, tunnel.end_bg, from_start_pct)
                     if current_colour != libtcod.black:
                         blended_colour = libtcod.color_lerp(current_colour,new_colour,0.5)
                     else:
                         blended_colour = new_colour
 
-
                     self.floor_tile_colours[sx, sy] = list(blended_colour)
 
         # Make floor walkable where rooms are and store any floor tile colours
         for room in self.map_rooms:
+
             x, y, w, h = room.rect
             self.walkable[x:x + w, y: y + h] = 1
-            # if random.randint(0,10) > 5:
-            #     self.walkable[x, y] = 0
-            #     self.walkable[x + w - 2, y] = 0
-            #     self.walkable[x, y + h - 2] = 0
-            #     self.walkable[x + w - 2, y + h - 2] = 0
 
+            # Create an outline around the room that is a darker colour than the room floor
+            room_outline_bg = Palette.dim_hsl(room.bg,0.75)
+            self.floor_tile_colours[x-1:x + w+1, y-1: y + h+1] = list(room_outline_bg)
+
+            # Fill in the room flow with its tile colour
             self.floor_tile_colours[x:x + w, y: y + h] = list(room.bg)
 
         # Convert walkable to array of bools
@@ -1420,6 +1420,7 @@ class Model():
         self.floors=[]
         self.current_floor = None
         self.shop = None
+        self.journal = None
         self.events = EventQueue()
         self.item_user = None
 
@@ -1459,6 +1460,9 @@ class Model():
 
         self.shop = Shop(f'{self.name} Shop')
         self.shop.initialise(self.current_floor)
+
+        self.journal = Journal()
+        self.journal.initialise(self)
 
 
     def load_game_parameters(self, level=1, XP=0)->dict:
@@ -1508,6 +1512,7 @@ class Model():
     def debug(self):
         self.player.print()
         self.print()
+        self.journal.print()
         r = self.current_floor.get_current_room()
         if r is not None:
             self.current_floor.get_current_room().print()
@@ -1534,6 +1539,9 @@ class Model():
                 self.events.add_event(Event(type=Event.STATE,
                                             name=Event.STATE_GAME_OVER,
                                             description=f"Game Over!"))
+
+    def process_event(self, new_event: Event):
+        self.journal.process_event(new_event)
 
     def set_state(self, new_state):
         """
@@ -2027,6 +2035,43 @@ class Model():
                                         description=f"You sold {old_item.description}"))
 
         return success
+
+class Journal:
+
+    def __init__(self):
+        self.journal_entries = {}
+
+    def initialise(self, model: Model):
+        self.model = model
+        self.name = f'The Journal of {self.model.player.name} the {self.model.player.combat_class_name}'
+        self.event_names = [Event.ACTION_GAIN_XP, Event.LOSE_HEALTH, Event.ACTION_KILL, Event.ACTION_FOUND_LORE, Event.LEVEL_UP]
+
+    def process_event(self, new_event: Event):
+
+        if new_event.name in self.event_names:
+
+            print(f'{__class__}: Event {new_event}')
+
+            level_key = self.model.current_floor.level
+            level_name = self.model.current_floor.name
+
+            if level_key not in self.journal_entries:
+                self.journal_entries[level_key] = {}
+                self.journal_entries[level_key]["Name"] = level_name
+
+            if new_event.name not in self.journal_entries[level_key]:
+                self.journal_entries[level_key][new_event.name] = []
+
+            self.journal_entries[level_key][new_event.name].append(new_event.description)
+
+    def print(self):
+        print(f'{self.name:=^40}')
+        for k, v in self.journal_entries.items():
+            print(f'Level {k} journal entries:')
+            for kk,vv in v.items():
+                print(f'\t{kk}={vv}')
+
+
 
 class ItemUser():
     def __init__(self):

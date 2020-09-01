@@ -1899,6 +1899,7 @@ class EventView(View):
     EVENT_NAME_TO_COLOUR = {model.Event.ACTION_SUCCEEDED: (libtcod.lighter_green, None),
                             model.Event.ACTION_FAILED: (libtcod.yellow, None),
                             model.Event.ACTION_ATTACK: (libtcod.light_red, None),
+                            model.Event.ACTION_KILL: (libtcod.lighter_red, libtcod.darkest_red),
                             model.Event.ACTION_FOUND_ITEM: (libtcod.light_azure, None),
                             model.Event.ACTION_FOUND_LORE: (libtcod.lightest_sepia, libtcod.darkest_sepia),
                             model.Event.ACTION_TAKE_ITEM: (libtcod.lightest_blue, None),

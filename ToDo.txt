@@ -5,7 +5,6 @@
 [OF] Better weapon and armour upgrade system
 [OF] Spell book of reusable spells for Wizard and Cleric
 [KW] spell slot in inventory for currently active spell
-[KW] Floor colours - add colour boundary around a room so that exits are highlighted
 [KW] Add high score tables
 [KW] Move room colours for a theme into floor_palettes.csv and remove room_palettes.csv
 [KW] Remove old room names file and logic now we are using randomly generated
@@ -14,6 +13,6 @@
 [KW] Use A* algo for monster movements towards player
 [KW] Journal that summarises what you did or found on each level e.g. Lore.  Takes events and converts to journal logs.
 
-
 # Ideas DONE!
 [KW] Warlock class with CHA based abilities
+[KW] Floor colours - add colour boundary around a room so that exits are highlighted
