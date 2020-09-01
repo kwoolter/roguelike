@@ -1988,6 +1988,9 @@ class JournalView(View):
 
         y += 2
 
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
 
 
 
