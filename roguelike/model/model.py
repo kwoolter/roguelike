@@ -2064,6 +2064,10 @@ class Journal:
 
             self.journal_entries[level_key][new_event.name].append(new_event.description)
 
+    def get_journal_for_level(self, level:int):
+        
+        return self.journal_entries.get(level)
+
     def print(self):
         print(f'{self.name:=^40}')
         for k, v in self.journal_entries.items():
