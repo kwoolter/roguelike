@@ -28,8 +28,8 @@ class SpellBook:
     def __init__(self):
         self.learned_spells = set()
         self.memorised_spells = set()
-        self.max_learned_spells = 3
-        self.max_memorised_spells = 10
+        self.max_learned_spells = 10
+        self.max_memorised_spells = 3
 
     def add_spell(self, new_spell:Spell)->bool:
         success = False
@@ -75,10 +75,8 @@ class SpellFactory:
 
 
     @staticmethod
-    def row_to_spell(row)->Spell:
+    def row_to_spell(spell_name:str, row)->Spell:
 
-
-        name = row.index
         description = row["Description"]
         atk = row["ATK"]
         defence = row["DEF"]
@@ -87,7 +85,7 @@ class SpellFactory:
         level = row["Level"]
         freq = row["Frequency"]
 
-        new_spell = Spell(name=name,
+        new_spell = Spell(name=spell_name,
                           description=description,
                           attack_ability=atk,
                           defence = defence,
@@ -107,7 +105,7 @@ class SpellFactory:
         r = df.loc[(class_name)]
 
         for i, row in r.iterrows():
-            new_spell = SpellFactory.row_to_spell(row)
+            new_spell = SpellFactory.row_to_spell(i, row)
             spell_list.append(new_spell)
 
 
@@ -123,7 +121,6 @@ if __name__ == "__main__":
 
     for rr in r:
         my_book.add_spell(rr)
-
 
     my_book.print()
 
