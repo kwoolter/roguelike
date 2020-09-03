@@ -6,3 +6,8 @@ Wizard,Scorching Burst,a vertical column of golden flames,INT,REF,1d6,10,1,At Wi
 Wizard,Burning Hands,a fierce burst of flame from your hands,INT,REF,2d5,5,1,Encounter
 Wizard,Chill Strike,a bolt of frigid purple energy,INT,FOR,2d8,10,1,Encounter
 Wizard,Acid Arrow,a shimmering arrow of green glowing liquid,INT,REF,2d8,20,1,Daily
+Warlock,Dire Radiance,a shaft of brilliant cold starlight,CON,FOR,1d6,10,1,At Will
+Warlock,Eldritch Blast,a bolt of dark crackling eldricth energy,CHA,REF,1d10,10,1,At Will
+Warlock,Diabolic Grasp,a great talon of sulfurous darkness#,CON,FOR,2d8,10,1,Encounter
+Warlock,Curse of the Dark Dram,inflict a waking nightmare,CHA,WILL,2d8,10,1,Daily
+Warlock,Dread Star,a fist-sized orb of painful blue-white radiance,CHA,WILL,3d6,10,1,Daily
