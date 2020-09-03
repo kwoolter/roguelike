@@ -1,0 +1,8 @@
+﻿Class,Name,Description,ATK,DEF,DMG,Range,Level,Frequency
+Wizard,Cloud of Daggers,a small cloud of whirling daggers,INT,REF,1d6,10,1,At Will
+Wizard,Magic Missile,a silvery bolt of force,INT,REF,2d4,20,1,At Will
+Wizard,Ray of Frost,a blisteringly cold ray of white frost,INT,FOR,1d6,10,1,At Will
+Wizard,Scorching Burst,a vertical column of golden flames,INT,REF,1d6,10,1,At Will
+Wizard,Burning Hands,a fierce burst of flame from your hands,INT,REF,2d5,5,1,Encounter
+Wizard,Chill Strike,a bolt of frigid purple energy,INT,FOR,2d8,10,1,Encounter
+Wizard,Acid Arrow,a shimmering arrow of green glowing liquid,INT,REF,2d8,20,1,Daily

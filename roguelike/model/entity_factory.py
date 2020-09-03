@@ -827,6 +827,7 @@ class Inventory:
 
         return coins
 
+
 if __name__ == "__main__":
 
     text = "1g2s3b"
