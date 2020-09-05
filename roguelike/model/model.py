@@ -9,6 +9,7 @@ import tcod as libtcod
 from .combat import *
 from .entity_factory import Entity, Player, EntityFactory, Fighter
 from .entity_factory import Inventory
+from .spells import *
 from .events import Event
 from .game_parameters import GameParameters
 from .themes import ThemeManager, Palette
@@ -1437,6 +1438,7 @@ class Model():
         AbilityChecksFactory.load("ability_checks.csv")
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
+        SpellFactory.load("spells.csv")
 
         if self.player is None:
             name = ThemeManager.get_random_history("Name")

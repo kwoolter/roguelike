@@ -1,11 +1,18 @@
 import pandas as pd
 from pathlib import Path
-import roguelike.model.combat as combat
+from roguelike.model.dice import DnD_Dice
+
 
 class SpellBookException(Exception):
 
-    def __init__(self):
+    def __init__(self, description : str):
+        self.description = description
         super().__init__()
+
+    def __str__(self):
+        return self.description
+
+
 
 class Spell:
     def __init__(self,
@@ -26,52 +33,95 @@ class Spell:
         self.range = range
 
     def roll_damage(self) -> int:
-        dmg = combat.CombatEquipment.dnd_dice_text_to_roll(self.damage)
+        dmg = DnD_Dice.roll_dice_from_text(self.damage)
         return dmg
 
+
+    def tick(self):
+        pass
+
     def __str__(self):
-        return f'{self.name}:{self.description} ATK({self.attack_ability}) vs DEF({self.defense})'
+        return f'{self.name}:{self.description} ATK({self.attack_ability}) vs DEF({self.defense}: DMG={self.damage})'
 
 class SpellBook:
+    """
+    Class to represent tha spell book of a specified class
+    """
+
     def __init__(self, class_name:str):
+        """
+
+        Args:
+            class_name: name of the class that this book belongs to
+        """
+
+        # Properties
         self.class_name = class_name
-        self.learned_spells = set()
-        self.memorised_spells = set()
         self.max_learned_spells = 10
         self.max_memorised_spells = 3
 
-    def learn_spell(self, new_spell:Spell)->bool:
-        success = False
+        # Components
+        self.learned_spells = {}
+        self.memorised_spells = {}
 
+    def learn_spell(self, new_spell:Spell)->bool:
+        """
+        Attempt to learn a new spell
+        Args:
+            new_spell: the new Spell object that you want to learn
+
+        Returns:
+
+        """
+        success = False
 
         if new_spell.class_name != self.class_name:
             raise SpellBookException(f"You are a {self.class_name}, you cannot learn {new_spell.class_name} spells")
         elif len(self.learned_spells) >= self.max_learned_spells:
             raise SpellBookException(f"No more free spell pages in your book - max {self.max_learned_spells}")
         else:
-            self.learned_spells.add(new_spell)
+            self.learned_spells[new_spell.name]=new_spell
             success = True
-
 
         return success
 
     def memorise_spell(self, new_spell):
         success = False
 
-        learned_spell_names = [spell.name for spell in self.learned_spells]
-        if new_spell.name  not in learned_spell_names:
+        if new_spell.name  not in self.learned_spells:
             raise SpellBookException(f"You have not learned spell {new_spell.name}")
-        elif len(self.memorised_spells) > self.max_memorised_spells:
+        elif len(self.memorised_spells) >= self.max_memorised_spells:
             raise SpellBookException(f"You can't memorise anymore spells - max { self.max_memorised_spells}")
         else:
-            self.memorised_spells.add(new_spell)
+            self.memorised_spells[new_spell.name]=new_spell
             success = True
 
         return success
 
+
+    def get_learned_spell_names(self):
+        return list(self.learned_spells.keys())
+
+    def get_learned_spell(self,spell_name):
+        return self.learned_spells.get(spell_name)
+
+    def get_memorised_spell_names(self):
+        return list(self.memorised_spells.keys())
+
+    def get_memorised_spell(self,spell_name):
+        return self.memorised_spells.get(spell_name)
+
+
     def print(self):
+        print(f'** {self.class_name} Spell Book **')
+        print(f'** Learned Spells **')
         for spell in self.learned_spells:
             print(str(spell))
+
+        print(f'** Memorised Spells **')
+        for spell in self.memorised_spells:
+            print(str(spell))
+
 
 class SpellFactory:
     spells = None
@@ -113,8 +163,10 @@ class SpellFactory:
 
 
     @staticmethod
-    def row_to_spell(class_name:str, spell_name:str, row)->Spell:
+    def row_to_spell(row)->Spell:
 
+        class_name = row["Class"]
+        spell_name = row["Name"]
         description = row["Description"]
         atk = row["ATK"]
         defence = row["DEF"]
@@ -143,10 +195,11 @@ class SpellFactory:
 
         assert class_name in df.index
 
-        r = df.loc[(class_name)]
+        r = df.xs(class_name, level=0, drop_level=False)
+        r.reset_index(inplace=True)
 
         for i, row in r.iterrows():
-            new_spell = SpellFactory.row_to_spell(class_name, i, row)
+            new_spell = SpellFactory.row_to_spell(row)
             spell_list.append(new_spell)
 
         return spell_list
@@ -157,9 +210,10 @@ class SpellFactory:
         if spell_name not in SpellFactory.get_available_spell_names():
             raise SpellBookException(f"Spell {spell_name} does not exist")
 
-        row = SpellFactory.spells.xs(spell_name,level=1)
+        row = SpellFactory.spells.xs(spell_name,level=1,drop_level=False)
+        row.reset_index(inplace=True)
 
-        new_spell = SpellFactory.row_to_spell(row.index, spell_name, row)
+        new_spell = SpellFactory.row_to_spell(row.iloc[0])
 
         return new_spell
 
@@ -183,13 +237,35 @@ if __name__ == "__main__":
                 success = my_book.learn_spell(new_spell)
                 if success is False:
                     print(f"Failed to learn spell {new_spell.name}:{new_spell.description}")
+
+                my_book.memorise_spell(new_spell)
             except SpellBookException as e:
                 print(e)
+
+        # mem_spell = random.choice(list(my_book.learned_spells.values()))
+        # my_book.memorise_spell(mem_spell)
+
         my_book.print()
 
-        spells = SpellFactory.get_available_spell_names()
+    print("*"*50)
 
-        spell = SpellFactory.get_spell_by_name(random.choice(spells))
+    spells = SpellFactory.get_available_spell_names()
+    spell = SpellFactory.get_spell_by_name(random.choice(spells))
 
-        print(str(spell))
+    print(str(spell))
+    r = spell.roll_damage()
+    print(f'{spell.name} did {r} damage')
+
+    print("*" * 50)
+
+    try:
+
+        my_book = SpellBook("Cleric")
+
+        new_spell = SpellFactory.get_spells_by_class("Wizard")[0]
+        my_book.learn_spell(new_spell)
+
+    except SpellBookException as e:
+        print(e)
+
 

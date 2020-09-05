@@ -55,7 +55,7 @@ class DnD_Dice:
 
         return result
 
-if __name__ == "__main__":
+def run_tests():
 
     dice_rolls = ["1d6", "1d4+1", "1d20"]
 
@@ -69,3 +69,6 @@ if __name__ == "__main__":
     for dice in dice_rolls:
         r=DnD_Dice.roll_dice_from_text(dice)
         print(f'Rolling {dice} dice....result = {r}')
+
+if __name__ == "__main__":
+    run_tests()

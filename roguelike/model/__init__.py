@@ -12,6 +12,7 @@ from . combat import CombatEquipment
 from . combat import CombatEquipmentFactory
 from . combat import CombatClass
 from . combat import CombatClassFactory
+from . spells import SpellFactory
 from . themes import ThemeManager
 from . themes import Palette
 from . entity_factory import text_to_color
