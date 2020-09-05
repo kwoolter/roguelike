@@ -6,7 +6,8 @@ import operator
 import numpy as np
 import tcod as libtcod
 
-#from . combat import CombatClass, CombatEquipmentFactory, CombatEquipment
+from . combat import CombatClass, CombatEquipmentFactory, CombatEquipment
+from . spells import SpellBook, Spell
 
 from roguelike.model.combat import *
 
@@ -203,11 +204,11 @@ class Player(Entity):
 
         assert self.fighter is not None, "Trying to equip an item when you don't have a fighter set-up"
 
-        # If new item is None then effectively we are just unequipping whatever is in teh specified slot
+        # If new item is None then effectively we are just unequipping whatever is in the specified slot
         if new_item is None:
             success = self.fighter.equip_item(new_item, slot)
 
-        # Check if the new item is equippable or is is somethign that you can collect and use e.g. a key
+        # Check if the new item is equippable or is is something that you can collect and use e.g. a key
         elif new_item.get_property("IsEquippable") == True or \
                 (new_item.get_property("IsCollectable") == True and new_item.get_property("IsInteractable") == True):
 
@@ -264,14 +265,20 @@ class Fighter():
     WEAPON_SLOT = "Main Hand"
     OFF_HAND = "Off Hand"
     ITEM_SLOT = "Item Slot"
+    SPELL_SLOT = "spell Slot"
 
     def __init__(self, combat_class: CombatClass):
+
+        # Properties
         self.last_target = None
         self.combat_class = combat_class
-        self.equipment = {}
-        Fighter.DEFAULT_WEAPON = EntityFactory.get_entity_by_name(Fighter.DEFAULT_WEAPON_NAME)
         self.set_property("Level", 0)
         self.set_property("HP", self.get_max_HP())
+
+        # Components
+        self.equipment = {}
+        Fighter.DEFAULT_WEAPON = EntityFactory.get_entity_by_name(Fighter.DEFAULT_WEAPON_NAME)
+        self.spell_book = SpellBook(self.combat_class.name)
 
     @property
     def is_dead(self) -> bool:
@@ -510,6 +517,17 @@ class Fighter():
                         totals[stat] += v
 
         return totals
+
+    def learn_spell(self, new_spell:Spell)->bool:
+
+        success = False
+
+        success = self.spell_book.learn_spell(new_spell)
+
+        return success
+
+    def memorise_spell(self, new_spell:Spell):
+        return self.spell_book.memorise_spell(new_spell)
 
     def roll_damage(self) -> int:
         dmg = CombatEquipmentFactory.get_damage_roll_by_name(self.current_weapon.name)

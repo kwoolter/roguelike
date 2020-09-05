@@ -15,6 +15,9 @@ class SpellBookException(Exception):
 
 
 class Spell:
+
+    FREQUENCY_AT_WILL = "At Will"
+
     def __init__(self,
                  class_name:str,
                  name: str,
@@ -22,7 +25,9 @@ class Spell:
                  attack_ability: str,
                  defence: str,
                  damage:str,
-                 range:int):
+                 level:int,
+                 range:int,
+                 frequency:str):
 
         self.class_name = class_name
         self.name = name
@@ -30,12 +35,29 @@ class Spell:
         self.attack_ability = attack_ability
         self.defense = defence
         self.damage = damage
+        self.level = level
         self.range = range
+        self.frequency = frequency
+
+        self.used = False
 
     def roll_damage(self) -> int:
-        dmg = DnD_Dice.roll_dice_from_text(self.damage)
+
+        if self.used is True:
+            dmg = 0
+        else:
+
+            dmg = DnD_Dice.roll_dice_from_text(self.damage)
+
+            if self.frequency != Spell.FREQUENCY_AT_WILL:
+                self.used = True
+
         return dmg
 
+    def reset(self):
+
+
+        self.used = False
 
     def tick(self):
         pass
@@ -99,11 +121,17 @@ class SpellBook:
         return success
 
 
+    def get_learned_spells(self):
+        return list(self.learned_spells.values())
+
     def get_learned_spell_names(self):
         return list(self.learned_spells.keys())
 
     def get_learned_spell(self,spell_name):
         return self.learned_spells.get(spell_name)
+
+    def get_memorised_spells(self):
+        return list(self.memorised_spells.values())
 
     def get_memorised_spell_names(self):
         return list(self.memorised_spells.keys())
@@ -181,7 +209,9 @@ class SpellFactory:
                           attack_ability=atk,
                           defence = defence,
                           damage=dmg,
-                          range=range)
+                          level=level,
+                          range=range,
+                          frequency=freq)
 
         return new_spell
 
@@ -255,6 +285,9 @@ if __name__ == "__main__":
     print(str(spell))
     r = spell.roll_damage()
     print(f'{spell.name} did {r} damage')
+    r = spell.roll_damage()
+    print(f'{spell.name} did {r} damage')
+
 
     print("*" * 50)
 

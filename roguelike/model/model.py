@@ -1614,6 +1614,7 @@ class Model():
             eq = EntityFactory.get_entity_by_name(item.strip())
             new_player.take_item(eq)
 
+
         # Give the Player some money
         coins = {Inventory.GOLD: 0, Inventory.SILVER:1, Inventory.COPPER:7}
         for c,v in coins.items():
@@ -1622,6 +1623,13 @@ class Model():
                 new_player.take_item(eq)
 
         new_player.level_up()
+
+        # Learn some spells
+        if new_player.combat_class_name in SpellFactory.get_available_class_names():
+            available_spells = SpellFactory.get_spells_by_class(class_name)
+            level_spells = [spell for spell in available_spells if spell.level <= new_player.get_property("Level")]
+            for spell in level_spells:
+                new_player.fighter.learn_spell(spell)
 
         return new_player
 

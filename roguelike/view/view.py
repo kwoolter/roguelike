@@ -42,6 +42,7 @@ class MainFrame(View):
     MODE_CHARACTER_SCREEN = "character"
     MODE_SHOP_SCREEN = "shop"
     MODE_JOURNAL_SCREEN = "journal"
+    MODE_SPELLBOOK_SCREEN = "spellbook"
     MODE_CHARACTER_CREATION_SCREEN = "character creation"
     MODE_PAUSED = "game paused"
     MODE_GAME_OVER = "game over"
@@ -111,6 +112,13 @@ class MainFrame(View):
                                             border_bg=libtcod.sepia,
                                             border_fg=libtcod.gold)
 
+        self.spellbook_view = SpellBookView(width=int(self.width - 2),
+                                            height=50,
+                                            fg=libtcod.dark_sepia,
+                                            bg=libtcod.lightest_sepia,
+                                            border_bg=libtcod.sepia,
+                                            border_fg=libtcod.gold)
+
         self.text_entry = TextEntryBox()
         self.frame1 = None
 
@@ -166,6 +174,9 @@ class MainFrame(View):
 
         self.journal_view.initialise(self.game)
         self.journal_view.change_selection(0)
+
+        self.spellbook_view.initialise(self.game)
+        self.spellbook_view.change_selection(0)
 
         w = self.width
         h = self.height
@@ -304,8 +315,24 @@ class MainFrame(View):
             bx = int((self.width - self.journal_view.width) / 2)
             by = int((self.height - self.journal_view.height) / 2)
             by = 1
-            # Blit the character panel
+            # Blit the journal panel
             libtcod.console_blit(self.journal_view.con,
+                                 0, 0,
+                                 self.journal_view.width,
+                                 self.journal_view.height,
+                                 0,
+                                 bx, by,
+                                 ffade=1, bfade=1)
+
+        # If we are in JOURNAL mode then draw the character screen
+        elif self.mode == MainFrame.MODE_SPELLBOOK_SCREEN:
+            # Redraw the character view
+            self.spellbook_view.draw()
+            bx = int((self.width - self.journal_view.width) / 2)
+            by = int((self.height - self.journal_view.height) / 2)
+            by = 1
+            # Blit the spellbook panel
+            libtcod.console_blit(self.spellbook_view.con,
                                  0, 0,
                                  self.journal_view.width,
                                  self.journal_view.height,
@@ -2058,6 +2085,172 @@ class JournalView(View):
 
 
 
+class SpellBookView(View):
+    BORDER_TYPE1 = "type1"
+    BORDER_TYPE2 = "type2"
+
+    def __init__(self, width: int, height: int,
+                 fg=libtcod.white, bg=libtcod.black,
+                 border_fg=libtcod.white, border_bg=libtcod.black):
+
+        super().__init__(width=width, height=height)
+
+        # Properties
+        self.fg = fg
+        self.bg = bg
+        self.border_fg = border_fg
+        self.border_bg = border_bg
+        self.heading_fg = libtcod.dark_orange
+        self.border_type = SpellBookView.BORDER_TYPE2
+        self.border = None
+
+        # Components
+        self.con = None
+        self.game = None
+        self.spellbook = None
+        self.selected_item = -1
+        self.selected_spell = None
+
+    def initialise(self, game: model.Model):
+
+        self.game = game
+
+        self.con = libtcod.console_new(self.width, self.height)
+        self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+    def process_event(self, new_event: model.Event):
+        pass
+
+    def get_selected_item(self):
+        return self.selected_spell
+
+    def change_selection(self, d: int, relative = True):
+
+        if relative is True:
+
+            self.selected_item += d
+            self.selected_item = min(max(0, self.selected_item), len(self.game.player.fighter.spell_book.get_learned_spells())-1)
+
+        else:
+            self.selected_item = min(max(0, d), len(self.game.player.fighter.spell_book.get_learned_spells()) - 1)
+
+    def draw(self):
+
+        spell_book = self.game.player.fighter.spell_book
+
+        # Clear the screen with the background colour
+        self.con.default_bg = self.bg
+        libtcod.console_clear(self.con)
+
+        cx, cy = self.center
+
+        # Draw the border
+        bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
+        bo.render(self.con, 0, 0)
+
+        # Create a box divider
+        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
+        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
+
+        y = 2
+        text = f"The {spell_book.class_name}'s Spell Book"
+
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y += 2
+
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
+        y += 2
+
+        text = f"Memorised Spells"
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y+=1
+
+        self.con.default_fg = self.fg
+        self.con.hline(1, y, self.width - 2)
+
+        spells = spell_book.get_memorised_spells()
+
+        if len(spells) == 0:
+            y+=1
+
+            text = f"None"
+            so = ScreenString(text,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+
+        for spell in spells:
+
+            text = f"{spell.name}"
+            t = textwrap.wrap(text, self.width - 4)
+            for tt in t:
+                y += 1
+                so = ScreenString(tt,
+                                  fg=self.fg,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, cx, y)
+
+        y+=1
+
+        self.con.default_fg = self.fg
+        self.con.hline(1, y, self.width - 2)
+
+
+        y += 1
+
+        text = f"Learned Spells"
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.CENTER)
+
+        so.render(self.con, cx, y)
+
+        y += 1
+
+        self.con.default_fg = self.fg
+        self.con.hline(1, y, self.width - 2)
+
+        spells = spell_book.get_learned_spells()
+
+        for i, spell in enumerate(spells):
+
+            if i == self.selected_item:
+                bg = self.fg
+                fg = self.bg
+                self.selected_spell =  spell
+            else:
+                bg = self.bg
+                fg = self.fg
+
+            text = f"{spell.name}:{spell.description}"
+            t = textwrap.wrap(text, self.width - 4)
+            for tt in t:
+                y += 1
+                so = ScreenString(tt,
+                                  fg=fg,
+                                  bg=bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, cx, y)
 
 
 
