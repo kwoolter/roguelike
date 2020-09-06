@@ -2324,7 +2324,7 @@ class SpellBookView(View):
         if self.mode == SpellBookView.MODE_ACTIVE:
             text = f"Spells Learned:"
         else:
-            text = "All Class Spells"
+            text = "All Class Spells:"
 
         so = ScreenString(text,
                           fg=self.fg,

@@ -1799,6 +1799,9 @@ class Model():
                                                 name=Event.ACTION_SUCCEEDED,
                                                 description=f"You rest from your adventuring and heal your wounds"))
 
+                    # Reset spells that can only be used once per floor
+                    self.player.fighter.spell_book.reset(Spell.FREQUENCY_PER_FLOOR)
+
             # Increase the dungeon level
             self.dungeon_level += 1
 
@@ -2080,21 +2083,31 @@ class Model():
                                         name=Event.ACTION_FAILED,
                                         description=f"{sbe.description}"))
 
-    def cast_spell(self, slot:int):
+    def cast_spell(self, slot:int)->bool:
+
+        success = False
 
         try:
-            print(f'attempting to cast spell in slot {slot}')
-
             spell = self.player.fighter.spell_book.get_memorised_spell_at_slot(slot)
-            dmg = spell.roll_damage()
+            caster = SpellCaster(self.events)
+            success = caster.process(spell=spell, floor = self.current_floor)
 
-            print(f'Casting spell {spell.name}...damage={dmg}')
+            if success is True:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"{caster.effect}"))
+            else:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"{caster.effect}"))
 
         except SpellBookException as sbe:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"{sbe.description}"))
 
+
+        return success
 
 class Journal:
 
@@ -2115,7 +2128,7 @@ class Journal:
 
     def process_event(self, new_event: Event):
 
-        print(f'{__class__}: Event {new_event.name}')
+        #print(f'{__class__}: Event {new_event.name}')
 
         if new_event.name in self.event_names:
 
@@ -2147,6 +2160,92 @@ class Journal:
                 print(f'\t{kk}={vv}')
 
 
+class SpellCaster:
+
+    def __init__(self, events:EventQueue):
+        self.effect = None
+        self.events = events
+
+    def process(self, spell:Spell, floor:Floor)->bool:
+        success = True
+        self.floor=floor
+
+        print(f'Casting spell {spell.name} on Floor {floor.name}')
+
+        target = floor.player.fighter.last_target
+
+        if target is None:
+            self.effect = f"You don't have a target to cast {spell.name} on"
+            success = False
+        else:
+            success = self.do_attack(attacker=floor.player, target=target, spell=spell)
+
+        return success
+
+    def do_attack(self, attacker: Entity, target: Entity, spell:Spell)->bool:
+
+        success = False
+
+        # What are the attack and defence abilities for this spell?
+        attack_ability = spell.attack_ability
+        defence_ability = spell.defense
+
+        # Roll a 20 sided dice and add to attack power
+        attack = attacker.fighter.get_attack(attack_ability) + random.randint(1,20)
+
+        # Calculate the target's ability defence
+        defence = target.fighter.get_defence(defence_ability)
+
+        print(f'{attacker.name} using weapon {spell.name} ({attack_ability} vs {defence_ability})')
+        print(f'{attacker.name} ATK ({attack_ability}={attack}) vs ({defence_ability}={defence}) DEF of {target.name}')
+        print(f'Defender HP={target.fighter.combat_class.get_property("HP")}')
+
+        # Did the attack succeed...?
+        if attack > defence:
+
+            # Roll some damage based on the attackers spell + attack modifier and deduct damage from target's HP
+            dmg = spell.roll_damage() + max(0, attacker.fighter.get_attack(attack_ability))
+            target.fighter.take_damage(dmg)
+            self.effect = f'You cast {spell.name} on {target.description}. {spell.description} deals {dmg} damage'
+            success = True
+
+            target.fighter.take_damage(dmg)
+
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_ATTACK,
+                      description=f"{attacker.description.capitalize()} deals {dmg} damage with {spell.name}"))
+
+            # If the target died...
+            if target.fighter.is_dead:
+                target.state = Entity.STATE_DEAD
+
+                # Update attacker stats
+                attacker.fighter.add_kills()
+                XP = target.fighter.get_XP_reward()
+                attacker.fighter.add_XP(XP)
+                attacker.fighter.last_target = None
+
+                # Swap the target on the floor to a corpse
+                corpse = EntityFactory.get_entity_by_name("Corpse")
+                self.floor.swap_entity(target, corpse)
+
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_KILL,
+                          description=f"{attacker.description.capitalize()} kills {target.description}."))
+
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_GAIN_XP,
+                          description=f"{attacker.description.capitalize()} gains {XP} XP"))
+
+        else:
+            self.effect = f'Your {spell.name} spell misses {target.description}'
+
+        spell.use()
+
+        return success
 
 class ItemUser():
     def __init__(self):

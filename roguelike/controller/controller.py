@@ -175,7 +175,8 @@ class Controller():
                     self.model.move_player(dx, dy)
                     player_turn = False
                 elif cast:
-                    self.model.cast_spell(slot=cast)
+                    if self.model.cast_spell(slot=cast) is True:
+                        player_turn = False
                 elif stairs:
                     self.model.take_stairs()
                     player_turn = False

@@ -15,6 +15,8 @@ class SpellBookException(Exception):
 
 class Spell:
     FREQUENCY_AT_WILL = "At Will"
+    FREQUENCY_PER_FLOOR = "Encounter"
+    FREQUENCY_PER_LEVEL = "Daily"
 
     def __init__(self,
                  class_name: str,
@@ -42,19 +44,18 @@ class Spell:
     def roll_damage(self) -> int:
 
         if self.used is True:
-
             raise SpellBookException(f'Spell {self.name} has already been used for period {self.frequency}')
         else:
-
             dmg = DnD_Dice.roll_dice_from_text(self.damage)
-
-            if self.frequency != Spell.FREQUENCY_AT_WILL:
-                self.used = True
 
         return dmg
 
-    def reset(self):
+    def use(self):
+        if self.frequency != Spell.FREQUENCY_AT_WILL:
+            self.used = True
+            print(f'\t******** Spell {self.name} just got used!')
 
+    def reset(self):
         self.used = False
 
     def tick(self):
@@ -85,6 +86,12 @@ class SpellBook:
         # Components
         self.learned_spells = {}
         self.memorised_spells = []
+
+    def reset(self, frequency:str):
+
+        matching_spells = [spell for spell in self.learned_spells.values() if spell.frequency == frequency]
+        for spell in matching_spells:
+            spell.reset()
 
     def learn_spell(self, new_spell: Spell) -> bool:
         """
