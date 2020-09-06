@@ -436,7 +436,8 @@ class Floor():
         for tunnel in self.map_tunnels:
             tunnel.print()
 
-        self.get_stats()
+        target = self.auto_target()
+        print(f'auto-target={target}')
 
     def get_stats(self):
         stats_text = []
@@ -666,6 +667,10 @@ class Floor():
             # Recalculate their current FOV using sight radius of combat class
             self.recompute_fov(radius = self.player.fighter.combat_class.get_property("SightRange"))
 
+            # Attempt to Auto-target nearest enemy if no target exists
+            if self.player.fighter.last_target is None:
+                self.player.fighter.last_target = self.auto_target()
+
             # See if we found something?
             e = self.get_entity_at_pos(self.player.xy)
             if e is not None:
@@ -799,6 +804,21 @@ class Floor():
             self.entities.remove(old_entity)
         else:
             print(f"Couldn't find {old_entity.name} on this floor!")
+
+    def auto_target(self, index:int = 0)->Entity:
+
+        target = None
+        targets = []
+        fov = self.get_fov_cells()
+        targets = [(e, e.distance_to_target(self.player)) for e in self.entities if e.get_property("IsEnemy") == True and e.xy in fov]
+
+        if len(targets)>0:
+            targets.sort(key=lambda x:x[1])
+            target = targets[index][0]
+
+        print(targets)
+
+        return target
 
     def attack_entity(self, attacker : Entity, target : Entity, weapon : CombatEquipment = None):
         """
@@ -1506,8 +1526,11 @@ class Model():
         return game_parameters
 
     def print(self):
-        #self.current_floor.print()
         print(f'target={self.player.fighter.last_target}')
+        target=self.current_floor.auto_target()
+        print(f'nearest target={str(target)}')
+        self.player.fighter.last_target = target
+
 
     def debug(self):
         self.player.print()
