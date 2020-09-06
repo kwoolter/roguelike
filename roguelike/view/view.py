@@ -2382,7 +2382,7 @@ class SpellBookView(View):
             self.con.hline(1, y, self.width - 2)
 
             y += 1
-            text = f'{self.selected_spell.name}'
+            text = f'{self.selected_spell.name} (level:{self.selected_spell.level})'
             libtcod.console_print_ex(self.con,x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
 
             y += 1
@@ -2391,13 +2391,19 @@ class SpellBookView(View):
             self.con.default_fg = self.fg
 
             y += 1
-            text = f'{self.selected_spell.description}'
-            libtcod.console_print_ex(self.con,x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
+            text = f'{self.selected_spell.description}.'
+            t = textwrap.wrap(text, self.width - 4)
+            for tt in t:
+                so = ScreenString(tt,
+                                  fg=self.fg,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
 
-            y += 1
-            text = f'Level:{self.selected_spell.level}, ' \
-                   f'{self.selected_spell.attack_ability} vs {self.selected_spell.defense}, ' \
-                   f'DMG={self.selected_spell.damage}, {self.selected_spell.frequency}'
+                so.render(self.con, cx, y)
+                y += 1
+
+            text = f'{self.selected_spell.attack_ability} vs {self.selected_spell.defense}, ' \
+                   f'DMG={self.selected_spell.damage}, HP={self.selected_spell.heal}, {self.selected_spell.frequency}'
             libtcod.console_print_ex(self.con, x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
 
 

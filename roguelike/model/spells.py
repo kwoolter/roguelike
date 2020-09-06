@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 from pathlib import Path
 from roguelike.model.dice import DnD_Dice
 
@@ -25,6 +26,7 @@ class Spell:
                  attack_ability: str,
                  defence: str,
                  damage: str,
+                 heal:str,
                  level: int,
                  range: int,
                  frequency: str):
@@ -35,11 +37,29 @@ class Spell:
         self.attack_ability = attack_ability
         self.defense = defence
         self.damage = damage
+        self.heal=heal
         self.level = level
         self.range = range
         self.frequency = frequency
 
         self.used = False
+
+    @property
+    def is_attack(self):
+        return self.damage != "nan"
+
+    @property
+    def is_defense(self):
+        return self.heal != "nan"
+
+    def roll_HP(self)->int:
+
+        if self.used is True:
+            raise SpellBookException(f'Spell {self.name} has already been used for period {self.frequency}')
+        else:
+            hp = DnD_Dice.roll_dice_from_text(self.heal)
+
+        return  hp
 
     def roll_damage(self) -> int:
 
@@ -58,16 +78,13 @@ class Spell:
     def reset(self):
         self.used = False
 
-    def tick(self):
-        pass
-
     def __str__(self):
         return f'{self.name}:{self.description}: ATK({self.attack_ability}) vs DEF({self.defense}): DMG={self.damage}, {self.frequency}'
 
 
 class SpellBook:
     """
-    Class to represent tha spell book of a specified class
+    Class to represent the spell book of a specified class
     """
 
     def __init__(self, class_name: str, level:int = 1):
@@ -251,6 +268,7 @@ class SpellFactory:
         atk = row["ATK"]
         defence = row["DEF"]
         dmg = row["DMG"]
+        heal = row["HP"]
         range = row["Range"]
         level = row["Level"]
         freq = row["Frequency"]
@@ -261,6 +279,7 @@ class SpellFactory:
                           attack_ability=atk,
                           defence=defence,
                           damage=dmg,
+                          heal=heal,
                           level=level,
                           range=range,
                           frequency=freq)

@@ -2,15 +2,15 @@
 
 # Ideas TO DO
 [OF] Better weapon and armour upgrade system
-[OF] Spell book of reusable spells for Wizard and Cleric
+[OF] Spell book of reusable spells for Cleric
 [KW] Need to add enemy targeting for ranged attacks.  Highlight target by floor tile colour
-[KW] spell slot in inventory for currently active spell OR spell slots 1,2,3,etc
 [KW] Add high score tables
 [KW] Move room colours for a theme into floor_palettes.csv and remove room_palettes.csv
 [KW] Remove old room names file and logic now we are using randomly generated
 [KW] Room and Floor names have themes based on the Floor theme e.g. Swamp, Desert, etc
 [KW] buy an ability upgrade in the shop
 [KW] Use A* algo for monster movements towards player
+[KW] How do 'Daily' spells get reset?
 
 # Bugs
 [OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves
@@ -23,8 +23,9 @@
 [KW] Configurable number of allowable attempts at an ability check
 
 06/09/2020
-- Added SpellBook and SpellBookView basics.  Now nee to be able to use them!
-
+- Added SpellBook and SpellBookView basics.
+- Memorised Spells in spellbook can now be used in combat
+[KW] spell slots 1,2,3,etc
 
 02/09/2020
 - Added stairs up gp back up to prior level but you don't get and completion rewards for exting again

@@ -2172,14 +2172,32 @@ class SpellCaster:
 
         print(f'Casting spell {spell.name} on Floor {floor.name}')
 
-        target = floor.player.fighter.last_target
+        if spell.is_attack is True:
 
-        if target is None:
-            self.effect = f"You don't have a target to cast {spell.name} on"
-            success = False
-        else:
-            success = self.do_attack(attacker=floor.player, target=target, spell=spell)
+            target = floor.player.fighter.last_target
 
+            if target is None:
+                self.effect = f"You don't have a target to cast {spell.name} on"
+                success = False
+            else:
+                success = self.do_attack(attacker=floor.player, target=target, spell=spell)
+
+        elif spell.is_defense:
+            success = self.do_heal(target=floor.player, spell=spell)
+
+
+        return success
+
+    def do_heal(self, target:Entity, spell:Spell)->bool:
+        success = True
+        print(f'Heal {target.description} using spell {spell.name}')
+        hp = spell.roll_HP()
+        target.fighter.heal(hp)
+        self.events.add_event(
+            Event(type=Event.GAME,
+                  name=Event.GAIN_HEALTH,
+                  description=f"{spell.description}. You gain {hp} HP"))
+        spell.use()
         return success
 
     def do_attack(self, attacker: Entity, target: Entity, spell:Spell)->bool:
