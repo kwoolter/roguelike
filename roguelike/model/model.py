@@ -1506,7 +1506,8 @@ class Model():
         return game_parameters
 
     def print(self):
-        self.current_floor.print()
+        #self.current_floor.print()
+        print(f'target={self.player.fighter.last_target}')
 
     def debug(self):
         self.player.print()
@@ -2092,14 +2093,16 @@ class Model():
             caster = SpellCaster(self.events)
             success = caster.process(spell=spell, floor = self.current_floor)
 
-            if success is True:
+            if success is True and caster.effect is not None:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
                                             description=f"{caster.effect}"))
-            else:
+            elif caster.effect is not None:
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_FAILED,
                                             description=f"{caster.effect}"))
+
+            success = True
 
         except SpellBookException as sbe:
             self.events.add_event(Event(type=Event.GAME,
@@ -2182,7 +2185,7 @@ class SpellCaster:
             else:
                 success = self.do_attack(attacker=floor.player, target=target, spell=spell)
 
-        elif spell.is_defense:
+        elif spell.is_defense is True:
             success = self.do_heal(target=floor.player, spell=spell)
 
 
@@ -2190,7 +2193,6 @@ class SpellCaster:
 
     def do_heal(self, target:Entity, spell:Spell)->bool:
         success = True
-        print(f'Heal {target.description} using spell {spell.name}')
         hp = spell.roll_HP()
         target.fighter.heal(hp)
         self.events.add_event(

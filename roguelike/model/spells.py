@@ -46,11 +46,11 @@ class Spell:
 
     @property
     def is_attack(self):
-        return self.damage != "nan"
+        return type(self.damage) == str or math.isnan(self.damage) is False
 
     @property
     def is_defense(self):
-        return self.heal != "nan"
+        return type(self.heal) == str or math.isnan(self.heal) is False
 
     def roll_HP(self)->int:
 

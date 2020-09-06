@@ -622,7 +622,13 @@ class FloorView(View):
                     # If no background colour for this entity then use the current tile colour with 'shadow'
                     else:
                         tile_bg = self.floor.floor_tile_colours[x, y]
-                        bg = dim_rgb(tile_bg, a+10)
+
+                        if e != self.floor.player.fighter.last_target:
+                            bg = dim_rgb(tile_bg, 10)
+                        else:
+                            bg = libtcod.yellow
+                            bg = dim_rgb(tile_bg, -70)
+
                         libtcod.console_set_char_background(self.con, x, y, bg)
 
                 except Exception as ex:

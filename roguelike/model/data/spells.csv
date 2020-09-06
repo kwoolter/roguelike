@@ -15,3 +15,8 @@ Cleric,Healing Word,A divine light washes over you,,,,1d6,0,1,At Will
 Cleric,Lance of Faith,A brilliant light sears through your foe,WIS,REF,1d8,,5,1,At Will
 Cleric,Sacred Flame,A sacred light shines from above searing your enemy,WIS,REF,1d6,,5,1,At Will
 Cleric,Divine Glow,You invoke a blast of white radiance from a holy symbol,WIS,REF,1d8,,1,1,Encounter
+Cleric,Cure Light Wounds,You gain the power to instantly heal wounds,,,,1d6,1,2,Daily
+Cleric,Daunting Light,A burining column of light engulfs your foe,WIS,REF,2d10,,10,3,Encounter
+Cleric,Spiritual Weapon,You conjure a glowing weapon adorned with the symbol of your deity.,WIS,AC,1d10,,10,5,Daily
+Cleric,Cure Serious Wounds,You gain the power to instantly heal wounds,,,2d10,,1,6,Daily
+Cleric,Break the Spirit,Calling down the power of you god you bathe your fow in agonizing radiance,WIS,WILL,2d8,,10,7,Encounter

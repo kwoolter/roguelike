@@ -2,7 +2,6 @@
 
 # Ideas TO DO
 [OF] Better weapon and armour upgrade system
-[OF] Spell book of reusable spells for Cleric
 [KW] Need to add enemy targeting for ranged attacks.  Highlight target by floor tile colour
 [KW] Add high score tables
 [KW] Move room colours for a theme into floor_palettes.csv and remove room_palettes.csv
@@ -22,10 +21,12 @@
 [KW] Journal that summarises what you did or found on each level e.g. Lore.  Takes events and converts to journal logs.
 [KW] Configurable number of allowable attempts at an ability check
 
+02/09/2020
+- Added stairs up gp back up to prior level but you don't get and completion rewards for exting again
+
 06/09/2020
 - Added SpellBook and SpellBookView basics.
 - Memorised Spells in spellbook can now be used in combat
 [KW] spell slots 1,2,3,etc
+[OF] Spell book of reusable spells for Cleric
 
-02/09/2020
-- Added stairs up gp back up to prior level but you don't get and completion rewards for exting again
