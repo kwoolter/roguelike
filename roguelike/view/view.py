@@ -220,7 +220,7 @@ class MainFrame(View):
         # Built the font file name that we want to load using current font size
         font_file = f'{MainFrame.CONSOLE_FONT_NAME}_{self.font_size}x{self.font_size}.png'
 
-        font_file = "terminal12x12_gs_ro.png"
+        #font_file = "terminal12x12_gs_ro.png"
 
         # Create path for the file that we are going to load and load it
         data_folder = Path(__file__).resolve().parent
@@ -755,7 +755,7 @@ class InventoryView(View):
         self.border_fg = border_fg
         self.border_bg = border_bg
         self.border_type = InventoryView.BORDER_TYPE2
-        self.equipped_item_fg = libtcod.desaturated_chartreuse
+        self.equipped_item_fg = Palette.dim_hsl(libtcod.desaturated_chartreuse, 0.75)
         self.carried_item_fg = self.fg
 
         # Components
@@ -832,6 +832,11 @@ class InventoryView(View):
                               alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
+
+        y+=1
+
+        self.con.default_fg = self.fg
+        self.con.hline(1, y, self.width - 2)
 
         # Print what is currently equipped
         # Start with the header
@@ -2193,13 +2198,15 @@ class SpellBookView(View):
         else:
             self.selection_list = self.class_spells
 
+        # Sort selection list by spell level and name
+        self.selection_list.sort(key=lambda x:f'{x.level:0>4}:{x.name}')
 
     def draw(self):
 
         self.build_lists()
 
         player_level = self.game.player.fighter.get_property("Level")
-        player_level = None
+        #player_level = None
         spell_book = self.game.player.fighter.spell_book
 
         # Clear the screen with the background colour
@@ -2217,7 +2224,7 @@ class SpellBookView(View):
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
-        text = f"{self.game.player.name} The {spell_book.class_name}'s Spell Book"
+        text = f"{self.game.player.name} The Level {player_level} {spell_book.class_name}'s Spell Book"
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -2243,32 +2250,31 @@ class SpellBookView(View):
 
         y+=2
 
-        self.con.default_fg = self.fg
+        self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
         self.con.hline(1, y, self.width - 2)
 
         y += 2
 
-        if len(self.memorised_spells) == 0:
 
-            text = f"None"
+        for i in range(spell_book.max_memorised_spells):
+
+            fg = self.fg
+            bg = self.bg
+
+            if i >= len(self.memorised_spells) or self.memorised_spells[i] is None:
+                text = f"[{i+1}] Empty"
+                fg = Palette.dim_hsl(fg,0.5)
+            else:
+                spell = self.memorised_spells[i]
+                text = f"[{i+1}] {spell.name}"
+
+
             so = ScreenString(text,
-                              fg=self.fg,
-                              bg=self.bg,
-                              alignment=libtcod.CENTER)
+                              fg=fg,
+                              bg=bg,
+                              alignment=libtcod.LEFT)
 
-            so.render(self.con, cx, y)
-            y+=1
-
-        for spell in self.memorised_spells:
-
-            text = f"{spell.name}"
-
-            so = ScreenString(text,
-                              fg=self.fg,
-                              bg=self.bg,
-                              alignment=libtcod.CENTER)
-
-            so.render(self.con, cx, y)
+            so.render(self.con, int(cx*1/2), y)
 
             y+=1
 
@@ -2293,7 +2299,7 @@ class SpellBookView(View):
 
         y += 2
 
-        self.con.default_fg = self.fg
+        self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
         self.con.hline(1, y, self.width - 2)
 
         y+=2
@@ -2344,8 +2350,9 @@ class SpellBookView(View):
             libtcod.console_print_ex(self.con,x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
 
             y += 1
-            self.con.default_fg = self.fg
+            self.con.default_fg = Palette.dim_hsl(self.fg,0.5)
             self.con.hline(1, y, self.width - 2)
+            self.con.default_fg = self.fg
 
             y += 1
             text = f'{self.selected_spell.description}'

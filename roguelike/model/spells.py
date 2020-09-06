@@ -68,7 +68,7 @@ class SpellBook:
     Class to represent tha spell book of a specified class
     """
 
-    def __init__(self, class_name: str):
+    def __init__(self, class_name: str, level:int = 1):
         """
 
         Args:
@@ -77,12 +77,13 @@ class SpellBook:
 
         # Properties
         self.class_name = class_name
+        self.level = level
         self.max_learned_spells = 10
         self.max_memorised_spells = 3
 
         # Components
         self.learned_spells = {}
-        self.memorised_spells = {}
+        self.memorised_spells = []
 
     def learn_spell(self, new_spell: Spell) -> bool:
         """
@@ -97,8 +98,10 @@ class SpellBook:
 
         if new_spell.class_name != self.class_name:
             raise SpellBookException(f"You are a {self.class_name}, you cannot learn {new_spell.class_name} spells")
+        elif new_spell.level > self.level:
+            raise SpellBookException(f'You need to be level {new_spell.level} or above to learn this spell')
         elif len(self.learned_spells) >= self.max_learned_spells:
-            raise SpellBookException(f"No more free spell pages in your book - max {self.max_learned_spells}")
+            raise SpellBookException(f"No more free spell pages in your book - max={self.max_learned_spells}")
         else:
             self.learned_spells[new_spell.name] = new_spell
             success = True
@@ -114,9 +117,8 @@ class SpellBook:
 
             del self.learned_spells[old_spell.name]
 
-
         else:
-            raise SpellBookException(f"You can't unlearn {old_spell.name} as you do not know it!")
+            raise SpellBookException(f"You can't unlearn {old_spell.name} as it is a spell that you do not know!")
 
     def memorise_spell(self, new_spell: Spell):
 
@@ -125,16 +127,19 @@ class SpellBook:
         elif len(self.memorised_spells) >= self.max_memorised_spells:
             raise SpellBookException(f"You can't memorise anymore spells - max {self.max_memorised_spells}")
         else:
-            self.memorised_spells[new_spell.name] = new_spell
+            self.memorised_spells.append(new_spell)
 
     def forget_spell(self, old_spell: Spell):
         if self.is_memorised(old_spell.name) is True:
-            del self.memorised_spells[old_spell.name]
+            memorised_spell_names = [spell.name for spell in self.memorised_spells]
+            idx = memorised_spell_names.index(old_spell.name)
+            del self.memorised_spells[idx]
         else:
             raise SpellBookException(f"You can't forget {old_spell.name} as you have not memorised it")
 
     def is_memorised(self, spell_name: str):
-        return spell_name in self.memorised_spells
+        memorised_spell_names = [spell.name for spell in self.memorised_spells]
+        return spell_name in memorised_spell_names
 
     def is_learned(self, spell_name: str):
         return spell_name in self.learned_spells
@@ -149,13 +154,36 @@ class SpellBook:
         return self.learned_spells.get(spell_name)
 
     def get_memorised_spells(self):
-        return list(self.memorised_spells.values())
+        return list(self.memorised_spells)
 
     def get_memorised_spell_names(self):
-        return list(self.memorised_spells.keys())
+        memorised_spell_names = [spell.name for spell in self.memorised_spells]
+        return memorised_spell_names
 
     def get_memorised_spell(self, spell_name):
-        return self.memorised_spells.get(spell_name)
+
+        if self.is_memorised(spell_name):
+            memorised_spell_names = [spell.name for spell in self.memorised_spells]
+            idx = memorised_spell_names.find(spell_name)
+            spell = self.memorised_spells[idx]
+
+        else:
+            spell=None
+
+        return spell
+
+    def get_memorised_spell_at_slot(self, slot:int):
+
+        if slot < 1 or slot > len(self.memorised_spells):
+            raise SpellBookException(f"Invalid memorised spell slot {slot}")
+
+        # Adjust for array indexing
+        array_slot = slot - 1
+
+        if self.memorised_spells[array_slot] is None:
+            raise SpellBookException(f"No memorised spell in slot {slot}")
+
+        return self.memorised_spells[array_slot]
 
     def print(self):
         print(f'** {self.class_name} Spell Book **')
@@ -238,15 +266,16 @@ class SpellFactory:
 
         df = SpellFactory.spells
 
-        assert class_name in df.index
+        # If we have spells for this class name available...
+        if class_name in df.index:
 
-        r = df.xs(class_name, level=0, drop_level=False)
-        r.reset_index(inplace=True)
+            r = df.xs(class_name, level=0, drop_level=False)
+            r.reset_index(inplace=True)
 
-        for i, row in r.iterrows():
-            new_spell = SpellFactory.row_to_spell(row)
-            if level is None or new_spell.level <= level:
-                spell_list.append(new_spell)
+            for i, row in r.iterrows():
+                new_spell = SpellFactory.row_to_spell(row)
+                if level is None or new_spell.level <= level:
+                    spell_list.append(new_spell)
 
         return spell_list
 

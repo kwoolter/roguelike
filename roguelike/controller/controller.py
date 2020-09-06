@@ -159,6 +159,7 @@ class Controller():
 
                 # Game playing actions
                 wait = action.get('wait')
+                cast = action.get('cast')
                 fullscreen = action.get('fullscreen')
                 stairs = action.get('take stairs')
                 pickup = action.get('pickup')
@@ -173,6 +174,8 @@ class Controller():
                     dx, dy = move
                     self.model.move_player(dx, dy)
                     player_turn = False
+                elif cast:
+                    self.model.cast_spell(slot=cast)
                 elif stairs:
                     self.model.take_stairs()
                     player_turn = False
@@ -518,6 +521,8 @@ class Controller():
             return {'wait': True}
         elif key_char == 'u' or key_char == 'q':
             return {'use': True}
+        elif ord(key_char) in range(ord('0'),ord('9')+1):
+            return {'cast':int(key_char)}
         elif key_char == 'i' or key_char == 'r':
             return {'show_inventory': True}
         elif key_char == 'c':

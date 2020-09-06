@@ -438,6 +438,8 @@ class Fighter():
 
         self.set_property("MaxHP", self.get_max_HP())
 
+        self.spell_book.level = level
+
         return success
 
     def equip_item(self, new_item: Entity, slot: str = None) -> bool:

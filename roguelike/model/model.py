@@ -2080,6 +2080,21 @@ class Model():
                                         name=Event.ACTION_FAILED,
                                         description=f"{sbe.description}"))
 
+    def cast_spell(self, slot:int):
+
+        try:
+            print(f'attempting to cast spell in slot {slot}')
+
+            spell = self.player.fighter.spell_book.get_memorised_spell_at_slot(slot)
+
+            print(f'Casting spell {spell.name}...')
+
+        except SpellBookException as sbe:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"{sbe.description}"))
+
+
 class Journal:
 
     def __init__(self):
