@@ -267,6 +267,8 @@ class Fighter():
     ITEM_SLOT = "Item Slot"
     SPELL_SLOT = "spell Slot"
 
+    DEFENSES = {"FORT":("STR", "CON"), "REF":("DEX","INT"), "WILL":("WIS","CHA")}
+
     def __init__(self, combat_class: CombatClass):
 
         # Properties
@@ -283,6 +285,10 @@ class Fighter():
     @property
     def is_dead(self) -> bool:
         return self.combat_class.get_property("HP") <= 0
+
+    @property
+    def level(self) -> int:
+        return self.combat_class.get_property("Level")
 
     @property
     def current_weapon(self) -> Entity:
@@ -359,7 +365,7 @@ class Fighter():
         if total is None:
             total = 0
 
-        # Get the same stat from your abilities add add it
+        # Get the same stat from your abilities and add it
         v = self.combat_class.get_property(stat_name)
         if v is not None:
             total += v
@@ -380,23 +386,29 @@ class Fighter():
 
         return attack
 
-    def get_defence(self, ability: str = "AC"):
+    def get_defence(self, defense: str = "AC"):
         """
         Get the fighter's defence that uses the specified ability
-        :param ability: the nme of the ability that you will be using to attack
+        :param defense: the nme of the ability that you will be using to attack
         :return: current total defence value
         """
 
-        # If this is a playable character then add bonus
-        if self.combat_class.get_property("Playable") == True:
-            bonus = 10
-        # Else not required as already part of AC stats for the fighter
+        if defense == "AC":
+            # If this is a playable character then add bonus
+            if self.combat_class.get_property("Playable") == True:
+                bonus = 10 + self.level/2
+            # Else not required as already part of AC stats for the fighter
+            else:
+                bonus = 0
+
+            defense = self.get_stat_total(defense) + bonus
+
         else:
-            bonus = 0
+            ability1, ability2 = Fighter.DEFENSES[defense]
+            modifier = max(self.get_property_modifier(ability1)+self.level/2, self.get_property_modifier(ability2)+self.level/2)
+            defense = modifier + 10 + self.level/2
 
-        defence = self.get_stat_total(ability)
-
-        return bonus + defence
+        return int(defense)
 
     def take_damage(self, damage_amount: int):
         self.combat_class.update_property("HP", damage_amount * -1, increment=True)

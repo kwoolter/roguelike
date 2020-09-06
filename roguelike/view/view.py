@@ -95,7 +95,7 @@ class MainFrame(View):
                                             border_fg=libtcod.gold)
 
         self.character_creation_view = CreateCharacterView(width=int(self.width - 2),
-                                                           height=40,
+                                                           height=50,
                                                            fg=libtcod.dark_sepia,
                                                            bg=libtcod.lightest_sepia,
                                                            border_bg=libtcod.sepia,
@@ -1497,7 +1497,7 @@ class CharacterView(View):
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
-        self.other_stats = ('XP', 'Level', 'HP', "HPPerLevel","SightRange")
+        self.other_stats = ('XP', "HPPerLevel","SightRange")
         self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
 
         # Components
@@ -1555,7 +1555,7 @@ class CharacterView(View):
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
-        text = f"{self.character.name} the {cc.name}"
+        text = f"{self.character.name} the Level {self.character.fighter.level} {cc.name}"
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -1603,7 +1603,7 @@ class CharacterView(View):
                 so.render(self.con, int(cx / 2), y)
                 y += 1
 
-        y += 1
+        y += 2
 
         abilities_end_y = y
 
@@ -1622,27 +1622,30 @@ class CharacterView(View):
         y += 2
 
         right_shift = 6
-        ac = self.character.fighter.get_defence("AC")
-        text = f'AC:{ac:>3}'
-        so = ScreenString(text,
-                          fg=self.fg,
-                          bg=self.bg,
-                          alignment=libtcod.RIGHT)
+        defenses = ("AC","FORT","REF","WILL")
+        for defense in defenses:
 
-        so.render(self.con, int(cx * 3 / 2)+right_shift, y)
-        y += 1
+            ac = self.character.fighter.get_defence(defense)
+            text = f'{defense:<5}:{ac:>3}'
+            so = ScreenString(text,
+                              fg=self.fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, int(cx * 3 / 2), y)
+            y += 1
 
         for i, stat in enumerate(self.other_stats):
             stat_value = cc.properties.get(stat)
             if stat is not None:
-                text = f'{stat}:{stat_value:>3}'
+                text = f'{stat:<5}:{stat_value:>3}'
 
                 so = ScreenString(text,
                                   fg=self.fg,
                                   bg=self.bg,
-                                  alignment=libtcod.RIGHT)
+                                  alignment=libtcod.CENTER)
 
-                so.render(self.con, int(cx * 3 / 2)+right_shift, y)
+                so.render(self.con, int(cx * 3 / 2), y)
 
                 y += 1
 
@@ -1666,7 +1669,7 @@ class CharacterView(View):
         so = ScreenStringRect(text,
                               width=self.width - 2,
                               height=self.height - 2,
-                              fg=self.fg,
+                              fg=self.heading_fg,
                               bg=self.bg,
                               alignment=libtcod.CENTER)
 
@@ -1703,6 +1706,38 @@ class CharacterView(View):
                     if ce.get_property("HANDS") == "2H":
                         text = f'Both Hands: {item.description}'
 
+                so = ScreenString(text,
+                                  fg=self.fg,
+                                  bg=self.bg,
+                                  alignment=libtcod.CENTER)
+
+                so.render(self.con, cx, y)
+                y += 1
+
+        spell_book = self.character.fighter.spell_book
+
+        learned_spells = spell_book.get_learned_spells()
+
+        if len(learned_spells) > 0:
+
+            y+=2
+            self.con.default_fg = Palette.dim_hsl(self.fg, 1.5)
+            self.con.hline(1, y, self.width - 2)
+            y+=2
+
+            text = "Spells Learned:"
+            so = ScreenString(text,
+                              fg=self.heading_fg,
+                              bg=self.bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
+            y += 2
+
+
+            for spell in learned_spells:
+
+                text = f'{spell.name}'
                 so = ScreenString(text,
                                   fg=self.fg,
                                   bg=self.bg,
@@ -1843,7 +1878,6 @@ class CreateCharacterView(View):
 
         so.render(self.con, x=2, y=y)
 
-        y += 2
 
         text = f'Class: {self.character_class}'
 
@@ -1852,13 +1886,13 @@ class CreateCharacterView(View):
                           bg=self.bg,
                           alignment=libtcod.LEFT)
 
-        so.render(self.con, x=2, y=y)
+        so.render(self.con, x=cx, y=y)
 
         y += 2
 
         self.character_view.draw()
         libtcod.console_blit(self.character_view.con,
-                             0, 0, self.character_view.width, 29,
+                             0, 0, self.character_view.width, self.height-10,
                              self.con, 2, y)
 
 
@@ -2240,7 +2274,7 @@ class SpellBookView(View):
 
         y += 2
 
-        text = f"Memorised Spells"
+        text = f"Spells Memorised:"
         so = ScreenString(text,
                           fg=self.fg,
                           bg=self.bg,
@@ -2258,7 +2292,7 @@ class SpellBookView(View):
 
         for i in range(spell_book.max_memorised_spells):
 
-            fg = self.fg
+            fg = self.memorised_spell_fg
             bg = self.bg
 
             if i >= len(self.memorised_spells) or self.memorised_spells[i] is None:
@@ -2267,6 +2301,8 @@ class SpellBookView(View):
             else:
                 spell = self.memorised_spells[i]
                 text = f"[{i+1}] {spell.name}"
+                if spell.used is True:
+                    fg = Palette.dim_hsl(fg, 0.7)
 
 
             so = ScreenString(text,
@@ -2286,7 +2322,7 @@ class SpellBookView(View):
         y += 2
 
         if self.mode == SpellBookView.MODE_ACTIVE:
-            text = f"Learned Spells"
+            text = f"Spells Learned:"
         else:
             text = "All Class Spells"
 

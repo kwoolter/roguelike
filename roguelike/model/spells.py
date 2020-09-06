@@ -42,7 +42,8 @@ class Spell:
     def roll_damage(self) -> int:
 
         if self.used is True:
-            dmg = 0
+
+            raise SpellBookException(f'Spell {self.name} has already been used for period {self.frequency}')
         else:
 
             dmg = DnD_Dice.roll_dice_from_text(self.damage)

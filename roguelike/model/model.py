@@ -2086,8 +2086,9 @@ class Model():
             print(f'attempting to cast spell in slot {slot}')
 
             spell = self.player.fighter.spell_book.get_memorised_spell_at_slot(slot)
+            dmg = spell.roll_damage()
 
-            print(f'Casting spell {spell.name}...')
+            print(f'Casting spell {spell.name}...damage={dmg}')
 
         except SpellBookException as sbe:
             self.events.add_event(Event(type=Event.GAME,
