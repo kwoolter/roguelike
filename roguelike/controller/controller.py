@@ -419,6 +419,8 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_SHOP:
             keys_help = '^v / WA=Change selected item|B/E=change to BUY tab|Q/V=change to SELL tab|' \
                         '<> / AD=change selected buy item category|Enter/Space=Buy or sell selected item|Esc=Exit'
+        elif self.mode == Controller.GAME_MODE_SPELLBOOK:
+            keys_help = "M=Memorise/Forget|L=Learn/unlearn|T=Toggle Spell catalog|Esc/K=Exit"
         elif self.mode == Controller.GAME_MODE_GAME_OVER:
             keys_help = 'SPACE=continue'
         else:
