@@ -518,13 +518,8 @@ class Fighter():
 
         return totals
 
-    def learn_spell(self, new_spell:Spell)->bool:
-
-        success = False
-
-        success = self.spell_book.learn_spell(new_spell)
-
-        return success
+    def learn_spell(self, new_spell:Spell):
+        self.spell_book.learn_spell(new_spell)
 
     def memorise_spell(self, new_spell:Spell):
         return self.spell_book.memorise_spell(new_spell)

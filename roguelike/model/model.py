@@ -1442,7 +1442,7 @@ class Model():
 
         if self.player is None:
             name = ThemeManager.get_random_history("Name")
-            self.add_player(self.generate_player(name=name, class_name="Rogue"))
+            self.add_player(self.generate_player(name=name, class_name="Wizard"))
 
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)
@@ -1510,11 +1510,12 @@ class Model():
 
     def debug(self):
         self.player.print()
-        self.print()
-        self.journal.print()
-        r = self.current_floor.get_current_room()
-        if r is not None:
-            self.current_floor.get_current_room().print()
+        # self.print()
+        # self.journal.print()
+        # r = self.current_floor.get_current_room()
+        # if r is not None:
+        #     self.current_floor.get_current_room().print()
+
 
     def tick(self):
         if self.state == Model.GAME_STATE_PLAYING:
@@ -2045,6 +2046,39 @@ class Model():
                                         description=f"You sold {old_item.description}"))
 
         return success
+
+    def memorise_spell(self, new_spell: Spell):
+
+        spell_book = self.player.fighter.spell_book
+
+        try:
+
+            if spell_book.is_memorised(new_spell.name) is False:
+                if spell_book.is_learned(new_spell.name) is False:
+                    spell_book.learn_spell(new_spell)
+                spell_book.memorise_spell(new_spell)
+            else:
+                spell_book.forget_spell(new_spell)
+
+        except SpellBookException as sbe:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"{sbe.description}"))
+
+    def learn_spell(self, new_spell: Spell):
+
+        spell_book = self.player.fighter.spell_book
+
+        try:
+            if spell_book.is_learned(new_spell.name) is False:
+                spell_book.learn_spell(new_spell)
+            else:
+                spell_book.unlearn_spell(new_spell)
+
+        except SpellBookException as sbe:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"{sbe.description}"))
 
 class Journal:
 

@@ -67,7 +67,6 @@ class Controller():
             elif new_mode == Controller.GAME_MODE_JOURNAL:
                 self.view.set_mode(view.MainFrame.MODE_JOURNAL_SCREEN)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
-                self.view.journal_view.change_selection(self.model.dungeon_level, relative=False)
 
             elif new_mode == Controller.GAME_MODE_SPELLBOOK:
                 self.view.set_mode(view.MainFrame.MODE_SPELLBOOK_SCREEN)
@@ -88,6 +87,12 @@ class Controller():
             elif new_mode == Controller.GAME_MODE_GAME_OVER:
                 self.view.set_mode(view.MainFrame.MODE_GAME_OVER)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
+
+            self.events.add_event(model.Event(type=model.Event.CONTROL,
+                                              name=model.Event.GAME_MODE_CHANGED,
+                                              description=f'Game mode changed from {self.last_mode} to {self.mode}'))
+
+
 
     def run(self):
 
@@ -139,6 +144,7 @@ class Controller():
 
             if debug is True:
                 self.model.print()
+                self.view.print()
 
             if help is True:
                 self.help()
@@ -290,18 +296,21 @@ class Controller():
             elif self.mode == Controller.GAME_MODE_SPELLBOOK:
                 learn = action.get('learn')
                 memorise = action.get('memorise')
+                toggle = action.get('toggle')
 
                 if move:
                     dx, dy = move
                     self.view.spellbook_view.change_selection(dy)
                 else:
-                    e = self.view.spellbook_view.get_selected_item()
-                    if e is not None:
-                        if memorise:
-                            print(f"You memorise {e.name}")
-                            #self.model.equip_item(e)
-                        elif learn:
-                            pass
+                    if toggle:
+                        self.view.spellbook_view.toggle_mode()
+                    else:
+                        e = self.view.spellbook_view.get_selected_item()
+                        if e is not None:
+                            if memorise:
+                                self.model.memorise_spell(e)
+                            elif learn:
+                                self.model.learn_spell(e)
 
             # If we are in SHOP mode
             elif self.mode == Controller.GAME_MODE_SHOP:
@@ -653,6 +662,8 @@ class Controller():
             return {'memorise': True}
         elif key_char == 'l':
             return {'learn': True}
+        elif key_char == 't':
+            return {'toggle': True}
         elif key.vk == libtcod.KEY_ESCAPE or key_char == 'k':
             return {'exit': True}
 
