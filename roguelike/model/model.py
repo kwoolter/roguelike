@@ -9,6 +9,7 @@ import tcod as libtcod
 from .combat import *
 from .entity_factory import Entity, Player, EntityFactory, Fighter
 from .entity_factory import Inventory
+from .spells import *
 from .events import Event
 from .game_parameters import GameParameters
 from .themes import ThemeManager, Palette
@@ -435,7 +436,8 @@ class Floor():
         for tunnel in self.map_tunnels:
             tunnel.print()
 
-        self.get_stats()
+        target = self.auto_target()
+        print(f'auto-target={target}')
 
     def get_stats(self):
         stats_text = []
@@ -665,6 +667,10 @@ class Floor():
             # Recalculate their current FOV using sight radius of combat class
             self.recompute_fov(radius = self.player.fighter.combat_class.get_property("SightRange"))
 
+            # Attempt to Auto-target nearest enemy if no target exists
+            if self.player.fighter.last_target is None:
+                self.player.fighter.last_target = self.auto_target()
+
             # See if we found something?
             e = self.get_entity_at_pos(self.player.xy)
             if e is not None:
@@ -799,6 +805,21 @@ class Floor():
         else:
             print(f"Couldn't find {old_entity.name} on this floor!")
 
+    def auto_target(self, index:int = 0)->Entity:
+
+        target = None
+        targets = []
+        fov = self.get_fov_cells()
+        targets = [(e, e.distance_to_target(self.player)) for e in self.entities if e.get_property("IsEnemy") == True and e.xy in fov]
+
+        if len(targets)>0:
+            targets.sort(key=lambda x:x[1])
+            target = targets[index][0]
+
+        print(targets)
+
+        return target
+
     def attack_entity(self, attacker : Entity, target : Entity, weapon : CombatEquipment = None):
         """
         Process an attacker performing an attack on a target.  The process is:-
@@ -893,6 +914,8 @@ class Floor():
                 Event(type=Event.GAME,
                       name=Event.ACTION_FAILED,
                       description=f"{attacker.description.capitalize()} swings at {target.description} and misses!"))
+
+        target.fighter.is_under_attack = True
 
     def run_ability_check(self, e:Entity):
         """
@@ -1437,10 +1460,11 @@ class Model():
         AbilityChecksFactory.load("ability_checks.csv")
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
+        SpellFactory.load("spells.csv")
 
         if self.player is None:
             name = ThemeManager.get_random_history("Name")
-            self.add_player(self.generate_player(name=name, class_name="Rogue"))
+            self.add_player(self.generate_player(name=name, class_name="Wizard"))
 
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)
@@ -1504,15 +1528,20 @@ class Model():
         return game_parameters
 
     def print(self):
-        self.current_floor.print()
+        print(f'target={self.player.fighter.last_target}')
+        target=self.current_floor.auto_target()
+        print(f'nearest target={str(target)}')
+        self.player.fighter.last_target = target
+
 
     def debug(self):
         self.player.print()
-        self.print()
-        self.journal.print()
-        r = self.current_floor.get_current_room()
-        if r is not None:
-            self.current_floor.get_current_room().print()
+        # self.print()
+        # self.journal.print()
+        # r = self.current_floor.get_current_room()
+        # if r is not None:
+        #     self.current_floor.get_current_room().print()
+
 
     def tick(self):
         if self.state == Model.GAME_STATE_PLAYING:
@@ -1612,6 +1641,7 @@ class Model():
             eq = EntityFactory.get_entity_by_name(item.strip())
             new_player.take_item(eq)
 
+
         # Give the Player some money
         coins = {Inventory.GOLD: 0, Inventory.SILVER:1, Inventory.COPPER:7}
         for c,v in coins.items():
@@ -1620,6 +1650,16 @@ class Model():
                 new_player.take_item(eq)
 
         new_player.level_up()
+
+        # Learn some spells
+        if new_player.combat_class_name in SpellFactory.get_available_class_names():
+            available_spells = SpellFactory.get_spells_by_class(class_name)
+            level_spells = [spell for spell in available_spells if spell.level <= new_player.get_property("Level")]
+            for spell in level_spells:
+                try:
+                    new_player.fighter.learn_spell(spell)
+                except SpellBookException as e:
+                    pass
 
         return new_player
 
@@ -1823,6 +1863,11 @@ class Model():
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.LEVEL_UP_AVAILABLE,
                                             description=f"*** Time to level up to level {player_level}! ***"))
+
+            # Reset spells that can only be used once per floor or once every X floors
+            self.player.fighter.spell_book.reset(Spell.FREQUENCY_PER_FLOOR)
+            if self.dungeon_level % 3 == 0:
+                self.player.fighter.spell_book.reset(Spell.FREQUENCY_PER_LEVEL)
 
 
 
@@ -2036,6 +2081,67 @@ class Model():
 
         return success
 
+    def memorise_spell(self, new_spell: Spell):
+
+        spell_book = self.player.fighter.spell_book
+
+        try:
+
+            if spell_book.is_memorised(new_spell.name) is False:
+                if spell_book.is_learned(new_spell.name) is False:
+                    spell_book.learn_spell(new_spell)
+                spell_book.memorise_spell(new_spell)
+            else:
+                spell_book.forget_spell(new_spell)
+
+        except SpellBookException as sbe:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"{sbe.description}"))
+
+    def learn_spell(self, new_spell: Spell):
+
+        spell_book = self.player.fighter.spell_book
+
+        try:
+            if spell_book.is_learned(new_spell.name) is False:
+                spell_book.learn_spell(new_spell)
+            else:
+                spell_book.unlearn_spell(new_spell)
+
+        except SpellBookException as sbe:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"{sbe.description}"))
+
+    def cast_spell(self, slot:int)->bool:
+
+        success = False
+
+        try:
+            spell = self.player.fighter.spell_book.get_memorised_spell_at_slot(slot)
+            caster = SpellCaster(self.events)
+            success = caster.process(spell=spell, floor = self.current_floor)
+
+            if success is True and caster.effect is not None:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"{caster.effect}"))
+            elif caster.effect is not None:
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_FAILED,
+                                            description=f"{caster.effect}"))
+
+            success = True
+
+        except SpellBookException as sbe:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"{sbe.description}"))
+
+
+        return success
+
 class Journal:
 
     def __init__(self):
@@ -2055,7 +2161,7 @@ class Journal:
 
     def process_event(self, new_event: Event):
 
-        print(f'{__class__}: Event {new_event.name}')
+        #print(f'{__class__}: Event {new_event.name}')
 
         if new_event.name in self.event_names:
 
@@ -2087,6 +2193,119 @@ class Journal:
                 print(f'\t{kk}={vv}')
 
 
+class SpellCaster:
+
+    def __init__(self, events:EventQueue):
+        self.effect = None
+        self.events = events
+
+    def process(self, spell:Spell, floor:Floor)->bool:
+        success = True
+        self.floor=floor
+
+        print(f'Casting spell {spell.name} on Floor {floor.name}')
+
+        if spell.is_attack is True:
+
+            target = floor.player.fighter.last_target
+
+            if target is None:
+                self.effect = f"You don't have a target to cast {spell.name} on"
+                success = False
+            else:
+                success = self.do_attack(attacker=floor.player, target=target, spell=spell)
+
+        elif spell.is_defense is True:
+            success = self.do_heal(target=floor.player, spell=spell)
+
+
+        return success
+
+    def do_heal(self, target:Entity, spell:Spell)->bool:
+        success = True
+        hp = spell.roll_HP()
+        target.fighter.heal(hp)
+        self.events.add_event(
+            Event(type=Event.GAME,
+                  name=Event.GAIN_HEALTH,
+                  description=f"{spell.description}. You gain {hp} HP"))
+        spell.use()
+        return success
+
+    def do_attack(self, attacker: Entity, target: Entity, spell:Spell)->bool:
+
+        success = False
+
+        # Check that the target is in range for the spell being used to attack
+        d = attacker.distance_to_target(target)
+        if d > spell.range:
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_FAILED,
+                      description=f"{target.description} is out of range"))
+            return success
+
+        # What are the attack and defence abilities for this spell?
+        attack_ability = spell.attack_ability
+        defence_ability = spell.defense
+
+        # Roll a 20 sided dice and add to attack power
+        attack = attacker.fighter.get_attack(attack_ability) + random.randint(1,20)
+
+        # Calculate the target's ability defence
+        defence = target.fighter.get_defence(defence_ability)
+
+        print(f'{attacker.name} using weapon {spell.name} ({attack_ability} vs {defence_ability})')
+        print(f'{attacker.name} ATK ({attack_ability}={attack}) vs ({defence_ability}={defence}) DEF of {target.name}')
+        print(f'Defender HP={target.fighter.combat_class.get_property("HP")}')
+
+        # Did the attack succeed...?
+        if attack > defence:
+
+            # Roll some damage based on the attackers spell + attack modifier and deduct damage from target's HP
+            dmg = spell.roll_damage() + max(0, attacker.fighter.get_attack(attack_ability))
+            target.fighter.take_damage(dmg)
+            self.effect = f'You cast {spell.name} on {target.description}. {spell.description} deals {dmg} damage'
+            success = True
+
+            target.fighter.take_damage(dmg)
+
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_ATTACK,
+                      description=f"{attacker.description.capitalize()} deals {dmg} damage with {spell.name}"))
+
+            # If the target died...
+            if target.fighter.is_dead:
+                target.state = Entity.STATE_DEAD
+
+                # Update attacker stats
+                attacker.fighter.add_kills()
+                XP = target.fighter.get_XP_reward()
+                attacker.fighter.add_XP(XP)
+                attacker.fighter.last_target = None
+
+                # Swap the target on the floor to a corpse
+                corpse = EntityFactory.get_entity_by_name("Corpse")
+                self.floor.swap_entity(target, corpse)
+
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_KILL,
+                          description=f"{attacker.description.capitalize()} kills {target.description}."))
+
+                self.events.add_event(
+                    Event(type=Event.GAME,
+                          name=Event.ACTION_GAIN_XP,
+                          description=f"{attacker.description.capitalize()} gains {XP} XP"))
+
+        else:
+            self.effect = f'Your {spell.name} spell misses {target.description}'
+
+        target.fighter.is_under_attack = True
+        spell.use()
+
+        return success
 
 class ItemUser():
     def __init__(self):
@@ -2337,6 +2556,9 @@ class AIBot:
         self.tick_count += 1
         return self.tick_count % self.tick_slow_factor == 0
 
+    def alert(self):
+        pass
+
     def reset(self):
         self.tick_count = 0
 
@@ -2383,12 +2605,16 @@ class AIBotTracker(AIBot):
         self.combat_class = CombatClassFactory.get_combat_class_by_name(self.bot_entity.name)
         self.sight_range = self.combat_class.get_property("SightRange")
 
-    def tick(self):
+    def tick(self)->bool:
         """
         Tick this Bot
         :return:
         """
         success = False
+
+        # If bot is under attack then widen its sight range to chase nearby attacker
+        if self.bot_entity.fighter.is_under_attack == True:
+            self.sight_range = 10
 
         # If it's not our turn or
         # We haven't got a target

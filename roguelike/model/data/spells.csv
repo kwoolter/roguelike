@@ -1,8 +1,36 @@
-﻿Class,Name,Description,ATK,DEF,DMG,Range,Level,Frequency
-Wizard,Cloud of Daggers,a small cloud of whirling daggers,INT,REF,1d6,10,1,At Will
-Wizard,Magic Missile,a silvery bolt of force,INT,REF,2d4,20,1,At Will
-Wizard,Ray of Frost,a blisteringly cold ray of white frost,INT,FOR,1d6,10,1,At Will
-Wizard,Scorching Burst,a vertical column of golden flames,INT,REF,1d6,10,1,At Will
-Wizard,Burning Hands,a fierce burst of flame from your hands,INT,REF,2d5,5,1,Encounter
-Wizard,Chill Strike,a bolt of frigid purple energy,INT,FOR,2d8,10,1,Encounter
-Wizard,Acid Arrow,a shimmering arrow of green glowing liquid,INT,REF,2d8,20,1,Daily
+﻿Class,Name,Description,ATK,DEF,DMG,HP,Range,Level,Frequency
+Cleric,Healing Word,A divine light washes over you,,,,1d6,0,1,At Will
+Cleric,Lance of Faith,A brilliant light sears through your foe,WIS,REF,1d8,,5,1,At Will
+Cleric,Sacred Flame,A sacred light shines from above searing your enemy,WIS,REF,1d6,,5,1,At Will
+Cleric,Divine Glow,You invoke a blast of white radiance from a holy symbol,WIS,REF,1d8,,1,1,Encounter
+Cleric,Cure Light Wounds,You gain the power to instantly heal wounds,,,,1d6,1,2,Daily
+Cleric,Daunting Light,A burining column of light engulfs your foe,WIS,REF,2d10,,10,3,Encounter
+Cleric,Spiritual Weapon,You conjure a glowing weapon adorned with the symbol of your deity,WIS,AC,1d10,,10,5,Daily
+Cleric,Cure Serious Wounds,You gain the power to instantly heal wounds,,,2d10,,1,6,Daily
+Cleric,Break the Spirit,Calling down the power of you god you bathe your fow in agonizing radiance,WIS,WILL,2d8,,10,7,Encounter
+Warlock,Dire Radiance,A shaft of brilliant cold starlight,CON,FORT,1d6,,10,1,At Will
+Warlock,Eyebite,You glare at your enemy and your eyes briefly gleam with brilliant colours.  Your foe reels under you mental assault,CHA,WILL,1d6,,10,1,At Will
+Warlock,Hellish Rebuke,Your foe is scoured in hellish flames stoked by your own anger and pain,CON,REF,1d6,,10,1,At Will
+Warlock,Curse of the Dark Dream,Inflict a waking nightmare,CHA,WILL,2d8,,10,1,Daily
+Warlock,Flames of Phlegethos,Rivulets of clinging liquid fire appear and cascade over your target,CON,REF,3d10,,10,1,Daily
+Warlock,Diabolic Grasp,A great talon of sulfurous darkness,CON,FORT,2d8,,10,1,Encounter
+Warlock,Dreadful Word,You whisper one word of an unthinkable cosmic secret to your foe,CHA,WILL,2d8,,5,1,Encounter
+Warlock,Vampiric Embrace,A ribbon of twisting darkness streams from your hand to your target's heart,CON,WILL,2d8,,5,1,Encounter
+Warlock,Witchfire,From the mystic energy of the Feywild you draw a brilliant white flame and set it in your enemy's mind and body,CHA,REF,2d6,,10,1,Encounter
+Warlock,Eldritch Blast,A bolt of dark crackling eldricth energy,CHA,REF,1d10,,10,2,At Will
+Warlock,Dread Star,A fist-sized orb of painful blue-white radiance,CHA,WILL,3d6,,10,2,Daily
+Warlock,Fiery Bolt,You call up a bolt of golden flame and hurl it at your foe,CON,REF,3d6,,10,3,Encounter
+Warlock,Frigid Darkness,You create a freezing black shadow around your foe,CON,FORT,2d8,,10,3,Encounter
+Wizard,Cloud of Daggers,A small cloud of whirling daggers,INT,REF,1d6,,5,1,At Will
+Wizard,Magic Missile,A silvery bolt of force,INT,REF,2d4,,20,1,At Will
+Wizard,Ray of Frost,A blisteringly cold ray of white frost,INT,FORT,1d6,,10,1,At Will
+Wizard,Scorching Burst,A vertical column of golden flames,INT,REF,1d6,,10,1,At Will
+Wizard,Thunderwave,You create a whip-crack of sonic power that lashes up from the ground,INT,FORT,1d6,,3,1,At Will
+Wizard,Acid Arrow,A shimmering arrow of green glowing liquid,INT,REF,2d8,,20,1,Daily
+Wizard,Flaming Sphere,You conjure a rolling ball of fire and control where it goes,INT,REF,2d6,,10,1,Daily
+Wizard,Freezing Cloud,A pellet shoots from your hand and exdplodes into a cloud of icy mist,INT,FORT,1d8,,2,1,Daily
+Wizard,Burning Hands,A fierce burst of flame from your hands,INT,REF,2d5,,5,1,Encounter
+Wizard,Force Orb,You hurl an orb of magical force at an enemy,INT,REF,2d8,,20,1,Encounter
+Wizard,Icy Terrain,With frosty breath you utter a single arcane work that creates a treacherous patch of ice,INT,REF,1d6,,10,1,Encounter
+Wizard,Ray of Enfeeblement,Weird green mist streams from your enemy's flesh carrying away its strength,INT,FORT,1d10,,10,1,Encounter
+Wizard,Chill Strike,A bolt of frigid purple energy,INT,FORT,2d8,,10,1,Encounter

@@ -24,6 +24,7 @@ class Event():
     GAME_ENTER_SHOP = "enter shop"
     GAME_SAVED = "game saved"
     GAME_LOADED = "game loaded"
+    GAME_MODE_CHANGED = "mode changed"
     TICK = "Tick"
 
     # Player action events

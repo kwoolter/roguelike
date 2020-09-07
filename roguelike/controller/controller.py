@@ -1,12 +1,14 @@
-import roguelike.model as model
-import roguelike.view as view
-import tcod as libtcod
-import numpy as np
 import pickle
 import random
 
-class Controller():
+import numpy as np
+import tcod as libtcod
 
+import roguelike.model as model
+import roguelike.view as view
+
+
+class Controller():
     GAME_MODE_START = "start"
     GAME_MODE_CHARACTER_CREATION = "character creation"
     GAME_MODE_INVENTORY = "inventory"
@@ -15,10 +17,11 @@ class Controller():
     GAME_MODE_PAUSED = "paused"
     GAME_MODE_GAME_OVER = "game over"
     GAME_MODE_JOURNAL = "journal"
+    GAME_MODE_SPELLBOOK = "spellbook"
     GAME_MODE_SHOP = "shop"
 
-    def __init__(self, name:str):
-        #Properties
+    def __init__(self, name: str):
+        # Properties
         self.name = name
         self.mode = None
 
@@ -32,13 +35,11 @@ class Controller():
         self.model.initialise()
         self.events = self.model.events
 
-        self.view = view.MainFrame(50,66)
+        self.view = view.MainFrame(50, 66)
         self.view.initialise(self.model)
         self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
         self.help()
-
-
 
     def set_mode(self, new_mode):
 
@@ -66,7 +67,10 @@ class Controller():
             elif new_mode == Controller.GAME_MODE_JOURNAL:
                 self.view.set_mode(view.MainFrame.MODE_JOURNAL_SCREEN)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
-                self.view.journal_view.change_selection(self.model.dungeon_level, relative = False)
+
+            elif new_mode == Controller.GAME_MODE_SPELLBOOK:
+                self.view.set_mode(view.MainFrame.MODE_SPELLBOOK_SCREEN)
+                self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
             elif new_mode == Controller.GAME_MODE_CHARACTER_CREATION:
                 self.view.set_mode(view.MainFrame.MODE_CHARACTER_CREATION_SCREEN)
@@ -84,6 +88,10 @@ class Controller():
                 self.view.set_mode(view.MainFrame.MODE_GAME_OVER)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
+            if self.last_mode is not None:
+                self.events.add_event(model.Event(type=model.Event.CONTROL,
+                                                  name=model.Event.GAME_MODE_CHANGED,
+                                                  description=f'Game mode changed from {self.last_mode.upper()} to {self.mode.upper()}'))
 
 
     def run(self):
@@ -114,13 +122,13 @@ class Controller():
 
             # Wait for event.........
             libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
-            #key = libtcod.console_wait_for_keypress(True)
+            # key = libtcod.console_wait_for_keypress(True)
             action = self.handle_keys(key)
 
             if action is None:
                 print(f'key={key}, mode={self.mode}')
 
-            #print(f'Game Mode={self.mode}; last mode={self.last_mode}')
+            # print(f'Game Mode={self.mode}; last mode={self.last_mode}')
 
             # Common actions
             exit = action.get('exit')
@@ -136,6 +144,7 @@ class Controller():
 
             if debug is True:
                 self.model.print()
+                self.view.print()
 
             if help is True:
                 self.help()
@@ -150,6 +159,7 @@ class Controller():
 
                 # Game playing actions
                 wait = action.get('wait')
+                cast = action.get('cast')
                 fullscreen = action.get('fullscreen')
                 stairs = action.get('take stairs')
                 pickup = action.get('pickup')
@@ -157,12 +167,16 @@ class Controller():
                 character = action.get('show_character')
                 shop = action.get('enter_shop')
                 journal = action.get('show_journal')
+                spellbook = action.get('show_spellbook')
                 pause = action.get('pause')
 
                 if move:
                     dx, dy = move
-                    self.model.move_player(dx,dy)
+                    self.model.move_player(dx, dy)
                     player_turn = False
+                elif cast:
+                    if self.model.cast_spell(slot=cast) is True:
+                        player_turn = False
                 elif stairs:
                     self.model.take_stairs()
                     player_turn = False
@@ -178,6 +192,8 @@ class Controller():
                     self.set_mode(Controller.GAME_MODE_SHOP)
                 elif journal:
                     self.set_mode(Controller.GAME_MODE_JOURNAL)
+                elif spellbook:
+                    self.set_mode(Controller.GAME_MODE_SPELLBOOK)
                 elif character:
                     self.set_mode(Controller.GAME_MODE_CHARACTER)
                 elif pause:
@@ -240,7 +256,7 @@ class Controller():
                     dx, dy = move
                     self.view.character_creation_view.change_selection(dy)
                 elif select:
-                    #if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
+                    # if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
                     name = self.view.character_creation_view.character_name
                     class_name = self.view.character_creation_view.get_selected_class()
                     self.model.add_player(self.model.generate_player(name, class_name))
@@ -279,6 +295,26 @@ class Controller():
                         # self.events.add_event(model.Event(type=model.Event.GAME,
                         #                             name=model.Event.ACTION_FAILED,
                         #                             description=f"No item selected!"))
+
+            # If we are in spellbook mode
+            elif self.mode == Controller.GAME_MODE_SPELLBOOK:
+                learn = action.get('learn')
+                memorise = action.get('memorise')
+                toggle = action.get('toggle')
+
+                if move:
+                    dx, dy = move
+                    self.view.spellbook_view.change_selection(dy)
+                else:
+                    if toggle:
+                        self.view.spellbook_view.toggle_mode()
+                    else:
+                        e = self.view.spellbook_view.get_selected_item()
+                        if e is not None:
+                            if memorise:
+                                self.model.memorise_spell(e)
+                            elif learn:
+                                self.model.learn_spell(e)
 
             # If we are in SHOP mode
             elif self.mode == Controller.GAME_MODE_SHOP:
@@ -387,6 +423,8 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_SHOP:
             keys_help = '^v / WA=Change selected item|B/E=change to BUY tab|Q/V=change to SELL tab|' \
                         '<> / AD=change selected buy item category|Enter/Space=Buy or sell selected item|Esc=Exit'
+        elif self.mode == Controller.GAME_MODE_SPELLBOOK:
+            keys_help = "M=Memorise/Forget|L=Learn/unlearn|T=Toggle Spell catalog|Esc/K=Exit"
         elif self.mode == Controller.GAME_MODE_GAME_OVER:
             keys_help = 'SPACE=continue'
         else:
@@ -400,7 +438,6 @@ class Controller():
                                               name=self.mode,
                                               description=text))
 
-
     def handle_keys(self, key):
 
         # Common Keys for all modes
@@ -408,13 +445,13 @@ class Controller():
             return {'help': True}
 
         elif key.vk == libtcod.KEY_F5:
-            return {'debug':True}
+            return {'debug': True}
 
         elif key.vk == libtcod.KEY_PAGEUP:
-            return {'zoom':True}
+            return {'zoom': True}
 
         elif key.vk == libtcod.KEY_PAGEDOWN:
-            return {'zoom':False}
+            return {'zoom': False}
 
         elif self.mode == Controller.GAME_MODE_START:
             return self.handle_start_menu_keys(key)
@@ -440,10 +477,11 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_JOURNAL:
             return self.handle_journal_view_keys(key)
 
+        elif self.mode == Controller.GAME_MODE_SPELLBOOK:
+            return self.handle_spell_book_view_keys(key)
+
         elif self.mode == Controller.GAME_MODE_GAME_OVER:
             return self.handle_game_over_keys(key)
-
-
 
         # No key was pressed
         return {}
@@ -484,17 +522,19 @@ class Controller():
             return {'wait': True}
         elif key_char == 'u' or key_char == 'q':
             return {'use': True}
+        elif ord(key_char) in range(ord('0'),ord('9')+1):
+            return {'cast':int(key_char)}
         elif key_char == 'i' or key_char == 'r':
             return {'show_inventory': True}
         elif key_char == 'c':
             return {'show_character': True}
         elif key_char == 'j':
             return {'show_journal': True}
+        elif key_char == 'k':
+            return {'show_spellbook': True}
         elif key_char == 'f':
             return {'drop_inventory': True}
-
-
-        if key.vk == libtcod.KEY_ENTER and key.lalt:
+        elif key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
         elif key.vk == libtcod.KEY_ESCAPE:
@@ -596,8 +636,8 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
-            return {'select': True}
+        # elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
+        #     return {'select': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}
@@ -617,6 +657,25 @@ class Controller():
 
         return {}
 
+    def handle_spell_book_view_keys(self, key):
+        key_char = chr(key.c)
+
+        # Movement keys
+        if key.vk == libtcod.KEY_UP or key_char == 'w':
+            return {'move': (0, -1)}
+        elif key.vk == libtcod.KEY_DOWN or key_char == 's':
+            return {'move': (0, 1)}
+        elif key_char == 'm':
+            return {'memorise': True}
+        elif key_char == 'l':
+            return {'learn': True}
+        elif key_char == 't':
+            return {'toggle': True}
+        elif key.vk == libtcod.KEY_ESCAPE or key_char == 'k':
+            return {'exit': True}
+
+        return {}
+
     def handle_game_paused_keys(self, key):
         key_char = chr(key.c)
 
@@ -632,7 +691,7 @@ class Controller():
         elif key.vk == libtcod.KEY_F4:
             return {'load': True}
         elif key_char == "q":
-            return {'exit':True}
+            return {'exit': True}
 
         return {}
 
@@ -650,13 +709,14 @@ class Controller():
 
         return {}
 
+
 class TextEntry:
     def __init__(self):
         self.mask = np.concatenate((np.arange(ord('a'), ord('z')),
                                     np.arange(ord('A'), ord('Z')),
                                     np.arange(ord('0'), ord('9'))), axis=0)
 
-    def get_text(self, max_length = 30):
+    def get_text(self, max_length=30):
 
         print(f"Getting some text (max {max_length} chars")
         print(f'Using mask {self.mask}')
@@ -664,7 +724,7 @@ class TextEntry:
         key = libtcod.Key()
         mouse = libtcod.Mouse()
 
-        text=""
+        text = ""
 
         typing = True
         while typing:
@@ -672,7 +732,7 @@ class TextEntry:
             if key.vk == libtcod.KEY_ENTER:
                 typing = False
             elif len(text) < max_length and key.c in self.mask:
-                text +=chr(key.c)
+                text += chr(key.c)
                 print(text)
             elif key.vk == libtcod.KEY_BACKSPACE:
                 text = text[:-1]
