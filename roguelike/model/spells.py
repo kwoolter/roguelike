@@ -1,6 +1,8 @@
-import pandas as pd
 import math
 from pathlib import Path
+
+import pandas as pd
+
 from roguelike.model.dice import DnD_Dice
 
 
@@ -26,7 +28,7 @@ class Spell:
                  attack_ability: str,
                  defence: str,
                  damage: str,
-                 heal:str,
+                 heal: str,
                  level: int,
                  range: int,
                  frequency: str):
@@ -37,7 +39,7 @@ class Spell:
         self.attack_ability = attack_ability
         self.defense = defence
         self.damage = damage
-        self.heal=heal
+        self.heal = heal
         self.level = level
         self.range = range
         self.frequency = frequency
@@ -52,14 +54,14 @@ class Spell:
     def is_defense(self):
         return type(self.heal) == str or math.isnan(self.heal) is False
 
-    def roll_HP(self)->int:
+    def roll_HP(self) -> int:
 
         if self.used is True:
             raise SpellBookException(f'Spell {self.name} has already been used for period {self.frequency}')
         else:
             hp = DnD_Dice.roll_dice_from_text(self.heal)
 
-        return  hp
+        return hp
 
     def roll_damage(self) -> int:
 
@@ -87,13 +89,12 @@ class SpellBook:
     Class to represent the spell book of a specified class
     """
 
-    def __init__(self, class_name: str, level:int = 1):
+    def __init__(self, class_name: str, level: int = 1):
         """
-
-        Args:
-            class_name: name of the class that this book belongs to
+        Create a SpellBook for the specified class and level
+        :param class_name:
+        :param level:
         """
-
         # Properties
         self.class_name = class_name
         self.level = level
@@ -104,7 +105,7 @@ class SpellBook:
         self.learned_spells = {}
         self.memorised_spells = []
 
-    def reset(self, frequency:str):
+    def reset(self, frequency: str):
 
         matching_spells = [spell for spell in self.learned_spells.values() if spell.frequency == frequency]
         for spell in matching_spells:
@@ -133,8 +134,11 @@ class SpellBook:
 
         return success
 
-    def unlearn_spell(self, old_spell:Spell):
-
+    def unlearn_spell(self, old_spell: Spell):
+        """
+        Attempt to unlearn a spell that is already learnt
+        :param old_spell: the spell to unlearn
+        """
         if self.is_learned(old_spell.name):
 
             if self.is_memorised(old_spell.name):
@@ -146,7 +150,10 @@ class SpellBook:
             raise SpellBookException(f"You can't unlearn {old_spell.name} as it is a spell that you do not know!")
 
     def memorise_spell(self, new_spell: Spell):
-
+        """
+        Attempt to memorise a specified spell
+        :param new_spell: the Spell that you want to memorise
+        """
         if self.is_learned(new_spell.name) is False:
             raise SpellBookException(f"You have not learned spell {new_spell.name}")
         elif len(self.memorised_spells) >= self.max_memorised_spells:
@@ -155,6 +162,10 @@ class SpellBook:
             self.memorised_spells.append(new_spell)
 
     def forget_spell(self, old_spell: Spell):
+        """
+    `   Attempt to forget an already memorised Spell
+        :param old_spell: The Spell that you want to forget
+        """
         if self.is_memorised(old_spell.name) is True:
             memorised_spell_names = [spell.name for spell in self.memorised_spells]
             idx = memorised_spell_names.index(old_spell.name)
@@ -193,12 +204,16 @@ class SpellBook:
             spell = self.memorised_spells[idx]
 
         else:
-            spell=None
+            spell = None
 
         return spell
 
-    def get_memorised_spell_at_slot(self, slot:int):
-
+    def get_memorised_spell_at_slot(self, slot: int) -> Spell:
+        """
+        Find out what spell you have memorised at a specified spell memory slot
+        :param slot: the slot that you are interested
+        :return: the Spell object that was found at the specified slot
+        """
         if slot < 1 or slot > len(self.memorised_spells):
             raise SpellBookException(f"Invalid memorised spell slot {slot}")
 
