@@ -118,8 +118,8 @@ class MainFrame(View):
         self.spellbook_view = SpellBookView(width=int(self.width - 2),
                                             height=50,
                                             fg=libtcod.gold,
-                                            bg=libtcod.darkest_violet,
-                                            border_bg=libtcod.darker_violet,
+                                            bg=libtcod.darkest_fuchsia,
+                                            border_bg=libtcod.darkest_violet,
                                             border_fg=libtcod.gold)
 
         self.text_entry = TextEntryBox()
@@ -818,6 +818,12 @@ class InventoryView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
+        title_bg = Palette.dim_hsl(self.bg,0.8)
+
+        # Colour the title area background
+        self.con.default_bg = title_bg
+        self.con.rect(0, 0, self.width, 4, False, libtcod.BKGND_SET)
+
         # Draw the border
         bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
         bo.render(self.con, 0, 0)
@@ -834,15 +840,16 @@ class InventoryView(View):
                               width=self.width - 2,
                               height=self.height - 2,
                               fg=self.fg,
-                              bg=self.bg,
+                              bg=title_bg,
                               alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
 
-        y+=1
+        y+=2
 
-        self.con.default_fg = self.fg
-        self.con.hline(1, y, self.width - 2)
+        # Draw a divider
+        divider.render(self.con, 0, y)
+
 
         # Print what is currently equipped
         # Start with the header
@@ -1550,6 +1557,12 @@ class CharacterView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
+        title_bg = Palette.dim_hsl(self.bg,0.8)
+
+        # Colour the title area background
+        self.con.default_bg = title_bg
+        self.con.rect(0, 0, self.width, 4, False, libtcod.BKGND_SET)
+
         cx, cy = self.center
 
         # Draw the border
@@ -1565,7 +1578,7 @@ class CharacterView(View):
 
         so = ScreenString(text,
                           fg=self.fg,
-                          bg=self.bg,
+                          bg=title_bg,
                           alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
@@ -2056,6 +2069,12 @@ class JournalView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
+        title_bg = Palette.dim_hsl(self.bg,0.8)
+
+        # Colour the title area background
+        self.con.default_bg = title_bg
+        self.con.rect(0, 0, self.width, 4, False, libtcod.BKGND_SET)
+
         cx, cy = self.center
 
         # Draw the border
@@ -2067,11 +2086,13 @@ class JournalView(View):
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
+
+
         text = f"{journal.name}"
 
         so = ScreenString(text,
                           fg=self.fg,
-                          bg=self.bg,
+                          bg=title_bg,
                           alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
@@ -2090,6 +2111,8 @@ class JournalView(View):
         if journal_entry is None:
             return
 
+        title_bg = Palette.dim_hsl(self.bg, 0.9)
+
         entry_name = journal_entry.get("Name")
 
         text = f"Level {level}:{entry_name}"
@@ -2097,13 +2120,17 @@ class JournalView(View):
         for tt in t:
             y += 1
             so = ScreenString(tt,
-                              fg=self.fg,
-                              bg=self.bg,
+                              fg=self.heading_fg,
+                              bg=title_bg,
                               alignment=libtcod.CENTER)
 
             so.render(self.con, cx, y)
 
-        y+=1
+        # Colour the title area background
+        self.con.default_bg = title_bg
+        self.con.rect(1, y-len(t), self.width - 2, 3+len(t), False, libtcod.BKGND_SET)
+
+        y+=2
         self.con.default_fg = self.fg
         self.con.hline(1, y, self.width - 2)
 
@@ -2253,6 +2280,12 @@ class SpellBookView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
+        title_bg = Palette.dim_hsl(self.bg,0.8)
+
+        # Colour the title area background
+        self.con.default_bg = title_bg
+        self.con.rect(0, 0, self.width, 4, False, libtcod.BKGND_SET)
+
         cx, cy = self.center
 
         # Draw the border
@@ -2268,7 +2301,7 @@ class SpellBookView(View):
 
         so = ScreenString(text,
                           fg=self.fg,
-                          bg=self.bg,
+                          bg=title_bg,
                           alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
