@@ -276,6 +276,7 @@ class Fighter():
         self.combat_class = combat_class
         self.set_property("Level", 0)
         self.set_property("HP", self.get_max_HP())
+        self.is_under_attack = False
 
         # Components
         self.equipment = {}

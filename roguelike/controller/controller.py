@@ -88,10 +88,10 @@ class Controller():
                 self.view.set_mode(view.MainFrame.MODE_GAME_OVER)
                 self.model.set_mode(model.Model.GAME_STATE_PAUSED)
 
-            self.events.add_event(model.Event(type=model.Event.CONTROL,
-                                              name=model.Event.GAME_MODE_CHANGED,
-                                              description=f'Game mode changed from {self.last_mode} to {self.mode}'))
-
+            if self.last_mode is not None:
+                self.events.add_event(model.Event(type=model.Event.CONTROL,
+                                                  name=model.Event.GAME_MODE_CHANGED,
+                                                  description=f'Game mode changed from {self.last_mode.upper()} to {self.mode.upper()}'))
 
 
     def run(self):
@@ -534,8 +534,7 @@ class Controller():
             return {'show_spellbook': True}
         elif key_char == 'f':
             return {'drop_inventory': True}
-
-        if key.vk == libtcod.KEY_ENTER and key.lalt:
+        elif key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
         elif key.vk == libtcod.KEY_ESCAPE:
@@ -637,8 +636,8 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
-            return {'select': True}
+        # elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
+        #     return {'select': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}

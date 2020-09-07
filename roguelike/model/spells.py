@@ -98,7 +98,7 @@ class SpellBook:
         self.class_name = class_name
         self.level = level
         self.max_learned_spells = 10
-        self.max_memorised_spells = 3
+        self.max_memorised_spells = 4
 
         # Components
         self.learned_spells = {}

@@ -2382,13 +2382,13 @@ class SpellBookView(View):
 
         if self.selected_spell is not None:
             x=cx
-            y = self.height - 7
+            y = self.height - 8
 
             self.con.default_fg = self.fg
             self.con.hline(1, y, self.width - 2)
 
             y += 1
-            text = f'{self.selected_spell.name} (level:{self.selected_spell.level})'
+            text = f'{self.selected_spell.name} (level:{self.selected_spell.level} {self.selected_spell.frequency})'
             libtcod.console_print_ex(self.con,x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
 
             y += 1
@@ -2408,8 +2408,8 @@ class SpellBookView(View):
                 so.render(self.con, cx, y)
                 y += 1
 
-            text = f'{self.selected_spell.attack_ability} vs {self.selected_spell.defense}, ' \
-                   f'DMG={self.selected_spell.damage}, HP={self.selected_spell.heal}, {self.selected_spell.frequency}'
+            text = f'{self.selected_spell.attack_ability} vs {self.selected_spell.defense}, range={self.selected_spell.range}, ' \
+                   f'DMG={self.selected_spell.damage}, HP={self.selected_spell.heal}'
             libtcod.console_print_ex(self.con, x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
 
 

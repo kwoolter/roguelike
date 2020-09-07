@@ -915,6 +915,8 @@ class Floor():
                       name=Event.ACTION_FAILED,
                       description=f"{attacker.description.capitalize()} swings at {target.description} and misses!"))
 
+        target.fighter.is_under_attack = True
+
     def run_ability_check(self, e:Entity):
         """
         See if there any ability checks for the specified object and run them
@@ -1654,7 +1656,10 @@ class Model():
             available_spells = SpellFactory.get_spells_by_class(class_name)
             level_spells = [spell for spell in available_spells if spell.level <= new_player.get_property("Level")]
             for spell in level_spells:
-                new_player.fighter.learn_spell(spell)
+                try:
+                    new_player.fighter.learn_spell(spell)
+                except SpellBookException as e:
+                    pass
 
         return new_player
 
@@ -1823,9 +1828,6 @@ class Model():
                                                 name=Event.ACTION_SUCCEEDED,
                                                 description=f"You rest from your adventuring and heal your wounds"))
 
-                    # Reset spells that can only be used once per floor
-                    self.player.fighter.spell_book.reset(Spell.FREQUENCY_PER_FLOOR)
-
             # Increase the dungeon level
             self.dungeon_level += 1
 
@@ -1861,6 +1863,11 @@ class Model():
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.LEVEL_UP_AVAILABLE,
                                             description=f"*** Time to level up to level {player_level}! ***"))
+
+            # Reset spells that can only be used once per floor or once every X floors
+            self.player.fighter.spell_book.reset(Spell.FREQUENCY_PER_FLOOR)
+            if self.dungeon_level % 3 == 0:
+                self.player.fighter.spell_book.reset(Spell.FREQUENCY_PER_LEVEL)
 
 
 
@@ -2229,6 +2236,15 @@ class SpellCaster:
 
         success = False
 
+        # Check that the target is in range for the spell being used to attack
+        d = attacker.distance_to_target(target)
+        if d > spell.range:
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_FAILED,
+                      description=f"{target.description} is out of range"))
+            return success
+
         # What are the attack and defence abilities for this spell?
         attack_ability = spell.attack_ability
         defence_ability = spell.defense
@@ -2286,6 +2302,7 @@ class SpellCaster:
         else:
             self.effect = f'Your {spell.name} spell misses {target.description}'
 
+        target.fighter.is_under_attack = True
         spell.use()
 
         return success
@@ -2539,6 +2556,9 @@ class AIBot:
         self.tick_count += 1
         return self.tick_count % self.tick_slow_factor == 0
 
+    def alert(self):
+        pass
+
     def reset(self):
         self.tick_count = 0
 
@@ -2585,12 +2605,16 @@ class AIBotTracker(AIBot):
         self.combat_class = CombatClassFactory.get_combat_class_by_name(self.bot_entity.name)
         self.sight_range = self.combat_class.get_property("SightRange")
 
-    def tick(self):
+    def tick(self)->bool:
         """
         Tick this Bot
         :return:
         """
         success = False
+
+        # If bot is under attack then widen its sight range to chase nearby attacker
+        if self.bot_entity.fighter.is_under_attack == True:
+            self.sight_range = 10
 
         # If it's not our turn or
         # We haven't got a target
