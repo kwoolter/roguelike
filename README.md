@@ -49,6 +49,7 @@ Game Playing Screen
 * `C` character screen
 * `R` inventory screen
 * `J` journal screen
+* `K` spell book
 * `ENTER` or `V` travel down stairs
 * `Esc` pause game
 
@@ -57,11 +58,18 @@ Game Paused Screen
 * `Esc` continue playing game
 
 Inventory Screen
+* Arrow keys or `WASD` - change selected item
 * `E` equip an item
 * `Q` or `U` use an item
 * `X` examine an item
 * `F` drop an item
 * `Esc` or `R` exit screen
+
+Spellbook Screen
+* Arrow keys or `WASD` - change selected spell
+* `M` memorise/forget spell
+* `L` learn/unlearn spell
+* `Esc` or `K` exit screen
 
 Character Screen
 * Arrow keys or `WASD` - change selected ability
@@ -108,6 +116,7 @@ Features:
 * Random Lore generation
 * DnD-like classes, abilities, monsters and combat rules
 * DnD-like armour, weapons and other items
+* Dnd-like spells and spellbook
 * DnD-like ability checks
 * Inventory and Shop features
 * Perma-death
@@ -126,6 +135,7 @@ Overview:
 * `model.py` - main module that contains `Model`, `Floor`, `Room`, `Tunnel` classes 
 * `entity_factory.py` - contains `Entity`, `EntityFactory`, `Player`, `Fighter`, `Inventory` classes
 * `combat.py` - contains `CombatEquipment`, `CombatEquipmentFactory`, `CombatClass`, `CombatClassFactory` classes
+* `spells.py` - spells and spellbook related classes
 * `events.py` - all of the event names used in the game
 * `themes.py` - module for managing colour themes and random name generation
 * `data` directory - data files for the game

@@ -2265,7 +2265,7 @@ class SpellCaster:
             # Roll some damage based on the attackers spell + attack modifier and deduct damage from target's HP
             dmg = spell.roll_damage() + max(0, attacker.fighter.get_attack(attack_ability))
             target.fighter.take_damage(dmg)
-            self.effect = f'You cast {spell.name} on {target.description}. {spell.description} deals {dmg} damage'
+            self.effect = f'You cast {spell.name} on {target.description}. {spell.description}.'
             success = True
 
             target.fighter.take_damage(dmg)

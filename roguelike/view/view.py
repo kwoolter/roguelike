@@ -818,7 +818,7 @@ class InventoryView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        title_bg = Palette.dim_hsl(self.bg,0.8)
+        title_bg = Palette.dim_hsl(self.bg,0.85)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -1557,7 +1557,7 @@ class CharacterView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        title_bg = Palette.dim_hsl(self.bg,0.8)
+        title_bg = Palette.dim_hsl(self.bg,0.85)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -1848,6 +1848,12 @@ class CreateCharacterView(View):
 
         cx, cy = self.center
 
+        title_bg = Palette.dim_hsl(self.bg,0.85)
+
+        # Colour the title area background
+        self.con.default_bg = title_bg
+        self.con.rect(0, 0, self.width, 4, False, libtcod.BKGND_SET)
+
         # Draw the border
         bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
         bo.render(self.con, 0, 0)
@@ -1856,12 +1862,14 @@ class CreateCharacterView(View):
         divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
+
+
         y = 2
         text = f"Create a New Character"
 
         so = ScreenString(text,
                           fg=self.fg,
-                          bg=self.bg,
+                          bg=title_bg,
                           alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
