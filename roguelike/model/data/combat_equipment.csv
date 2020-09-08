@@ -39,3 +39,9 @@ Spear,a wooden spear,Main Hand,2H,STR,AC,0,1d4,0,0,2,2
 Sword,a sword,Main Hand,1H,STR,AC,0,1d4,0,0,1,1
 Tunic of Dexterity,a shiny smooth tunic,Body,,,,1,0,0,2,3,0
 War Hammer,a mighty War Hammer,Main Hand,2H,STR,AC,0,1d10,0,0,5,2
+Hand Crossbow,a hand crossbow,Main Hand,1H,DEX,AC,0,1d6,0,0,2,10
+Sling,a sling,Main Hand,1H,DEX,AC,0,1d6,0,0,2,10
+Crossbow,a crossbow,Main Hand,2H,DEX,AC,0,1d8,0,0,2,10
+Longbow,a longbow,Main Hand,2H,DEX,AC,0,1d10,0,0,3,10
+Shortbow,a shortbow,Main Hand,2H,DEX,AC,0,1d8,0,0,2,10
+Shuriken,a shuriken,Main Hand,1H,DEX,AC,0,1d4,0,0,0.5,6

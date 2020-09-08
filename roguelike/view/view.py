@@ -1042,6 +1042,11 @@ class InventoryView(View):
                     bg = self.bg
                     fg = self.carried_item_fg
 
+                if i % 2 == 0:
+                    fg = Palette.shift_hue(fg, -15.0)
+                    fg = Palette.dim_hsl(fg, 1.5)
+
+
                 # If this is the currently selected item swap fg and bg
                 if i == (self.selected_item - len(inventory)):
                     fg, bg = bg, fg
