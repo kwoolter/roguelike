@@ -1739,7 +1739,7 @@ class CharacterView(View):
 
         if len(learned_spells) > 0:
 
-            y+=2
+            y+=1
             self.con.default_fg = Palette.dim_hsl(self.fg, 1.5)
             self.con.hline(1, y, self.width - 2)
             y+=2
@@ -1753,12 +1753,15 @@ class CharacterView(View):
             so.render(self.con, cx, y)
             y += 2
 
+            for i,spell in enumerate(learned_spells):
 
-            for spell in learned_spells:
+                fg = self.fg
+                if i % 2 ==0:
+                    fg = Palette.dim_hsl(fg, 1.5)
 
                 text = f'{spell.name}'
                 so = ScreenString(text,
-                                  fg=self.fg,
+                                  fg=fg,
                                   bg=self.bg,
                                   alignment=libtcod.CENTER)
 
@@ -2401,6 +2404,12 @@ class SpellBookView(View):
 
             bg = self.bg
             fg = self.fg
+
+            fg = self.fg
+            if i % 2 == 0:
+                fg = Palette.dim_hsl(fg, 0.8)
+                #fg = Palette.shift_hue(fg,45.0)
+
 
             if spell_book.is_memorised(spell.name) is True:
                 fg = self.memorised_spell_fg

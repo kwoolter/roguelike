@@ -8,7 +8,9 @@
 [KW] Room and Floor names have themes based on the Floor theme e.g. Swamp, Desert, etc
 [KW] buy an ability upgrade in the shop
 [KW] Use A* algo for monster movements towards player
+[KW] Use A* to generate tunnels between rooms
 [KW] Cycle through available targets
+[KW] Add ranged melee weapons - bows, etc
 
 # Bugs
 [OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves
@@ -30,3 +32,4 @@
 [KW] Alert a bot when it is under attack from Player
 [KW] spell range check on attacks
 [KW] How do 'Daily' spells get reset? Every 3 levels? YES
+

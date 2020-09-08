@@ -636,8 +636,8 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        # elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
-        #     return {'select': True}
+        elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
+            return {'select': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}
