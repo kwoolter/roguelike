@@ -107,14 +107,17 @@ class Palette:
         return new_colour
 
     @staticmethod
-    def shift_hue( colour:libtcod.Color, shift:int)->libtcod.Color:
-        h,s,v = libtcod.color_get_hsv(colour)
+    def shift_hue( colour:libtcod.Color, shift:float)->libtcod.Color:
+        new_colour = copy.deepcopy(colour)
+        h,s,v = libtcod.color_get_hsv(new_colour)
         h += shift
         if h < 0:
             h+= 360
         elif h>360:
             h-=360
-        return libtcod.color_set_hsv(colour, h,s,v)
+        libtcod.color_set_hsv(new_colour, h,s,v)
+
+        return new_colour
 
 
 class ThemeManager:

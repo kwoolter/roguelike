@@ -2282,6 +2282,7 @@ class SpellBookView(View):
     def draw(self):
 
         self.build_lists()
+        self.change_selection(0)
 
         player_level = self.game.player.fighter.get_property("Level")
         #player_level = None
@@ -2405,11 +2406,9 @@ class SpellBookView(View):
             bg = self.bg
             fg = self.fg
 
-            fg = self.fg
             if i % 2 == 0:
-                fg = Palette.dim_hsl(fg, 0.8)
-                #fg = Palette.shift_hue(fg,45.0)
-
+                fg = Palette.shift_hue(fg,-15.0)
+                fg = Palette.dim_hsl(fg, 1.5)
 
             if spell_book.is_memorised(spell.name) is True:
                 fg = self.memorised_spell_fg
@@ -2420,7 +2419,7 @@ class SpellBookView(View):
                 fg,bg = bg,fg
                 self.selected_spell =  spell
 
-            text = f"{spell.name}"
+            text = f"{spell.name: ^30}"
             so = ScreenString(text,
                               fg=fg,
                               bg=bg,
@@ -2438,6 +2437,10 @@ class SpellBookView(View):
             self.con.hline(1, y, self.width - 2)
 
             y += 1
+
+            fg = Palette.dim_hsl(fg, 1.5)
+            fg = Palette.shift_hue(fg,20.0)
+            self.con.default_fg = fg
             text = f'{self.selected_spell.name} (level:{self.selected_spell.level} {self.selected_spell.frequency})'
             libtcod.console_print_ex(self.con,x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
 
@@ -2447,6 +2450,7 @@ class SpellBookView(View):
             self.con.default_fg = self.fg
 
             y += 1
+
             text = f'{self.selected_spell.description}.'
             t = textwrap.wrap(text, self.width - 4)
             for tt in t:
