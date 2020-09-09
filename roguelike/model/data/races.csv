@@ -1,0 +1,7 @@
+Race,DEX,INT,STR,WIS,CHA,CON
+Dwarf,0,0,0,2,0,2
+Eladrin,2,2,0,0,0,0
+Elf,2,0,0,2,0,0
+Half Elf,0,0,0,0,2,2
+Halfling,2,0,0,0,2,0
+Tiefling,0,2,0,0,2,0

@@ -161,7 +161,6 @@ class Controller():
                 attack = action.get('attack')
                 wait = action.get('wait')
                 cast = action.get('cast')
-                fullscreen = action.get('fullscreen')
                 stairs = action.get('take stairs')
                 pickup = action.get('pickup')
                 inventory = action.get('show_inventory')
@@ -176,7 +175,7 @@ class Controller():
                     self.model.move_player(dx, dy)
                     player_turn = False
                 elif attack:
-                    if self.model.nattack() is True:
+                    if self.model.attack() is True:
                         player_turn = False
                 elif cast:
                     if self.model.cast_spell(slot=cast) is True:
@@ -186,8 +185,10 @@ class Controller():
                     player_turn = False
                 elif pickup:
                     self.model.take_item()
+                    player_turn = False
                 elif use:
                     self.model.use_item()
+                    player_turn = False
                 elif examine:
                     self.model.check_item()
                 elif inventory:
@@ -254,7 +255,8 @@ class Controller():
                 elif randomize:
                     name = model.ThemeManager.get_random_history("Name")
                     class_name = random.choice(model.CombatClassFactory.get_playable_classes())
-                    self.model.add_player(self.model.generate_player(name, class_name))
+                    race_name = random.choice(model.RaceFactory.get_available_races())
+                    self.model.add_player(self.model.generate_player(name, class_name, race_name))
                     self.view.character_creation_view.initialise(self.model)
                 elif move:
                     dx, dy = move

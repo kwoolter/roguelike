@@ -7,6 +7,7 @@ import numpy as np
 import tcod as libtcod
 
 from . combat import CombatClass, CombatEquipmentFactory, CombatEquipment
+from .races import Race, RaceFactory
 from . spells import SpellBook, Spell
 
 from roguelike.model.combat import *
@@ -269,11 +270,12 @@ class Fighter():
 
     DEFENSES = {"FORT":("STR", "CON"), "REF":("DEX","INT"), "WILL":("WIS","CHA")}
 
-    def __init__(self, combat_class: CombatClass):
+    def __init__(self, combat_class: CombatClass, race:Race = None):
 
         # Properties
         self.last_target = None
         self.combat_class = combat_class
+        self.race = race
         self.set_property("Level", 0)
         self.set_property("HP", self.get_max_HP())
         self.is_under_attack = False
@@ -394,6 +396,7 @@ class Fighter():
         :return: current total defence value
         """
 
+        # Special calculation for AC defense
         if defense == "AC":
             # If this is a playable character then add bonus
             if self.combat_class.get_property("Playable") == True:
@@ -404,10 +407,12 @@ class Fighter():
 
             defense = self.get_stat_total(defense) + bonus
 
+        # Standard calculation for other defenses
         else:
+            class_bonus = self.get_property(defense)
             ability1, ability2 = Fighter.DEFENSES[defense]
-            modifier = max(self.get_property_modifier(ability1)+self.level/2, self.get_property_modifier(ability2)+self.level/2)
-            defense = modifier + 10 + self.level/2
+            modifier = max(self.get_property_modifier(ability1), self.get_property_modifier(ability2))
+            defense = modifier + 10 + self.level/2 + class_bonus
 
         return int(defense)
 

@@ -1579,7 +1579,7 @@ class CharacterView(View):
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
-        text = f"{self.character.name} the Level {self.character.fighter.level} {cc.name}"
+        text = f"{self.character.name} the Level {self.character.fighter.level} {self.character.fighter.race.name} {cc.name}"
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -1824,6 +1824,7 @@ class CreateCharacterView(View):
         self.character = self.game.player
         self.character_name = self.character.name
         self.character_class = self.character.combat_class_name
+        self.character_race = self.character.fighter.race.name
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
@@ -1904,7 +1905,7 @@ class CreateCharacterView(View):
                                  self.con, int((self.width - self.class_picker.width) / 2), y)
             return
 
-        text = f'Name: {self.character_name}'
+        text = f'Name:{self.character_name}'
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -1914,15 +1915,23 @@ class CreateCharacterView(View):
         so.render(self.con, x=2, y=y)
 
 
-        text = f'Class: {self.character_class}'
+        text = f'Class:{self.character_class}'
 
         so = ScreenString(text,
                           fg=self.fg,
                           bg=self.bg,
-                          alignment=libtcod.LEFT)
+                          alignment=libtcod.CENTER)
 
         so.render(self.con, x=cx, y=y)
 
+        text = f'Race:{self.character_race}'
+
+        so = ScreenString(text,
+                          fg=self.fg,
+                          bg=self.bg,
+                          alignment=libtcod.RIGHT)
+
+        so.render(self.con, x=self.width-3, y=y)
         y += 2
 
         self.character_view.draw()

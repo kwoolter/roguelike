@@ -8,6 +8,7 @@ import tcod as libtcod
 
 from .combat import *
 from .entity_factory import Entity, Player, EntityFactory, Fighter
+from .races import Race, RaceFactory
 from .entity_factory import Inventory
 from .events import Event
 from .game_parameters import GameParameters
@@ -1469,10 +1470,12 @@ class Model():
         CombatClassFactory.load("combat_classes.csv")
         CombatEquipmentFactory.load("combat_equipment.csv")
         SpellFactory.load("spells.csv")
+        RaceFactory.load("races.csv")
 
         if self.player is None:
             name = ThemeManager.get_random_history("Name")
-            self.add_player(self.generate_player(name=name, class_name="Wizard"))
+            race_name = random.choice(RaceFactory.get_available_races())
+            self.add_player(self.generate_player(name=name, class_name="Wizard", race_name=race_name))
 
         self.next_floor()
         self.set_state(Model.GAME_STATE_LOADED)
@@ -1603,7 +1606,7 @@ class Model():
             next_event = self.events.pop_event()
         return next_event
 
-    def generate_player(self, name: str, class_name: str) -> Player:
+    def generate_player(self, name: str, class_name: str, race_name:str) -> Player:
         """
         Create an instance of a Player with the specified name, give them a combat class
         and give them some basic equipment.
@@ -1623,9 +1626,10 @@ class Model():
 
         new_player.properties = copy.deepcopy(player_entity.properties)
 
-        # Assign them a combat class
+        # Assign them a combat class and race
         cc = CombatClassFactory.get_combat_class_by_name(class_name)
-        new_player.fighter = Fighter(combat_class=cc)
+        race = RaceFactory.get_race_by_name(race_name)
+        new_player.fighter = Fighter(combat_class=cc, race=race)
 
         # Give the player their class equipment
         class_equipment = new_player.fighter.get_property("StartingEquipment").split(",")
