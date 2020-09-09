@@ -158,6 +158,7 @@ class Controller():
                 player_turn = True
 
                 # Game playing actions
+                attack = action.get('attack')
                 wait = action.get('wait')
                 cast = action.get('cast')
                 fullscreen = action.get('fullscreen')
@@ -174,6 +175,9 @@ class Controller():
                     dx, dy = move
                     self.model.move_player(dx, dy)
                     player_turn = False
+                elif attack:
+                    if self.model.nattack() is True:
+                        player_turn = False
                 elif cast:
                     if self.model.cast_spell(slot=cast) is True:
                         player_turn = False
@@ -512,6 +516,8 @@ class Controller():
             return {'move': (-1, 0)}
         elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
+        elif key.vk == libtcod.KEY_CONTROL:
+            return {'attack': True}
         elif key.vk == libtcod.KEY_ENTER or key_char == 'v':
             return {'take stairs': True}
         elif key.vk == libtcod.KEY_SPACE:

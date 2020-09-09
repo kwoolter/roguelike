@@ -818,7 +818,7 @@ class Floor():
 
         return target
 
-    def attack_entity(self, attacker: Entity, target: Entity, weapon: CombatEquipment = None):
+    def attack_entity(self, attacker: Entity, target: Entity = None, weapon: CombatEquipment = None)->bool:
         """
         Process an attacker performing an attack on a target.  The process is:-
         - Did the attack succeed?
@@ -828,16 +828,39 @@ class Floor():
         :param attacker: the Entity that is attacking
         :param target: The Entity that is the target of the attack
         """
+        success = True
+
+        if target is not None:
+            attacker.fighter.last_target = target
+        else:
+            target = attacker.fighter.last_target
+
+        if target is None:
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_FAILED,
+                      description=f"No target to attack"))
+            return False
+
+        # What weapon are we using for the attack?
+        if weapon is None:
+            weapon = attacker.fighter.current_weapon_details
+
+        # Target out of range???
+        d = attacker.distance_to_target(target)
+
+        if d > weapon.get_property("Range"):
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_FAILED,
+                      description=f"{target.description.capitalize()} is out of range for {weapon.description}"))
+            return False
+
         self.events.add_event(
             Event(type=Event.DEBUG,
                   name=Event.ACTION_ATTACK,
                   description=f"{attacker.description} attacks {target.description}"))
 
-        attacker.fighter.last_target = target
-
-        # What weapon are we using for the attack?
-        if weapon is None:
-            weapon = attacker.fighter.current_weapon_details
 
         # What are the attack and defence abilities for this weapon?
         attack_ability = weapon.get_property("ATK")
@@ -856,54 +879,43 @@ class Floor():
         # Did the attack succeed...?
         if attack > defence:
 
-            # Target out of range???
-            d = attacker.distance_to_target(target)
+            # Roll some damage based on the attackers weapon + attack modifier and deduct damage from target's HP
+            dmg = weapon.get_damage_roll() + max(0, attacker.fighter.get_attack(attack_ability))
 
-            if d > weapon.get_property("Range"):
+            target.fighter.take_damage(dmg)
+
+            # Strip of the first word of the weapon description
+            # e.g 'a small dagger' -> 'small dagger'
+            weapon_name = weapon.description[weapon.description.find(' ') + 1:]
+
+            self.events.add_event(
+                Event(type=Event.GAME,
+                      name=Event.ACTION_ATTACK,
+                      description=f"{attacker.description.capitalize()} deals {dmg} damage with {weapon.description}"))
+
+            # If the target died...
+            if target.fighter.is_dead:
+                target.state = Entity.STATE_DEAD
+
+                # Update attacker stats
+                attacker.fighter.add_kills()
+                XP = target.fighter.get_XP_reward()
+                attacker.fighter.add_XP(XP)
+                attacker.fighter.last_target = None
+
+                # Swap the target on the floor to a corpse
+                corpse = EntityFactory.get_entity_by_name("Corpse")
+                self.swap_entity(target, corpse)
+
                 self.events.add_event(
                     Event(type=Event.GAME,
-                          name=Event.ACTION_FAILED,
-                          description=f"{target.description.capitalize()} is out of range for {weapon.description}"))
-
-            else:
-
-                # Roll some damage based on the attackers weapon + attack modifier and deduct damage from target's HP
-                dmg = weapon.get_damage_roll() + max(0, attacker.fighter.get_attack(attack_ability))
-
-                target.fighter.take_damage(dmg)
-
-                # Strip of the first word of the weapon description
-                # e.g 'a small dagger' -> 'small dagger'
-                weapon_name = weapon.description[weapon.description.find(' ') + 1:]
+                          name=Event.ACTION_KILL,
+                          description=f"{attacker.description.capitalize()} kills {target.description}."))
 
                 self.events.add_event(
                     Event(type=Event.GAME,
-                          name=Event.ACTION_ATTACK,
-                          description=f"{attacker.description.capitalize()} deals {dmg} damage with {weapon.description}"))
-
-                # If the target died...
-                if target.fighter.is_dead:
-                    target.state = Entity.STATE_DEAD
-
-                    # Update attacker stats
-                    attacker.fighter.add_kills()
-                    XP = target.fighter.get_XP_reward()
-                    attacker.fighter.add_XP(XP)
-                    attacker.fighter.last_target = None
-
-                    # Swap the target on the floor to a corpse
-                    corpse = EntityFactory.get_entity_by_name("Corpse")
-                    self.swap_entity(target, corpse)
-
-                    self.events.add_event(
-                        Event(type=Event.GAME,
-                              name=Event.ACTION_KILL,
-                              description=f"{attacker.description.capitalize()} kills {target.description}."))
-
-                    self.events.add_event(
-                        Event(type=Event.GAME,
-                              name=Event.ACTION_GAIN_XP,
-                              description=f"{attacker.description.capitalize()} gains {XP} XP"))
+                          name=Event.ACTION_GAIN_XP,
+                          description=f"{attacker.description.capitalize()} gains {XP} XP"))
 
 
         # The attack failed...
@@ -914,6 +926,8 @@ class Floor():
                       description=f"{attacker.description.capitalize()} swings at {target.description} and misses!"))
 
         target.fighter.is_under_attack = True
+
+        return success
 
     def run_ability_check(self, e: Entity):
         """
@@ -2116,6 +2130,13 @@ class Model():
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"{sbe.description}"))
+
+        return success
+
+
+    def attack(self) -> bool:
+
+        success = self.current_floor.attack_entity(self.player)
 
         return success
 
