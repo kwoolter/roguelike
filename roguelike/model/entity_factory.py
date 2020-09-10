@@ -285,6 +285,9 @@ class Fighter():
         Fighter.DEFAULT_WEAPON = EntityFactory.get_entity_by_name(Fighter.DEFAULT_WEAPON_NAME)
         self.spell_book = SpellBook(self.combat_class.name)
 
+        if race is not None:
+            self.combat_class.add_properties(race.properties, increment=True)
+
     @property
     def is_dead(self) -> bool:
         return self.combat_class.get_property("HP") <= 0

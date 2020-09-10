@@ -52,8 +52,13 @@ class CombatClass:
         text = f'Class {self.name}: properties:{self.properties}'
         return text
 
-    def add_properties(self, new_properties: dict):
-        self.properties.update(new_properties)
+    def add_properties(self, new_properties: dict, increment:bool = False):
+        if increment is True:
+            for k,v in new_properties.items():
+                self.update_property(k,v,increment=True)
+        else:
+            self.properties.update(new_properties)
+
         self.properties["HP"] = self.properties["Level1HP"]
 
     def get_property(self, property_name : str):

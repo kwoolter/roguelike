@@ -1778,6 +1778,7 @@ class CreateCharacterView(View):
     MODE_DISPLAY_CHARACTER = "display_character"
     MODE_NAME_PICK = "name_pick"
     MODE_CLASS_PICK = "class_pick"
+    MODE_RACE_PICK = "race_pick"
 
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
@@ -1816,6 +1817,14 @@ class CreateCharacterView(View):
                                            border_bg=border_bg,
                                            border_fg=border_fg)
 
+        self.race_picker = ItemPickerView(width=self.width,
+                                           height=self.height,
+                                           fg=libtcod.white,
+                                           bg=libtcod.black,
+                                           border_bg=border_bg,
+                                           border_fg=border_fg)
+
+
         self.text_entry = None
 
     def initialise(self, game: model.Model):
@@ -1835,17 +1844,27 @@ class CreateCharacterView(View):
         self.available_classes = model.CombatClassFactory.get_playable_classes()
         self.class_picker.initialise("Choose Combat Class:", self.available_classes)
 
+        self.available_races = model.RaceFactory.get_available_races()
+        self.race_picker.initialise("Choose Race:", self.available_races)
+
         self.text_entry = TextEntryBox(width=20, parent=self.con)
 
     def process_event(self, new_event: model.Event):
-        pass
+        # If we have just got focus then rebuild lists that we are going to display
+        if new_event.name == model.Event.GAME_MODE_CHANGED:
+            self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
 
     def change_selection(self, d: int):
         if self.mode == CreateCharacterView.MODE_CLASS_PICK:
             self.class_picker.change_selection(d)
+        elif self.mode == CreateCharacterView.MODE_RACE_PICK:
+            self.race_picker.change_selection(d)
 
     def get_selected_class(self) -> str:
         return self.class_picker.get_selected_item()
+
+    def get_selected_race(self) -> str:
+        return self.race_picker.get_selected_item()
 
     def clear_messages(self):
         pass
@@ -1871,8 +1890,6 @@ class CreateCharacterView(View):
         divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
-
-
         y = 2
         text = f"Create a New Character"
 
@@ -1897,6 +1914,14 @@ class CreateCharacterView(View):
             self.character.name = self.character_name
             self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
 
+        elif self.mode == CreateCharacterView.MODE_RACE_PICK:
+            self.race_picker.draw()
+            y += 2
+            libtcod.console_blit(self.race_picker.con,
+                                 0, 0, self.race_picker.width, self.race_picker.height,
+                                 self.con, int((self.width - self.race_picker.width) / 2), y)
+            return
+
         elif self.mode == CreateCharacterView.MODE_CLASS_PICK:
             self.class_picker.draw()
             y += 2
@@ -1904,6 +1929,7 @@ class CreateCharacterView(View):
                                  0, 0, self.class_picker.width, self.class_picker.height,
                                  self.con, int((self.width - self.class_picker.width) / 2), y)
             return
+
 
         text = f'Name:{self.character_name}'
 

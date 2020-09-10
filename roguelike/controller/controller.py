@@ -245,6 +245,7 @@ class Controller():
 
                 edit_name = action.get('edit_name')
                 edit_class = action.get('edit_class')
+                edit_race = action.get('edit_race')
                 select = action.get("select")
                 randomize = action.get("randomize")
 
@@ -252,6 +253,8 @@ class Controller():
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_NAME_PICK
                 elif edit_class:
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_CLASS_PICK
+                elif edit_race:
+                    self.view.character_creation_view.mode = view.CreateCharacterView.MODE_RACE_PICK
                 elif randomize:
                     name = model.ThemeManager.get_random_history("Name")
                     class_name = random.choice(model.CombatClassFactory.get_playable_classes())
@@ -265,7 +268,8 @@ class Controller():
                     # if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
                     name = self.view.character_creation_view.character_name
                     class_name = self.view.character_creation_view.get_selected_class()
-                    self.model.add_player(self.model.generate_player(name, class_name))
+                    race_name = self.view.character_creation_view.get_selected_race()
+                    self.model.add_player(self.model.generate_player(name, class_name, race_name))
                     self.view.character_creation_view.initialise(self.model)
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
 
@@ -639,6 +643,8 @@ class Controller():
         elif key_char == "c":
             return {'edit_class': True}
         elif key_char == "r":
+            return {'edit_race': True}
+        elif key_char == "/":
             return {'randomize': True}
         elif key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
