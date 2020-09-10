@@ -154,7 +154,13 @@ class TextEntryBox:
     ALPHA_KEYS = [i for i in range(ord('a'), ord('z') + 1)]
     NUMERIC_KEY_PAD_VKS = [i for i in range(libtcod.KEY_KP0, libtcod.KEY_KP9 + 1)]
 
-    def __init__(self, width: int = DEFAULT_LENGTH, height: int = 1, parent=0, xpos: int = 0, ypos: int = 0):
+    def __init__(self, width: int = DEFAULT_LENGTH, height: int = 1,
+                 parent=0,
+                 fg = libtcod.white,
+                 bg = libtcod.black,
+                 xpos: int = 0, ypos: int = 0,
+                 label:str = None,
+                 text:str = None):
         """
         :param width: display width of the text entry box
         :param height: display height of the text entry box
@@ -173,12 +179,22 @@ class TextEntryBox:
         self.ypos = ypos
 
         # FG and BG of text
-        self.fg = libtcod.white
-        self.bg = libtcod.black
+        self.fg = fg
+        self.bg = bg
 
         # Define allowable characters
         self.mask_ranges = (['0', '9'], ['a', 'z'], ['A', 'Z'])
         self.mask_specials = "+,. "
+
+        if text is None:
+            self.text = ""
+        else:
+            self.text = text
+
+        if label is None:
+            self.label = ""
+        else:
+            self.label=label
 
         # Create a console to use as the text box entry
         self.con = libtcod.console_new(self.width, self.height)
@@ -209,7 +225,7 @@ class TextEntryBox:
         key = libtcod.Key()
         mouse = None
 
-        text = ""
+        text = self.text
         typing = True
         cursor_on = True
 
@@ -221,7 +237,7 @@ class TextEntryBox:
             libtcod.console_clear(self.con)
 
             # Print out what the user has currently entered
-            dtext = (text + "*" if cursor_on else text)
+            dtext = self.label+(text + "*" if cursor_on else text)
             cursor_on = not cursor_on
 
             for y, l in enumerate(textwrap.wrap(dtext, self.width)):
