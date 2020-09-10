@@ -250,6 +250,8 @@ class MainFrame(View):
             self.inventory_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_CHARACTER_SCREEN:
             self.character_view.process_event(new_event)
+        elif self.mode == MainFrame.MODE_CHARACTER_CREATION_SCREEN:
+            self.character_creation_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_SHOP_SCREEN:
             self.shop_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_JOURNAL_SCREEN:
@@ -1807,19 +1809,19 @@ class CreateCharacterView(View):
                                             height=40,
                                             fg=dim_rgb(self.fg, 30),
                                             bg=dim_rgb(self.bg, 30),
-                                            border_bg=border_bg,
-                                            border_fg=border_fg)
+                                            border_bg=self.border_bg,
+                                            border_fg=self.border_fg)
 
         self.class_picker = ItemPickerView(width=self.width,
                                            height=self.height,
-                                           fg=libtcod.white,
+                                           fg=libtcod.silver,
                                            bg=libtcod.black,
                                            border_bg=border_bg,
                                            border_fg=border_fg)
 
         self.race_picker = ItemPickerView(width=self.width,
                                            height=self.height,
-                                           fg=libtcod.white,
+                                           fg=libtcod.silver,
                                            bg=libtcod.black,
                                            border_bg=border_bg,
                                            border_fg=border_fg)
@@ -1850,7 +1852,7 @@ class CreateCharacterView(View):
         self.text_entry = TextEntryBox(width=20, parent=self.con)
 
     def process_event(self, new_event: model.Event):
-        # If we have just got focus then rebuild lists that we are going to display
+        # If we have just got focus then set mode to display
         if new_event.name == model.Event.GAME_MODE_CHANGED:
             self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
 
@@ -1930,18 +1932,11 @@ class CreateCharacterView(View):
                                  self.con, int((self.width - self.class_picker.width) / 2), y)
             return
 
-
-        text = f'Name:{self.character_name}'
-
-        so = ScreenString(text,
-                          fg=self.fg,
-                          bg=self.bg,
-                          alignment=libtcod.LEFT)
-
-        so.render(self.con, x=2, y=y)
-
-
-        text = f'Class:{self.character_class}'
+        libtcod.console_set_color_control(libtcod.COLCTRL_1, Palette.dim_hsl(self.fg,1.5), self.bg)
+        libtcod.console_set_color_control(libtcod.COLCTRL_1, libtcod.dark_orange, self.bg)
+        text = f'%cName:%c{self.character_name} ' \
+               f'%cRace:%c{self.character_race} ' \
+               f'%cClass:%c{self.character_class}'%(libtcod.COLCTRL_1,libtcod.COLCTRL_STOP,libtcod.COLCTRL_1,libtcod.COLCTRL_STOP,libtcod.COLCTRL_1,libtcod.COLCTRL_STOP)
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -1950,14 +1945,6 @@ class CreateCharacterView(View):
 
         so.render(self.con, x=cx, y=y)
 
-        text = f'Race:{self.character_race}'
-
-        so = ScreenString(text,
-                          fg=self.fg,
-                          bg=self.bg,
-                          alignment=libtcod.RIGHT)
-
-        so.render(self.con, x=self.width-3, y=y)
         y += 2
 
         self.character_view.draw()
@@ -1993,8 +1980,11 @@ class ItemPickerView(View):
 
         self.title = title
         self.item_list = item_list
+
+        # Calculate the height and width of the view
         self.height = len(item_list) + 6
-        self.width = len(title) + 6
+        self.max_item_length = max([len(l) for l in self.item_list])
+        self.width = max(self.max_item_length+3,len(title)) + 6
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
@@ -2030,10 +2020,6 @@ class ItemPickerView(View):
         bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
         bo.render(self.con, 0, 0)
 
-        # Create a box divider
-        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
-        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
-
         y = 2
 
         # Print the box header
@@ -2052,6 +2038,7 @@ class ItemPickerView(View):
         for i, item in enumerate(self.item_list):
             # Print each item that is equipped and in which slot
             text = f'{i + 1}: {item}'
+            text = f'{text: <{self.width-6}}'
             fg = self.fg
             bg = self.bg
             if i == self.selected_item:
