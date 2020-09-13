@@ -7,7 +7,7 @@ import pygame.rect as rect
 import tcod as libtcod
 
 from .combat import *
-from .entity_factory import Entity, Player, EntityFactory, Fighter
+from .entity_factory import Entity, Player, EntityFactory, Fighter, Level, LevelFactory
 from .races import Race, RaceFactory
 from .entity_factory import Inventory
 from .events import Event
@@ -1471,6 +1471,8 @@ class Model():
         CombatEquipmentFactory.load("combat_equipment.csv")
         SpellFactory.load("spells.csv")
         RaceFactory.load("races.csv")
+        LevelFactory.load("levels.csv")
+
 
         if self.player is None:
             name = ThemeManager.get_random_history("Name")
@@ -2021,11 +2023,13 @@ class Model():
 
     def level_up(self, stat_name=None) -> bool:
 
-        # Update the game parameters and get the level that the player can upgrade to
-        game_parameters = self.load_game_parameters()
-        player_level = game_parameters["Game"]["Player"]["Level"]
+        # Get current XP and Level
+        current_xp = self.player.get_property("XP")
+        player_possible_level = LevelFactory.xp_to_level(current_xp)
+        player_current_level = self.player.get_property("Level")
 
-        if player_level > self.player.get_property("Level"):
+        # Does the player have enough XP to level up?
+        if player_possible_level.level_id > player_current_level:
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.LEVEL_UP,
                                         description=f"You levelled up!"))
@@ -2034,9 +2038,11 @@ class Model():
 
         else:
 
+            next_level_xp = LevelFactory.xp_to_next_level(current_xp)
+
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
-                                        description=f"You don't have enough XP to level up!"))
+                                        description=f"You don't have enough XP to level up! {next_level_xp} XP required"))
 
             success = False
 
