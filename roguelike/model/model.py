@@ -2484,7 +2484,7 @@ class ItemUser():
             floor.swap_entities_by_name(ename, self.entity_swaps[ename], probability)
             effect = "You unlock some locked treasure chests"
 
-        # Enable resurection upon dying
+        # Enable resurrection upon dying
         elif item.name == "Scroll of Resurrection":
             effect = "You feel a strange aura surround you"
             player.set_property("Resurrect", True)
@@ -2494,7 +2494,7 @@ class ItemUser():
             if player.fighter.last_target is not None:
                 effect = f"You invoke {original_item.description}"
                 ce = CombatEquipmentFactory.get_equipment_by_name(item.name)
-                floor.attack_entity(player, last_enemy, weapon=ce)
+                success = floor.attack_entity(player, last_enemy, weapon=ce)
             else:
                 effect = f'No target for {item.description}'
                 success = False

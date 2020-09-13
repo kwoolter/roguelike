@@ -1,16 +1,13 @@
-import math
-import random
-import re
 import copy
+import math
 import operator
+
 import numpy as np
 import tcod as libtcod
 
-from . combat import CombatClass, CombatEquipmentFactory, CombatEquipment
-from .races import Race, RaceFactory
-from . spells import SpellBook, Spell
-
 from roguelike.model.combat import *
+from roguelike.model.races import Race
+from roguelike.model.spells import SpellBook, Spell
 
 
 def text_to_color(color_text: str) -> libtcod.color.Color:
@@ -685,6 +682,66 @@ class EntityFactory:
         return e
 
 
+class Level():
+    def __init__(self, level_id: int, xp: int):
+        self.level_id = level_id
+        self.xp = xp
+
+    def __str__(self):
+        return f'Level {self.level_id}: XP({self.xp})'
+
+class LevelFactory:
+
+    levels = None
+    level_id_to_level = {}
+
+
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def load(file_name:str):
+
+        # Create path for the file that we are going to load
+        data_folder = Path(__file__).resolve().parent
+        file_to_open = data_folder / "data" / file_name
+
+        # Read in the csv file
+        LevelFactory.levels = pd.read_csv(file_to_open)
+        df = LevelFactory.levels
+        df.set_index("Level", drop=True, inplace=True)
+
+
+
+    @staticmethod
+    def row_to_level(level_id:int, row)->Level:
+        xp = row["XP"]
+        new_level = Level(level_id=level_id, xp=xp)
+        return new_level
+
+    @staticmethod
+    def get_level_info(level_id:int):
+        df = LevelFactory.levels
+        row = df.loc[(level_id)]
+        level = LevelFactory.row_to_level(level_id, row)
+        return level
+
+    @staticmethod
+    def xp_to_level(xp:int)->Level:
+        df = LevelFactory.levels
+        i =  df.loc[df.XP <= xp,['XP']].idxmax()[0]
+
+        return LevelFactory.row_to_level(i, df.loc[(i)])
+
+    @staticmethod
+    def xp_to_next_level(xp:int)->int:
+        df = LevelFactory.levels
+        i = df.loc[df.XP > xp,['XP']].min()
+        return i['XP']
+
+
+
 class Inventory:
     GOLD = "Gold"
     SILVER = "Silver"
@@ -865,6 +922,20 @@ class Inventory:
 
 
 if __name__ == "__main__":
+
+    LevelFactory.load("levels.csv")
+
+    l = LevelFactory.get_level_info(1)
+    print(str(l))
+
+    xps = [1000,5000,6000,7000,20000]
+    for xp in xps:
+        l = LevelFactory.xp_to_level(xp)
+        xp_to_next = LevelFactory.xp_to_next_level(xp)
+
+        print(f'xp={xp} -> Level={l.level_id}, level up at {xp_to_next}')
+
+    assert False
 
     text = "1g2s3b"
     r = Inventory.gsb_coin_text_to_value(text)
