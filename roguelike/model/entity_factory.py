@@ -444,20 +444,10 @@ class Fighter():
 
         self.set_property("Level", level)
 
-        # Get the next level and add its new propertirs to ours
+        # Get the next level and add its new properties to ours
         new_level = LevelFactory.get_level_info(level)
         for k,v in new_level.properties.items():
             self.set_property(k,v,increment=True)
-
-        # Now increment the specified stat name
-        if stat_name is not None:
-            value = self.combat_class.get_property(stat_name)
-            if value is None:
-                value = 1
-            else:
-                value += 1
-
-            self.combat_class.update_property(property_name=stat_name, new_value=value)
 
         # Recalculate our Max HP
         self.set_property("MaxHP", self.get_max_HP())

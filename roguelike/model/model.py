@@ -1865,8 +1865,9 @@ class Model():
                                     description=f"{self.current_floor.theme}:{self.current_floor.name} on level {self.dungeon_level} ready!"))
 
         # Let the Player know if they can level up now!
-        player_level = game_parameters["Game"]["Player"]["Level"]
-        if player_level > self.player.get_property("Level"):
+        xp = self.player.get_property("XP")
+        player_level = LevelFactory.xp_to_level(xp)
+        if player_level.level_id > self.player.get_property("Level"):
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.LEVEL_UP_AVAILABLE,
                                         description=f"*** Time to level up to level {player_level}! ***"))
