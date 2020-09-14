@@ -459,7 +459,7 @@ class Fighter():
 
     def ability_upgrade(self, ability_name=None):
         """
-        Upgrade the specified ability an decrement the available Ability Points
+        Upgrade the specified ability and decrement the available Ability Points.
         :param ability_name: the name of the ability that you want to upgrade
         :return: True
         """

@@ -9,8 +9,8 @@
 [KW] buy an ability upgrade in the shop
 [KW] Use A* algo for monster movements towards player
 [KW] Use A* to generate tunnels between rooms
-[KW] Cycle through available targets
-[KW] Add ranged melee weapons - bows, etc
+[KW] Cycle through available targets rather than picking closest all the time
+[KW] Leveling-up - what about the rest of the stats in teh file?
 
 # Bugs
 [OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves
@@ -32,4 +32,9 @@
 [KW] Alert a bot when it is under attack from Player
 [KW] spell range check on attacks
 [KW] How do 'Daily' spells get reset? Every 3 levels? YES
+
+14/09/2020
+[KW] Add ranged melee weapons - bows, etc
+- Changed leveling-up system to be file driven
+- Added Ability Points that a player gains to increase abilities
 
