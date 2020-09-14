@@ -466,6 +466,9 @@ class Fighter():
         self.combat_class.update_property(property_name=ability_name, new_value=1, increment=True)
         self.set_property("Ability Points", -1, increment=True)
 
+        # Recalculate our Max HP
+        self.set_property("MaxHP", self.get_max_HP())
+
         return True
 
 
