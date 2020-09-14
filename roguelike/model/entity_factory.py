@@ -443,7 +443,26 @@ class Fighter():
             level += 1
 
         self.set_property("Level", level)
+
+        # Get the next level and add its new propertirs to ours
+        new_level = LevelFactory.get_level_info(level)
+        for k,v in new_level.properties.items():
+            self.set_property(k,v,increment=True)
+
+        # Now increment the specified stat name
+        if stat_name is not None:
+            value = self.combat_class.get_property(stat_name)
+            if value is None:
+                value = 1
+            else:
+                value += 1
+
+            self.combat_class.update_property(property_name=stat_name, new_value=value)
+
+        # Recalculate our Max HP
         self.set_property("MaxHP", self.get_max_HP())
+
+        # Update our spell book with the new level
         self.spell_book.level = level
 
         return success
@@ -686,6 +705,10 @@ class Level():
     def __init__(self, level_id: int, xp: int):
         self.level_id = level_id
         self.xp = xp
+        self.properties = {}
+
+    def add_properties(self, new_properties: dict):
+        self.properties.update(new_properties)
 
     def __str__(self):
         return f'Level {self.level_id}: XP({self.xp})'
@@ -717,7 +740,10 @@ class LevelFactory:
     @staticmethod
     def row_to_level(level_id:int, row)->Level:
         xp = row["XP"]
+
         new_level = Level(level_id=level_id, xp=xp)
+        new_level.add_properties(row.iloc[:].to_dict())
+
         return new_level
 
     @staticmethod
