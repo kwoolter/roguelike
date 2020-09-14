@@ -37,11 +37,14 @@ Game Ready Screen
 Create New Character Screen
 * `N` change player's name
 * `C` change player's class
-* `ENTER` or `SPACE` confirm class selection
+* `R` change player's race
+* `ENTER` or `SPACE` confirm race/class selection
 * `Esc` exit screen
 
 Game Playing Screen
 * Arrow keys - move and attack enemy
+* `1` - `4` - use spell in spell book slot
+* `Ctrl` attack current target with equipped weapon
 * `G` or `SPACE` get an item
 * `Q` or `U` use item currently equipped in Item slot
 * `X` examine item on floor
@@ -50,7 +53,7 @@ Game Playing Screen
 * `R` inventory screen
 * `J` journal screen
 * `K` spell book
-* `ENTER` or `V` travel down stairs
+* `ENTER` or `V` travel on stairs
 * `Esc` pause game
 
 Game Paused Screen
@@ -58,7 +61,7 @@ Game Paused Screen
 * `Esc` continue playing game
 
 Inventory Screen
-* Arrow keys or `WASD` - change selected item
+* Arrow keys or `WASD` change selected item
 * `E` equip an item
 * `Q` or `U` use an item
 * `X` examine an item
@@ -66,14 +69,15 @@ Inventory Screen
 * `Esc` or `R` exit screen
 
 Spellbook Screen
-* Arrow keys or `WASD` - change selected spell
+* Arrow keys or `WS` change selected spell
 * `M` memorise/forget spell
 * `L` learn/unlearn spell
 * `Esc` or `K` exit screen
 
 Character Screen
-* Arrow keys or `WASD` - change selected ability
-* `L`, `E` or `SPACE` level-up and increase selected ability
+* Arrow keys or `WS` change selected ability
+* `L`, `E` or `SPACE` level-up
+* `U` upgrade selected ability using Ability Points
 * `Esc` exit screen
 
 Shop Screen

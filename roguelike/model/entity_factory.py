@@ -1,15 +1,13 @@
-import math
-import random
-import re
 import copy
+import math
 import operator
+
 import numpy as np
 import tcod as libtcod
 
-from . combat import CombatClass, CombatEquipmentFactory, CombatEquipment
-from . spells import SpellBook, Spell
-
 from roguelike.model.combat import *
+from roguelike.model.races import Race
+from roguelike.model.spells import SpellBook, Spell
 
 
 def text_to_color(color_text: str) -> libtcod.color.Color:
@@ -229,8 +227,8 @@ class Player(Entity):
         self.fighter.unequip_item(old_item=old_item)
         return success
 
-    def level_up(self, stat_name: str = None):
-        success = self.fighter.level_up(stat_name)
+    def level_up(self):
+        success = self.fighter.level_up()
         if success is True:
             self.heal(20)
         return success
@@ -269,11 +267,12 @@ class Fighter():
 
     DEFENSES = {"FORT":("STR", "CON"), "REF":("DEX","INT"), "WILL":("WIS","CHA")}
 
-    def __init__(self, combat_class: CombatClass):
+    def __init__(self, combat_class: CombatClass, race:Race = None):
 
         # Properties
         self.last_target = None
         self.combat_class = combat_class
+        self.race = race
         self.set_property("Level", 0)
         self.set_property("HP", self.get_max_HP())
         self.is_under_attack = False
@@ -282,6 +281,9 @@ class Fighter():
         self.equipment = {}
         Fighter.DEFAULT_WEAPON = EntityFactory.get_entity_by_name(Fighter.DEFAULT_WEAPON_NAME)
         self.spell_book = SpellBook(self.combat_class.name)
+
+        if race is not None:
+            self.combat_class.add_properties(race.properties, increment=True)
 
     @property
     def is_dead(self) -> bool:
@@ -394,6 +396,7 @@ class Fighter():
         :return: current total defence value
         """
 
+        # Special calculation for AC defense
         if defense == "AC":
             # If this is a playable character then add bonus
             if self.combat_class.get_property("Playable") == True:
@@ -404,10 +407,12 @@ class Fighter():
 
             defense = self.get_stat_total(defense) + bonus
 
+        # Standard calculation for other defenses
         else:
+            class_bonus = self.get_property(defense)
             ability1, ability2 = Fighter.DEFENSES[defense]
-            modifier = max(self.get_property_modifier(ability1)+self.level/2, self.get_property_modifier(ability2)+self.level/2)
-            defense = modifier + 10 + self.level/2
+            modifier = max(self.get_property_modifier(ability1), self.get_property_modifier(ability2))
+            defense = modifier + 10 + self.level/2 + class_bonus
 
         return int(defense)
 
@@ -424,10 +429,9 @@ class Fighter():
     def add_kills(self, kill_count: int = 1):
         self.combat_class.update_property("KILLS", kill_count, increment=True)
 
-    def level_up(self, stat_name=None):
+    def level_up(self)->bool:
         """
-        Level up a Fighter and increase the specified stat.
-        :param stat_name: the stat that you want to increase. Default is None.
+        Level up a Fighter
         """
 
         success = True
@@ -440,20 +444,33 @@ class Fighter():
 
         self.set_property("Level", level)
 
-        if stat_name is not None:
-            value = self.combat_class.get_property(stat_name)
-            if value is None:
-                value = 1
-            else:
-                value += 1
+        # Get the next level and add its new properties to ours
+        new_level = LevelFactory.get_level_info(level)
+        for k,v in new_level.properties.items():
+            self.set_property(k,v,increment=True)
 
-            self.combat_class.update_property(property_name=stat_name, new_value=value)
-
+        # Recalculate our Max HP
         self.set_property("MaxHP", self.get_max_HP())
 
+        # Update our spell book with the new level
         self.spell_book.level = level
 
         return success
+
+    def ability_upgrade(self, ability_name=None):
+        """
+        Upgrade the specified ability and decrement the available Ability Points.
+        :param ability_name: the name of the ability that you want to upgrade
+        :return: True
+        """
+        self.combat_class.update_property(property_name=ability_name, new_value=1, increment=True)
+        self.set_property("Ability Points", -1, increment=True)
+
+        # Recalculate our Max HP
+        self.set_property("MaxHP", self.get_max_HP())
+
+        return True
+
 
     def equip_item(self, new_item: Entity, slot: str = None) -> bool:
         """
@@ -677,6 +694,73 @@ class EntityFactory:
         return e
 
 
+class Level():
+    def __init__(self, level_id: int, xp: int):
+        self.level_id = level_id
+        self.xp = xp
+        self.properties = {}
+
+    def add_properties(self, new_properties: dict):
+        self.properties.update(new_properties)
+
+    def __str__(self):
+        return f'Level {self.level_id}: XP({self.xp})'
+
+class LevelFactory:
+
+    levels = None
+    level_id_to_level = {}
+
+
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def load(file_name:str):
+
+        # Create path for the file that we are going to load
+        data_folder = Path(__file__).resolve().parent
+        file_to_open = data_folder / "data" / file_name
+
+        # Read in the csv file
+        LevelFactory.levels = pd.read_csv(file_to_open)
+        df = LevelFactory.levels
+        df.set_index("Level", drop=True, inplace=True)
+
+
+
+    @staticmethod
+    def row_to_level(level_id:int, row)->Level:
+        xp = row["XP"]
+
+        new_level = Level(level_id=level_id, xp=xp)
+        new_level.add_properties(row.iloc[:].to_dict())
+
+        return new_level
+
+    @staticmethod
+    def get_level_info(level_id:int):
+        df = LevelFactory.levels
+        row = df.loc[(level_id)]
+        level = LevelFactory.row_to_level(level_id, row)
+        return level
+
+    @staticmethod
+    def xp_to_level(xp:int)->Level:
+        df = LevelFactory.levels
+        i =  df.loc[df.XP <= xp,['XP']].idxmax()[0]
+
+        return LevelFactory.row_to_level(i, df.loc[(i)])
+
+    @staticmethod
+    def xp_to_next_level(xp:int)->int:
+        df = LevelFactory.levels
+        i = df.loc[df.XP > xp,['XP']].min()
+        return i['XP']
+
+
+
 class Inventory:
     GOLD = "Gold"
     SILVER = "Silver"
@@ -857,6 +941,20 @@ class Inventory:
 
 
 if __name__ == "__main__":
+
+    LevelFactory.load("levels.csv")
+
+    l = LevelFactory.get_level_info(1)
+    print(str(l))
+
+    xps = [1000,5000,6000,7000,20000]
+    for xp in xps:
+        l = LevelFactory.xp_to_level(xp)
+        xp_to_next = LevelFactory.xp_to_next_level(xp)
+
+        print(f'xp={xp} -> Level={l.level_id}, level up at {xp_to_next}')
+
+    assert False
 
     text = "1g2s3b"
     r = Inventory.gsb_coin_text_to_value(text)

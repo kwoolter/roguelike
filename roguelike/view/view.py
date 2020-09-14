@@ -6,6 +6,7 @@ import roguelike.model as model
 from roguelike.model import Palette
 from .view_utils import *
 
+
 class View():
     events = None
 
@@ -53,7 +54,7 @@ class MainFrame(View):
     CONSOLE_MESSAGE_PANEL_HEIGHT = 13
     CONSOLE_MESSAGE_PANEL_WIDTH = 50
 
-    CONSOLE_FONT_SIZES = [8, 10, 12, 14,16, 18, 20]
+    CONSOLE_FONT_SIZES = [8, 10, 12, 14, 16, 18, 20]
     CONSOLE_FONT_NAME = "cp437"
 
     def __init__(self, width: int = 50, height: int = 50):
@@ -109,11 +110,11 @@ class MainFrame(View):
                                   border_fg=libtcod.gold)
 
         self.journal_view = JournalView(width=int(self.width - 2),
-                                            height=50,
-                                            fg=libtcod.dark_sepia,
-                                            bg=libtcod.lightest_sepia,
-                                            border_bg=libtcod.sepia,
-                                            border_fg=libtcod.gold)
+                                        height=50,
+                                        fg=libtcod.dark_sepia,
+                                        bg=libtcod.lightest_sepia,
+                                        border_bg=libtcod.sepia,
+                                        border_fg=libtcod.gold)
 
         self.spellbook_view = SpellBookView(width=int(self.width - 2),
                                             height=50,
@@ -140,7 +141,7 @@ class MainFrame(View):
 
     def initialise(self, model: model.Model):
 
-        #self.set_mode(MainFrame.MODE_PLAYING)
+        # self.set_mode(MainFrame.MODE_PLAYING)
         self.game = model
 
         # Create the Game title Banner text
@@ -185,14 +186,14 @@ class MainFrame(View):
         h = self.height
         cx, cy = self.center
         instructions = ("U:1|R:1|" * 4) + ("R:1|D:1|" * 3) + f'R:{cx + 4}|' + ("U:1|R:1|" * 3) + (
-                    "R:1|D:1|" * 4) + f"D:{cy - 10}|"
+                "R:1|D:1|" * 4) + f"D:{cy - 10}|"
         instructions += ("d:1|L:1|") * 4 + ("l:1|U:1|") * 3 + f"l:{cx + 4}|" + ("d:1|l:1|" * 3) + (
-                    "l:1|u:1|" * 4) + f'U:{cy - 10}'
+                "l:1|u:1|" * 4) + f'U:{cy - 10}'
         instructions += f"|d:{cy - 21}|l:2|R:{cx + 22}"
         frame_template = Boxes.turtle_to_box(instructions)
         self.frame1 = Boxes.array_to_border(frame_template, border_type=ShopView.BORDER_TYPE2)
 
-    def font_zoom(self, zoom_in:bool = True)->bool:
+    def font_zoom(self, zoom_in: bool = True) -> bool:
 
         font_sizes = MainFrame.CONSOLE_FONT_SIZES
         current_font_size = self.font_size
@@ -200,12 +201,12 @@ class MainFrame(View):
         idx = font_sizes.index(self.font_size)
 
         if zoom_in is True:
-            idx+=1
+            idx += 1
             if idx < len(font_sizes):
                 self.font_size = font_sizes[idx]
 
         elif zoom_in is False:
-            idx-=1
+            idx -= 1
             if idx >= 0:
                 self.font_size = font_sizes[idx]
 
@@ -214,13 +215,12 @@ class MainFrame(View):
 
         return self.font_size != current_font_size
 
-
     def set_font(self):
 
         # Built the font file name that we want to load using current font size
         font_file = f'{MainFrame.CONSOLE_FONT_NAME}_{self.font_size}x{self.font_size}.png'
 
-        #font_file = "terminal12x12_gs_ro.png"
+        # font_file = "terminal12x12_gs_ro.png"
 
         # Create path for the file that we are going to load and load it
         data_folder = Path(__file__).resolve().parent
@@ -250,6 +250,8 @@ class MainFrame(View):
             self.inventory_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_CHARACTER_SCREEN:
             self.character_view.process_event(new_event)
+        elif self.mode == MainFrame.MODE_CHARACTER_CREATION_SCREEN:
+            self.character_creation_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_SHOP_SCREEN:
             self.shop_view.process_event(new_event)
         elif self.mode == MainFrame.MODE_JOURNAL_SCREEN:
@@ -266,7 +268,7 @@ class MainFrame(View):
 
         # Clear the root console
         self.con.default_bg = libtcod.black
-        libtcod.console_set_default_background(0,libtcod.black)
+        libtcod.console_set_default_background(0, libtcod.black)
         libtcod.console_clear(0)
 
         cx, cy = self.center
@@ -436,22 +438,22 @@ class MainFrame(View):
                              ffade=1, bfade=1)
 
         # Draw the status line
-        x=0
-        y=self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 2
+        x = 0
+        y = self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 2
 
         ac = self.game.player.fighter.get_defence("AC")
         hp = self.game.player.get_property("HP")
         max_hp = self.game.player.fighter.get_max_HP()
         status = f'F={self.game.dungeon_level}{chr(179)}AC={ac}'
-        stats = ["STR","DEX","INT","WIS","CHA", "XP", "Level"]
+        stats = ["STR", "DEX", "INT", "WIS", "CHA", "XP", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
             status += f'{chr(179)}{stat[0]}={stat_value}'
 
-        libtcod.console_set_default_foreground(0,libtcod.lightest_grey)
-        libtcod.console_print(0,x,y,f'{status:<{self.width}}')
+        libtcod.console_set_default_foreground(0, libtcod.lightest_grey)
+        libtcod.console_print(0, x, y, f'{status:<{self.width}}')
 
-        y +=1
+        y += 1
 
         # Draw the HP bar
         HP_status_bar_width = 48
@@ -460,20 +462,20 @@ class MainFrame(View):
         bar_text = chr(204) + chr(205) * (int(hp_pct * HP_status_bar_width)) + chr(185)
         hp_text = f'HP={hp}/{max_hp}'
 
-        libtcod.console_set_default_foreground(0,libtcod.dark_grey)
+        libtcod.console_set_default_foreground(0, libtcod.dark_grey)
         libtcod.console_set_default_background(0, libtcod.darkest_grey)
         libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=full_bar_text)
 
         # Calculate colour of HP bar by linear interpolation between Red and Green
-        fg = libtcod.color_lerp((255,0,0),(0,255,0),hp_pct)
-        bg = Palette.dim_hsl(fg,0.5)
+        fg = libtcod.color_lerp((255, 0, 0), (0, 255, 0), hp_pct)
+        bg = Palette.dim_hsl(fg, 0.5)
 
         if hp > 0:
-            libtcod.console_set_default_foreground(0,fg)
+            libtcod.console_set_default_foreground(0, fg)
             libtcod.console_set_default_background(0, bg)
             libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
 
-        libtcod.console_set_default_foreground(0, Palette.dim_hsl(fg,1.5))
+        libtcod.console_set_default_foreground(0, Palette.dim_hsl(fg, 1.5))
         libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=hp_text)
 
         libtcod.console_flush()
@@ -494,8 +496,6 @@ class MainFrame(View):
 
 
 class FloorView(View):
-
-
 
     def __init__(self, width: int, height: int, fg=libtcod.white, bg=libtcod.black):
         super().__init__(width=width, height=height)
@@ -562,13 +562,13 @@ class FloorView(View):
                     tile_colour = dim_rgb(tile_rgb, 0)
 
                     # Use linear interpolation to shade from lit path to unlit path based on distance from player
-                    tile_colour = libtcod.color_lerp(tile_colour, self.bg_explored_path, a/max_l)
+                    tile_colour = libtcod.color_lerp(tile_colour, self.bg_explored_path, a / max_l)
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
 
                 # Else lit wall
                 else:
                     # Use linear interpolation to shade from lit wall to unlit wall based on distance from player
-                    tile_colour = libtcod.color_lerp(self.bg_lit_wall,self.bg_explored_wall, a/max_l)
+                    tile_colour = libtcod.color_lerp(self.bg_lit_wall, self.bg_explored_wall, a / max_l)
                     libtcod.console_set_char_background(self.con, x, y, tile_colour)
             else:
                 # Unlit path
@@ -637,10 +637,10 @@ class FloorView(View):
 
         # Draw the player and a 'shadow' on the floor tile
         p = self.floor.player
-        player_tile_bg = self.floor.floor_tile_colours[p.x,p.y]
-        bg= dim_rgb(player_tile_bg,20)
+        player_tile_bg = self.floor.floor_tile_colours[p.x, p.y]
+        bg = dim_rgb(player_tile_bg, 20)
         libtcod.console_set_default_foreground(self.con, p.fg)
-        libtcod.console_set_default_background(self.con,bg)
+        libtcod.console_set_default_background(self.con, bg)
         libtcod.console_put_char(self.con, x=p.x, y=p.y, c=p.char, flag=libtcod.BKGND_SET)
 
         # Draw name of current room
@@ -739,7 +739,7 @@ class MessagePanel(View):
                                          x, y,
                                          flag=libtcod.BKGND_SET,
                                          alignment=libtcod.LEFT,
-                                         fmt=f'{line:<{self.width-2}}')
+                                         fmt=f'{line:<{self.width - 2}}')
 
                 # Move to the next line in the message panel
                 y += 1
@@ -818,7 +818,7 @@ class InventoryView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        title_bg = Palette.dim_hsl(self.bg,0.85)
+        title_bg = Palette.dim_hsl(self.bg, 0.85)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -845,11 +845,10 @@ class InventoryView(View):
 
         so.render(self.con, cx, y)
 
-        y+=2
+        y += 2
 
         # Draw a divider
         divider.render(self.con, 0, y)
-
 
         # Print what is currently equipped
         # Start with the header
@@ -1041,6 +1040,10 @@ class InventoryView(View):
                 else:
                     bg = self.bg
                     fg = self.carried_item_fg
+
+                if i % 2 == 0:
+                    fg = Palette.shift_hue(fg, -15.0)
+                    fg = Palette.dim_hsl(fg, 1.5)
 
                 # If this is the currently selected item swap fg and bg
                 if i == (self.selected_item - len(inventory)):
@@ -1510,7 +1513,7 @@ class CharacterView(View):
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
-        self.other_stats = ('XP', "HPPerLevel","SightRange")
+        self.other_stats = ('XP', "HPPerLevel", "SightRange", "Ability Points")
         self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
 
         # Components
@@ -1557,7 +1560,7 @@ class CharacterView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        title_bg = Palette.dim_hsl(self.bg,0.85)
+        title_bg = Palette.dim_hsl(self.bg, 0.85)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -1574,7 +1577,7 @@ class CharacterView(View):
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
-        text = f"{self.character.name} the Level {self.character.fighter.level} {cc.name}"
+        text = f"{self.character.name} the Level {self.character.fighter.level} {self.character.fighter.race.name} {cc.name}"
 
         so = ScreenString(text,
                           fg=self.fg,
@@ -1640,10 +1643,8 @@ class CharacterView(View):
 
         y += 2
 
-        right_shift = 6
-        defenses = ("AC","FORT","REF","WILL")
+        defenses = ("AC", "FORT", "REF", "WILL")
         for defense in defenses:
-
             ac = self.character.fighter.get_defence(defense)
             text = f'{defense:<5}:{ac:>3}'
             so = ScreenString(text,
@@ -1739,10 +1740,10 @@ class CharacterView(View):
 
         if len(learned_spells) > 0:
 
-            y+=2
+            y += 1
             self.con.default_fg = Palette.dim_hsl(self.fg, 1.5)
             self.con.hline(1, y, self.width - 2)
-            y+=2
+            y += 2
 
             text = "Spells Learned:"
             so = ScreenString(text,
@@ -1753,12 +1754,15 @@ class CharacterView(View):
             so.render(self.con, cx, y)
             y += 2
 
+            for i, spell in enumerate(learned_spells):
 
-            for spell in learned_spells:
+                fg = self.fg
+                if i % 2 == 0:
+                    fg = Palette.dim_hsl(fg, 1.5)
 
                 text = f'{spell.name}'
                 so = ScreenString(text,
-                                  fg=self.fg,
+                                  fg=fg,
                                   bg=self.bg,
                                   alignment=libtcod.CENTER)
 
@@ -1770,6 +1774,7 @@ class CreateCharacterView(View):
     MODE_DISPLAY_CHARACTER = "display_character"
     MODE_NAME_PICK = "name_pick"
     MODE_CLASS_PICK = "class_pick"
+    MODE_RACE_PICK = "race_pick"
 
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
@@ -1789,6 +1794,8 @@ class CreateCharacterView(View):
         self.border_type = CreateCharacterView.BORDER_TYPE2
         self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
 
+        self.max_name_length = 15
+
         # Components
         self.border = None
         self.con = None
@@ -1798,17 +1805,22 @@ class CreateCharacterView(View):
                                             height=40,
                                             fg=dim_rgb(self.fg, 30),
                                             bg=dim_rgb(self.bg, 30),
-                                            border_bg=border_bg,
-                                            border_fg=border_fg)
+                                            border_bg=self.border_bg,
+                                            border_fg=self.border_fg)
 
         self.class_picker = ItemPickerView(width=self.width,
                                            height=self.height,
-                                           fg=libtcod.white,
+                                           fg=libtcod.silver,
                                            bg=libtcod.black,
                                            border_bg=border_bg,
                                            border_fg=border_fg)
 
-        self.text_entry = None
+        self.race_picker = ItemPickerView(width=self.width,
+                                          height=self.height,
+                                          fg=libtcod.silver,
+                                          bg=libtcod.black,
+                                          border_bg=border_bg,
+                                          border_fg=border_fg)
 
     def initialise(self, game: model.Model):
         self.game = game
@@ -1816,6 +1828,7 @@ class CreateCharacterView(View):
         self.character = self.game.player
         self.character_name = self.character.name
         self.character_class = self.character.combat_class_name
+        self.character_race = self.character.fighter.race.name
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
@@ -1826,17 +1839,27 @@ class CreateCharacterView(View):
         self.available_classes = model.CombatClassFactory.get_playable_classes()
         self.class_picker.initialise("Choose Combat Class:", self.available_classes)
 
-        self.text_entry = TextEntryBox(width=20, parent=self.con)
+        self.available_races = model.RaceFactory.get_available_races()
+        self.race_picker.initialise("Choose Race:", self.available_races)
+
+        self.text_entry = TextEntryBox(width=15, parent=self.con)
 
     def process_event(self, new_event: model.Event):
-        pass
+        # If we have just got focus then set mode to display
+        if new_event.name == model.Event.GAME_MODE_CHANGED:
+            self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
 
     def change_selection(self, d: int):
         if self.mode == CreateCharacterView.MODE_CLASS_PICK:
             self.class_picker.change_selection(d)
+        elif self.mode == CreateCharacterView.MODE_RACE_PICK:
+            self.race_picker.change_selection(d)
 
     def get_selected_class(self) -> str:
         return self.class_picker.get_selected_item()
+
+    def get_selected_race(self) -> str:
+        return self.race_picker.get_selected_item()
 
     def clear_messages(self):
         pass
@@ -1848,7 +1871,7 @@ class CreateCharacterView(View):
 
         cx, cy = self.center
 
-        title_bg = Palette.dim_hsl(self.bg,0.85)
+        title_bg = Palette.dim_hsl(self.bg, 0.85)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -1861,8 +1884,6 @@ class CreateCharacterView(View):
         # Create a box divider
         divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
-
-
 
         y = 2
         text = f"Create a New Character"
@@ -1882,11 +1903,27 @@ class CreateCharacterView(View):
         y += 2
 
         if self.mode == CreateCharacterView.MODE_NAME_PICK:
-            text_entry = TextEntryBox(width=20, parent=self.con, xpos=8, ypos=6)
-            # text_entry = TextEntryBox(width=20, parent=0, xpos=8, ypos=6)
-            self.character_name = text_entry.get_text(max_length=20)
-            self.character.name = self.character_name
+            text_entry = TextEntryBox(width=self.max_name_length+6,
+                                      parent=self.con,
+                                      fg=self.fg,
+                                      bg=self.bg,
+                                      xpos=8,
+                                      ypos=6,
+                                      label="Name:",
+                                      text=self.character_name)
+            name = text_entry.get_text(max_length=self.max_name_length)
+            if name != "":
+                self.character.name = name
+                self.character_name = name
             self.mode = CreateCharacterView.MODE_DISPLAY_CHARACTER
+
+        elif self.mode == CreateCharacterView.MODE_RACE_PICK:
+            self.race_picker.draw()
+            y += 2
+            libtcod.console_blit(self.race_picker.con,
+                                 0, 0, self.race_picker.width, self.race_picker.height,
+                                 self.con, int((self.width - self.race_picker.width) / 2), y)
+            return
 
         elif self.mode == CreateCharacterView.MODE_CLASS_PICK:
             self.class_picker.draw()
@@ -1896,22 +1933,25 @@ class CreateCharacterView(View):
                                  self.con, int((self.width - self.class_picker.width) / 2), y)
             return
 
-        text = f'Name: {self.character_name}'
+        libtcod.console_set_color_control(libtcod.COLCTRL_1, libtcod.dark_orange, self.bg)
+        text = f'%cName:%c{self.character_name}' % (libtcod.COLCTRL_1, libtcod.COLCTRL_STOP)
 
         so = ScreenString(text,
                           fg=self.fg,
                           bg=self.bg,
-                          alignment=libtcod.LEFT)
+                          alignment=libtcod.CENTER)
 
-        so.render(self.con, x=2, y=y)
+        so.render(self.con, x=cx, y=y)
 
+        text = f'%cRace:%c{self.character_race} ' \
+               f'%cClass:%c{self.character_class}' % (libtcod.COLCTRL_1, libtcod.COLCTRL_STOP,
+                                                      libtcod.COLCTRL_1, libtcod.COLCTRL_STOP)
 
-        text = f'Class: {self.character_class}'
-
+        y += 1
         so = ScreenString(text,
                           fg=self.fg,
                           bg=self.bg,
-                          alignment=libtcod.LEFT)
+                          alignment=libtcod.CENTER)
 
         so.render(self.con, x=cx, y=y)
 
@@ -1919,7 +1959,7 @@ class CreateCharacterView(View):
 
         self.character_view.draw()
         libtcod.console_blit(self.character_view.con,
-                             0, 0, self.character_view.width, self.height-10,
+                             0, 0, self.character_view.width, self.height - 10,
                              self.con, 2, y)
 
 
@@ -1950,8 +1990,11 @@ class ItemPickerView(View):
 
         self.title = title
         self.item_list = item_list
+
+        # Calculate the height and width of the view
         self.height = len(item_list) + 6
-        self.width = len(title) + 6
+        self.max_item_length = max([len(l) for l in self.item_list])
+        self.width = max(self.max_item_length + 3, len(title)) + 6
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
@@ -1987,10 +2030,6 @@ class ItemPickerView(View):
         bo = ScreenObject2DArray(self.border, fg=self.border_fg, bg=self.border_bg)
         bo.render(self.con, 0, 0)
 
-        # Create a box divider
-        divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)
-        divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
-
         y = 2
 
         # Print the box header
@@ -2009,6 +2048,7 @@ class ItemPickerView(View):
         for i, item in enumerate(self.item_list):
             # Print each item that is equipped and in which slot
             text = f'{i + 1}: {item}'
+            text = f'{text: <{self.width - 6}}'
             fg = self.fg
             bg = self.bg
             if i == self.selected_item:
@@ -2058,7 +2098,7 @@ class JournalView(View):
         if new_event.name == model.Event.GAME_MODE_CHANGED:
             self.change_selection(self.game.dungeon_level, relative=False)
 
-    def change_selection(self, d: int, relative = True):
+    def change_selection(self, d: int, relative=True):
 
         if relative is True:
 
@@ -2077,7 +2117,7 @@ class JournalView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        title_bg = Palette.dim_hsl(self.bg,0.8)
+        title_bg = Palette.dim_hsl(self.bg, 0.8)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -2094,7 +2134,6 @@ class JournalView(View):
         divider = ScreenObject2DArray(divider_box, fg=self.border_fg, bg=self.border_bg)
 
         y = 2
-
 
         text = f"{journal.name}"
 
@@ -2136,9 +2175,9 @@ class JournalView(View):
 
         # Colour the title area background
         self.con.default_bg = title_bg
-        self.con.rect(1, y-len(t), self.width - 2, 3+len(t), False, libtcod.BKGND_SET)
+        self.con.rect(1, y - len(t), self.width - 2, 3 + len(t), False, libtcod.BKGND_SET)
 
-        y+=2
+        y += 2
         self.con.default_fg = self.fg
         self.con.hline(1, y, self.width - 2)
 
@@ -2147,9 +2186,9 @@ class JournalView(View):
             if k == "Name":
                 continue
 
-            y+=1
+            y += 1
 
-            text = f" { k.title() :-^20} "
+            text = f" {k.title() :-^20} "
 
             so = ScreenString(text,
                               fg=self.fg,
@@ -2171,14 +2210,12 @@ class JournalView(View):
 
                     so.render(self.con, cx, y)
 
-            y+=1
+            y += 1
             self.con.default_fg = self.fg
             self.con.hline(1, y, self.width - 2)
 
 
-
 class SpellBookView(View):
-
     MODE_ACTIVE = "active spells"
     MODE_CATALOGUE = "available spells"
 
@@ -2197,12 +2234,12 @@ class SpellBookView(View):
         self.border_fg = border_fg
         self.border_bg = border_bg
         self.memorised_spell_fg = libtcod.green
-        self.unknown_spell_fg = Palette.dim_hsl(self.fg,0.6)
+        self.unknown_spell_fg = Palette.dim_hsl(self.fg, 0.6)
 
         self.border_type = SpellBookView.BORDER_TYPE1
         self.border = None
 
-        self.mode=SpellBookView.MODE_ACTIVE
+        self.mode = SpellBookView.MODE_ACTIVE
         self.mode = SpellBookView.MODE_CATALOGUE
 
         # Components
@@ -2227,8 +2264,7 @@ class SpellBookView(View):
             self.mode = SpellBookView.MODE_ACTIVE
             self.build_lists()
 
-
-    def toggle_mode(self)->str:
+    def toggle_mode(self) -> str:
 
         if self.mode == SpellBookView.MODE_ACTIVE:
             self.mode = SpellBookView.MODE_CATALOGUE
@@ -2239,22 +2275,21 @@ class SpellBookView(View):
 
         return self.mode
 
-
     def get_selected_item(self):
         return self.selected_spell
 
-    def change_selection(self, d: int, relative = True):
+    def change_selection(self, d: int, relative=True):
 
         if relative is True:
 
             self.selected_item += d
-            self.selected_item = min(max(0, self.selected_item), len(self.selection_list)-1)
+            self.selected_item = min(max(0, self.selected_item), len(self.selection_list) - 1)
 
         else:
             self.selected_item = min(max(0, d), len(self.game.player.fighter.spell_book.get_learned_spells()) - 1)
 
     def build_lists(self):
-        #print("*** SpellBookView: building lists...")
+        # print("*** SpellBookView: building lists...")
 
         player_level = self.game.player.fighter.get_property("Level")
         player_level = None
@@ -2268,27 +2303,28 @@ class SpellBookView(View):
 
         self.class_spells = model.SpellFactory.get_spells_by_class(spell_book.class_name, player_level)
 
-        if self.mode==SpellBookView.MODE_ACTIVE:
+        if self.mode == SpellBookView.MODE_ACTIVE:
             self.selection_list = self.learned_spells
         else:
             self.selection_list = self.class_spells
 
         # Sort selection list by spell level and name
-        self.selection_list.sort(key=lambda x:f'{x.level:0>4}:{x.name}')
+        self.selection_list.sort(key=lambda x: f'{x.level:0>4}:{x.name}')
 
     def draw(self):
 
         self.build_lists()
+        self.change_selection(0)
 
         player_level = self.game.player.fighter.get_property("Level")
-        #player_level = None
+        # player_level = None
         spell_book = self.game.player.fighter.spell_book
 
         # Clear the screen with the background colour
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        title_bg = Palette.dim_hsl(self.bg,0.8)
+        title_bg = Palette.dim_hsl(self.bg, 0.8)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -2329,13 +2365,12 @@ class SpellBookView(View):
 
         so.render(self.con, cx, y)
 
-        y+=2
+        y += 2
 
         self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
         self.con.hline(1, y, self.width - 2)
 
         y += 2
-
 
         for i in range(spell_book.max_memorised_spells):
 
@@ -2343,25 +2378,24 @@ class SpellBookView(View):
             bg = self.bg
 
             if i >= len(self.memorised_spells) or self.memorised_spells[i] is None:
-                text = f"[{i+1}] Empty"
-                fg = Palette.dim_hsl(fg,0.5)
+                text = f"[{i + 1}] Empty"
+                fg = Palette.dim_hsl(fg, 0.5)
             else:
                 spell = self.memorised_spells[i]
-                text = f"[{i+1}] {spell.name}"
+                text = f"[{i + 1}] {spell.name}"
                 if spell.used is True:
                     fg = Palette.dim_hsl(fg, 0.7)
-
 
             so = ScreenString(text,
                               fg=fg,
                               bg=bg,
                               alignment=libtcod.LEFT)
 
-            so.render(self.con, int(cx*1/2), y)
+            so.render(self.con, int(cx * 1 / 2), y)
 
-            y+=1
+            y += 1
 
-        y+=1
+        y += 1
 
         # Draw a divider
         divider.render(self.con, 0, y)
@@ -2385,10 +2419,9 @@ class SpellBookView(View):
         self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
         self.con.hline(1, y, self.width - 2)
 
-        y+=2
+        y += 2
 
         if len(self.selection_list) == 0:
-
             text = f"None"
             so = ScreenString(text,
                               fg=self.fg,
@@ -2402,42 +2435,50 @@ class SpellBookView(View):
             bg = self.bg
             fg = self.fg
 
+            if i % 2 == 0:
+                fg = Palette.shift_hue(fg, -15.0)
+                fg = Palette.dim_hsl(fg, 1.5)
+
             if spell_book.is_memorised(spell.name) is True:
                 fg = self.memorised_spell_fg
             elif spell_book.is_learned(spell.name) is False:
                 fg = self.unknown_spell_fg
 
             if i == self.selected_item:
-                fg,bg = bg,fg
-                self.selected_spell =  spell
+                fg, bg = bg, fg
+                self.selected_spell = spell
 
-            text = f"{spell.name}"
+            text = f"{spell.name: ^30}"
             so = ScreenString(text,
                               fg=fg,
                               bg=bg,
                               alignment=libtcod.CENTER)
 
             so.render(self.con, cx, y)
-            y+=1
-
+            y += 1
 
         if self.selected_spell is not None:
-            x=cx
+            x = cx
             y = self.height - 8
 
             self.con.default_fg = self.fg
             self.con.hline(1, y, self.width - 2)
 
             y += 1
+
+            fg = Palette.dim_hsl(fg, 1.5)
+            fg = Palette.shift_hue(fg, 20.0)
+            self.con.default_fg = fg
             text = f'{self.selected_spell.name} (level:{self.selected_spell.level} {self.selected_spell.frequency})'
-            libtcod.console_print_ex(self.con,x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
+            libtcod.console_print_ex(self.con, x, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=text)
 
             y += 1
-            self.con.default_fg = Palette.dim_hsl(self.fg,0.5)
+            self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
             self.con.hline(1, y, self.width - 2)
             self.con.default_fg = self.fg
 
             y += 1
+
             text = f'{self.selected_spell.description}.'
             t = textwrap.wrap(text, self.width - 4)
             for tt in t:
@@ -2451,7 +2492,7 @@ class SpellBookView(View):
 
             text = f'{self.selected_spell.attack_ability} vs {self.selected_spell.defense}, range={self.selected_spell.range}, ' \
                    f'DMG={self.selected_spell.damage}, HP={self.selected_spell.heal}'
-            libtcod.console_print_ex(self.con, x,y,flag=libtcod.BKGND_NONE,alignment=libtcod.CENTER, fmt=text)
+            libtcod.console_print_ex(self.con, x, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=text)
 
 
 class EventView(View):

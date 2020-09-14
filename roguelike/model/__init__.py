@@ -6,6 +6,7 @@ from . model import EventQueue
 from . entity_factory import Entity, Player, Fighter
 from . entity_factory import EntityFactory
 from . entity_factory import Inventory
+from . races import Race, RaceFactory
 from . model import AbilityCheck
 from . model import AbilityChecksFactory
 from . combat import CombatEquipment

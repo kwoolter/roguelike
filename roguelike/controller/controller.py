@@ -158,9 +158,9 @@ class Controller():
                 player_turn = True
 
                 # Game playing actions
+                attack = action.get('attack')
                 wait = action.get('wait')
                 cast = action.get('cast')
-                fullscreen = action.get('fullscreen')
                 stairs = action.get('take stairs')
                 pickup = action.get('pickup')
                 inventory = action.get('show_inventory')
@@ -174,6 +174,9 @@ class Controller():
                     dx, dy = move
                     self.model.move_player(dx, dy)
                     player_turn = False
+                elif attack:
+                    if self.model.attack() is True:
+                        player_turn = False
                 elif cast:
                     if self.model.cast_spell(slot=cast) is True:
                         player_turn = False
@@ -182,8 +185,10 @@ class Controller():
                     player_turn = False
                 elif pickup:
                     self.model.take_item()
+                    player_turn = False
                 elif use:
                     self.model.use_item()
+                    player_turn = False
                 elif examine:
                     self.model.check_item()
                 elif inventory:
@@ -226,20 +231,23 @@ class Controller():
             elif self.mode == Controller.GAME_MODE_CHARACTER:
 
                 level_up = action.get('level-up')
+                ability_upgrade = action.get('ability_upgrade')
 
                 if move:
                     dx, dy = move
                     self.view.character_view.change_selection(dy)
-
                 elif level_up:
+                    self.model.level_up()
+                elif ability_upgrade:
                     stat_name = self.view.character_view.get_selected_stat()
-                    self.model.level_up(stat_name)
+                    self.model.ability_upgrade(stat_name)
 
             # If we are in CHARACTER CREATION mode
             elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
 
                 edit_name = action.get('edit_name')
                 edit_class = action.get('edit_class')
+                edit_race = action.get('edit_race')
                 select = action.get("select")
                 randomize = action.get("randomize")
 
@@ -247,10 +255,13 @@ class Controller():
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_NAME_PICK
                 elif edit_class:
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_CLASS_PICK
+                elif edit_race:
+                    self.view.character_creation_view.mode = view.CreateCharacterView.MODE_RACE_PICK
                 elif randomize:
                     name = model.ThemeManager.get_random_history("Name")
                     class_name = random.choice(model.CombatClassFactory.get_playable_classes())
-                    self.model.add_player(self.model.generate_player(name, class_name))
+                    race_name = random.choice(model.RaceFactory.get_available_races())
+                    self.model.add_player(self.model.generate_player(name, class_name, race_name))
                     self.view.character_creation_view.initialise(self.model)
                 elif move:
                     dx, dy = move
@@ -259,7 +270,8 @@ class Controller():
                     # if self.view.character_creation_view.mode == view.CreateCharacterView.MODE_CLASS_PICK:
                     name = self.view.character_creation_view.character_name
                     class_name = self.view.character_creation_view.get_selected_class()
-                    self.model.add_player(self.model.generate_player(name, class_name))
+                    race_name = self.view.character_creation_view.get_selected_race()
+                    self.model.add_player(self.model.generate_player(name, class_name, race_name))
                     self.view.character_creation_view.initialise(self.model)
                     self.view.character_creation_view.mode = view.CreateCharacterView.MODE_DISPLAY_CHARACTER
 
@@ -409,15 +421,15 @@ class Controller():
         if self.mode == Controller.GAME_MODE_START:
             keys_help = 'N=Create New Character|Enter=Start'
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
-            keys_help = 'N=Change name|C=change class|R=Randomise|Enter/Space=Confirm|Esc=Exit'
+            keys_help = 'N=Change name|C=change class|R=change race|?=Randomise|Enter/Space=Confirm|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_PLAYING:
-            keys_help = '^v<> / WASD=Move/attack/examine|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|J=show journal|Enter=take stairs|Esc=Pause'
+            keys_help = '^v<> / WASD=Move/attack/examine|Ctrl=attack|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|J=show journal|Enter=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
             keys_help = 'Esc=continue|Q=quit the game'
         elif self.mode == Controller.GAME_MODE_INVENTORY:
-            keys_help = '^v<> / WASD=Change selected item|E=equip selected item|F=drop selected item|U/Q=use equipped item|Esc=Exit'
+            keys_help = '^v<> / WASD=Change selected item|E=equip selected item|F=drop selected item|U/Q=use equipped item|Esc/I=Exit'
         elif self.mode == Controller.GAME_MODE_CHARACTER:
-            keys_help = '^v / WA=Change selected ability|L/E=level-up selected ability|Esc=Exit'
+            keys_help = '^v / WA=Change selected ability|L/E=level-up|U=upgrade selected ability|Esc/C=Exit'
         elif self.mode == Controller.GAME_MODE_JOURNAL:
             keys_help = '^v / WA=Change selected level|Esc/J=Exit'
         elif self.mode == Controller.GAME_MODE_SHOP:
@@ -512,6 +524,8 @@ class Controller():
             return {'move': (-1, 0)}
         elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
             return {'move': (1, 0)}
+        elif key.vk == libtcod.KEY_CONTROL:
+            return {'attack': True}
         elif key.vk == libtcod.KEY_ENTER or key_char == 'v':
             return {'take stairs': True}
         elif key.vk == libtcod.KEY_SPACE:
@@ -606,6 +620,9 @@ class Controller():
         if key_char == 'l' or key_char == 'e' or key.vk == libtcod.KEY_SPACE:
             return {'level-up': True}
 
+        elif key_char == 'u':
+            return {'ability_upgrade': True}
+
         elif key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen
             return {'fullscreen': True}
@@ -631,13 +648,15 @@ class Controller():
         elif key_char == "c":
             return {'edit_class': True}
         elif key_char == "r":
+            return {'edit_race': True}
+        elif key_char == "/":
             return {'randomize': True}
         elif key.vk == libtcod.KEY_UP or key_char == 'w':
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
-        # elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
-        #     return {'select': True}
+        elif key.vk == libtcod.KEY_ENTER or key.vk == libtcod.KEY_SPACE:
+            return {'select': True}
         elif key.vk == libtcod.KEY_ESCAPE:
             # Exit the menu
             return {'exit': True}

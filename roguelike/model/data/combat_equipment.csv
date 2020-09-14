@@ -10,7 +10,7 @@ Dagger,a small dagger,Main Hand,1H,STR,AC,0,1d4,0,0,1,1
 Dagger+1,a small dagger +1,Main Hand,1H,STR,AC,0,1d4+1,0,0,1,1
 Dagger+1+1,a small dagger +2,Main Hand,1H,STR,AC,0,1d4+2,0,0,1,1
 Default Weapon,Default Weapon,Main Hand,1H,STR,AC,0,1d1,0,0,1,1
-Fireball Scroll,a magic fireball scroll,Item Slot,,INT,DEX,0,2d6+2,0,0,0,3
+Fireball Scroll,a magic fireball scroll,Item Slot,,INT,REF,0,2d6+2,0,0,0,5
 Gold Crown,a golden crown,Head,,,,0,0,2,2,0,0
 Gold Ring,a gold ring,Finger,,,,0,0,2,0,0,0
 Greataxe,a great axe,Main Hand,2H,STR,AC,0,1d12,0,0,12,2
@@ -19,13 +19,13 @@ Helmet,a helmet,Head,,,,1,0,0,0,1,0
 Iron Crown,a iron crown,Head,,,,0,0,1,1,0,0
 Leather Armour,a leather tunic,Body,,,,1,0,0,0,2,0
 Leather Boots,a pair of old leather boots,Feet,,,,1,0,0,0,1,0
-Lightning Scroll,a magic lightning scroll,Item Slot,,INT,DEX,0,1d8+5,0,0,0,2
+Lightning Scroll,a magic lightning scroll,Item Slot,,INT,REF,0,1d8+5,0,0,0,5
 Longsword,a longsword,Main Hand,1H,STR,AC,0,1d8,0,0,4,1
 Mace,a mace,Main Hand,1H,STR,AC,0,1d8,0,0,6,1
 Metal Shield,a metal shield,Off Hand,1H,,,2,0,0,0,3,0
 Plate Armour,plate chest armour,Body,,,,2,0,0,0,3,0
 Plate Boots,plate armour boots,Feet,,,,2,0,0,0,2,0
-Poison Scroll,a magic poison scroll,Item Slot,,INT,DEX,0,3d4+1,0,0,0,2
+Poison Scroll,a magic poison scroll,Item Slot,,INT,REF,0,3d4+1,0,0,0,3
 Protection Ring,a ring of protection,Finger,,,,1,0,2,0,0,0
 Quarterstaff,a quarterstaff,Main Hand,2H,STR,AC,0,1d8,0,0,4,1
 Robe,a ragged cloth robe,Body,,,,0,0,0,0,1,0
@@ -39,3 +39,9 @@ Spear,a wooden spear,Main Hand,2H,STR,AC,0,1d4,0,0,2,2
 Sword,a sword,Main Hand,1H,STR,AC,0,1d4,0,0,1,1
 Tunic of Dexterity,a shiny smooth tunic,Body,,,,1,0,0,2,3,0
 War Hammer,a mighty War Hammer,Main Hand,2H,STR,AC,0,1d10,0,0,5,2
+Hand Crossbow,a hand crossbow,Main Hand,1H,DEX,AC,0,1d6,0,0,2,10
+Sling,a sling,Main Hand,1H,DEX,AC,0,1d6,0,0,2,10
+Crossbow,a crossbow,Main Hand,2H,DEX,AC,0,1d8,0,0,2,10
+Longbow,a longbow,Main Hand,2H,DEX,AC,0,1d10,0,0,3,10
+Shortbow,a shortbow,Main Hand,2H,DEX,AC,0,1d8,0,0,2,10
+Shuriken,a shuriken,Main Hand,1H,DEX,AC,0,1d4,0,0,0.5,6

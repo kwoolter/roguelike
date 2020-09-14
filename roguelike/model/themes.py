@@ -95,7 +95,7 @@ class Palette:
         return libtcod.Color(r, g, b)
 
     @staticmethod
-    def dim_hsl(colour, amt : int):
+    def dim_hsl(colour:libtcod.Color, amt : int)->libtcod.Color:
         """
         Dim a colour object by adjusting the L attribute of HSL representation
         :param colour: the colour that you want to adjust
@@ -104,6 +104,19 @@ class Palette:
         """
         new_colour = copy.deepcopy(colour)
         libtcod.color_scale_HSV(new_colour, 1.0, amt)
+        return new_colour
+
+    @staticmethod
+    def shift_hue( colour:libtcod.Color, shift:float)->libtcod.Color:
+        new_colour = copy.deepcopy(colour)
+        h,s,v = libtcod.color_get_hsv(new_colour)
+        h += shift
+        if h < 0:
+            h+= 360
+        elif h>360:
+            h-=360
+        libtcod.color_set_hsv(new_colour, h,s,v)
+
         return new_colour
 
 

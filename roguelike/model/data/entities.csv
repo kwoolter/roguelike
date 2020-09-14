@@ -138,3 +138,9 @@ Scroll of Revelation,a dark scroll,~,Scroll,white,black,4,TRUE,TRUE,TRUE,TRUE,TR
 Scroll of Secrets,a mysterious scroll,~,Scroll,white,dark_blue,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Scroll of Teleportation,a green scroll,~,Scroll,white,darker_green,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
 Scroll of XYZ,a tattered scroll,~,Scroll,black,sepia,4,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,0
+Hand Crossbow,a hand crossbow,T,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,25
+Sling,a sling,S,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,1
+Crossbow,a crossbow,T,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,25
+Longbow,a longbow,),Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,30
+Shortbow,a shortbow,),Combat,white,,4,TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,25
+Shuriken,a shuriken,*,Combat,white,,4,TRUE,TRUE,FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,1
