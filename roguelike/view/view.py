@@ -2457,6 +2457,16 @@ class SpellBookView(View):
             so.render(self.con, cx, y)
             y += 1
 
+        properties = ["At Will","Encounter","Daily","Utility"]
+        text=""
+        self.con.default_fg = self.fg
+        y+=2
+        for property in properties:
+            val = self.game.player.get_property(property)
+            text += f"{property}={val} "
+        libtcod.console_print_ex(self.con, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=text)
+
+
         if self.selected_spell is not None:
             x = cx
             y = self.height - 8
@@ -2466,14 +2476,16 @@ class SpellBookView(View):
 
             y += 1
 
-            fg = Palette.dim_hsl(fg, 1.5)
+            fg = Palette.dim_hsl(self.fg, 1.5)
             fg = Palette.shift_hue(fg, 20.0)
+            bg = Palette.dim_hsl(self.bg,1.5)
             self.con.default_fg = fg
+            self.con.default_bg = bg
             text = f'{self.selected_spell.name} (level:{self.selected_spell.level} {self.selected_spell.frequency})'
-            libtcod.console_print_ex(self.con, x, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=text)
+            libtcod.console_print_ex(self.con, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.CENTER, fmt=f'{text: ^{self.width-2}}')
 
             y += 1
-            self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
+            self.con.default_fg = self.fg
             self.con.hline(1, y, self.width - 2)
             self.con.default_fg = self.fg
 
