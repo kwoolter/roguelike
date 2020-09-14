@@ -1513,7 +1513,7 @@ class CharacterView(View):
         self.border_type = CharacterView.BORDER_TYPE2
         self.border = None
         self.abilities = ('STR', 'CON', 'DEX', 'INT', 'CHA', 'WIS')
-        self.other_stats = ('XP', "HPPerLevel", "SightRange")
+        self.other_stats = ('XP', "HPPerLevel", "SightRange", "Ability Points")
         self.equipment_stats = ("AC", "DEX", "INT", "Weight", "Value")
 
         # Components

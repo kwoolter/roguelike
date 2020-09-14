@@ -231,14 +231,16 @@ class Controller():
             elif self.mode == Controller.GAME_MODE_CHARACTER:
 
                 level_up = action.get('level-up')
+                ability_upgrade = action.get('ability_upgrade')
 
                 if move:
                     dx, dy = move
                     self.view.character_view.change_selection(dy)
-
                 elif level_up:
+                    self.model.level_up()
+                elif ability_upgrade:
                     stat_name = self.view.character_view.get_selected_stat()
-                    self.model.level_up(stat_name)
+                    self.model.ability_upgrade(stat_name)
 
             # If we are in CHARACTER CREATION mode
             elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
@@ -617,6 +619,9 @@ class Controller():
 
         if key_char == 'l' or key_char == 'e' or key.vk == libtcod.KEY_SPACE:
             return {'level-up': True}
+
+        elif key_char == 'u':
+            return {'ability_upgrade': True}
 
         elif key.vk == libtcod.KEY_ENTER and key.lalt:
             # Alt+Enter: toggle full screen

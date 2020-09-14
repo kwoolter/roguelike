@@ -2021,8 +2021,11 @@ class Model():
 
         return success
 
-    def level_up(self, stat_name=None) -> bool:
-
+    def level_up(self) -> bool:
+        """
+        Attempt to level up the player
+        :return: True if success
+        """
         # Get current XP and Level
         current_xp = self.player.get_property("XP")
         player_possible_level = LevelFactory.xp_to_level(current_xp)
@@ -2034,7 +2037,7 @@ class Model():
                                         name=Event.LEVEL_UP,
                                         description=f"You levelled up!"))
 
-            success = self.player.level_up(stat_name=stat_name)
+            success = self.player.level_up()
 
         else:
 
@@ -2043,8 +2046,22 @@ class Model():
             self.events.add_event(Event(type=Event.GAME,
                                         name=Event.ACTION_FAILED,
                                         description=f"You don't have enough XP to level up! {next_level_xp} XP required"))
-
             success = False
+
+        return success
+
+    def ability_upgrade(self,stat_name) -> bool:
+
+        success = False
+
+        ability_points = self.player.get_property("Ability Points")
+
+        if ability_points > 0:
+            success = self.player.fighter.ability_upgrade(stat_name)
+        else:
+            self.events.add_event(Event(type=Event.GAME,
+                                        name=Event.ACTION_FAILED,
+                                        description=f"You don't have any ability points to upgrade {stat_name}!"))
 
         return success
 

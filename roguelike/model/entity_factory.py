@@ -227,8 +227,8 @@ class Player(Entity):
         self.fighter.unequip_item(old_item=old_item)
         return success
 
-    def level_up(self, stat_name: str = None):
-        success = self.fighter.level_up(stat_name)
+    def level_up(self):
+        success = self.fighter.level_up()
         if success is True:
             self.heal(20)
         return success
@@ -429,10 +429,9 @@ class Fighter():
     def add_kills(self, kill_count: int = 1):
         self.combat_class.update_property("KILLS", kill_count, increment=True)
 
-    def level_up(self, stat_name=None):
+    def level_up(self)->bool:
         """
-        Level up a Fighter and increase the specified stat.
-        :param stat_name: the stat that you want to increase. Default is None.
+        Level up a Fighter
         """
 
         success = True
@@ -444,21 +443,22 @@ class Fighter():
             level += 1
 
         self.set_property("Level", level)
-
-        if stat_name is not None:
-            value = self.combat_class.get_property(stat_name)
-            if value is None:
-                value = 1
-            else:
-                value += 1
-
-            self.combat_class.update_property(property_name=stat_name, new_value=value)
-
         self.set_property("MaxHP", self.get_max_HP())
-
         self.spell_book.level = level
 
         return success
+
+    def ability_upgrade(self, ability_name=None):
+        """
+        Upgrade the specified ability an decrement the available Ability Points
+        :param ability_name: the name of the ability that you want to upgrade
+        :return: True
+        """
+        self.combat_class.update_property(property_name=ability_name, new_value=1, increment=True)
+        self.set_property("Ability Points", -1, increment=True)
+
+        return True
+
 
     def equip_item(self, new_item: Entity, slot: str = None) -> bool:
         """
