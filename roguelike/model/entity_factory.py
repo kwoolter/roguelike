@@ -452,8 +452,9 @@ class Fighter():
         # Recalculate our Max HP
         self.set_property("MaxHP", self.get_max_HP())
 
-        # Update our spell book with the new level
-        self.spell_book.level = level
+        # Update our spell book with the new level and allowed number of spells
+        spell_caps = {frequency:self.get_property(frequency) for frequency in Spell.FREQUENCIES}
+        self.spell_book.level_up(level, spell_caps)
 
         return success
 
