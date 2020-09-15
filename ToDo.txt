@@ -40,5 +40,5 @@
 - Changed leveling-up system to be file driven
 - Added Ability Points that a player gains to increase abilities
 [KW] Leveling-up - what about the rest of the stats in the file? Now using these so you can learn more spells
-Bug:Checked items need to be made uncheckable
-Bug leveling up allows many times!!
+Bug:Checked items need to be made uncheckable FIXED
+Bug leveling up allows many times!! FIXED
