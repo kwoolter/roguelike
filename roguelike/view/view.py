@@ -439,13 +439,15 @@ class MainFrame(View):
 
         # Draw the status line
         x = 0
-        y = self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 2
+        y = self.height - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - 3
 
         ac = self.game.player.fighter.get_defence("AC")
         hp = self.game.player.get_property("HP")
+        xp = self.game.player.get_property("XP")
+
         max_hp = self.game.player.fighter.get_max_HP()
         status = f'F={self.game.dungeon_level}{chr(179)}AC={ac}'
-        stats = ["STR", "DEX", "INT", "WIS", "CHA", "XP", "Level"]
+        stats = ["STR", "DEX", "INT", "WIS", "CHA", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
             status += f'{chr(179)}{stat[0]}={stat_value}'
@@ -456,7 +458,8 @@ class MainFrame(View):
         y += 1
 
         # Draw the HP bar
-        HP_status_bar_width = 48
+        HP_status_bar_width = self.width - 2
+
         hp_pct = hp / max_hp
         full_bar_text = chr(195) + chr(196) * HP_status_bar_width + chr(180)
         bar_text = chr(204) + chr(205) * (int(hp_pct * HP_status_bar_width)) + chr(185)
@@ -477,6 +480,37 @@ class MainFrame(View):
 
         libtcod.console_set_default_foreground(0, Palette.dim_hsl(fg, 1.5))
         libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=hp_text)
+
+        y += 1
+
+        # Draw XP bar
+        level_id = self.game.player.fighter.level
+        level = model.LevelFactory.get_level_info(level_id)
+        next_level = model.LevelFactory.get_level_info(level_id + 1)
+
+        XP_status_bar_width = self.width - 2
+        max_xp = next_level.xp
+        xp_pct = min((xp - level.xp) / (max_xp - level.xp),1)
+
+        full_bar_text = chr(195) + chr(196) * XP_status_bar_width + chr(180)
+        bar_text = chr(204) + chr(205) * (int(xp_pct * XP_status_bar_width)) + chr(185)
+        xp_text = f'XP={xp}/{max_xp}'
+
+        libtcod.console_set_default_foreground(0, libtcod.dark_grey)
+        libtcod.console_set_default_background(0, libtcod.darkest_grey)
+        libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=full_bar_text)
+
+        # Calculate colour of XP bar by linear interpolation between two colours
+        fg = libtcod.color_lerp((128, 30, 30), (50, 255, 100), xp_pct)
+        bg = Palette.dim_hsl(fg, 0.5)
+        libtcod.console_set_default_foreground(0, fg)
+        libtcod.console_set_default_background(0, bg)
+
+        libtcod.console_print_ex(0, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.LEFT, fmt=bar_text)
+
+        libtcod.console_set_default_foreground(0, Palette.dim_hsl(fg, 2.0))
+        libtcod.console_print_ex(0, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=xp_text)
+
 
         libtcod.console_flush()
 
@@ -2324,7 +2358,7 @@ class SpellBookView(View):
         self.con.default_bg = self.bg
         libtcod.console_clear(self.con)
 
-        title_bg = Palette.dim_hsl(self.bg, 0.8)
+        title_bg = Palette.dim_hsl(self.bg, 1.8)
 
         # Colour the title area background
         self.con.default_bg = title_bg
@@ -2355,20 +2389,20 @@ class SpellBookView(View):
         # Draw a divider
         divider.render(self.con, 0, y)
 
-        y += 2
-
-        text = f"Spells Memorised:"
+        y += 1
+        bg = Palette.dim_hsl(self.bg, 1.5)
+        text = f"Spells Memorised".center(self.width-2)
         so = ScreenString(text,
                           fg=self.fg,
-                          bg=self.bg,
+                          bg=bg,
                           alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
 
-        y += 2
+        y += 1
 
-        self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
-        self.con.hline(1, y, self.width - 2)
+        # Draw a divider
+        divider.render(self.con, 0, y)
 
         y += 2
 
@@ -2401,24 +2435,26 @@ class SpellBookView(View):
         # Draw a divider
         divider.render(self.con, 0, y)
 
-        y += 2
+        y += 1
 
         if self.mode == SpellBookView.MODE_ACTIVE:
             text = f"Spells Learned:"
         else:
             text = "All Class Spells:"
 
-        so = ScreenString(text,
+        bg = Palette.dim_hsl(self.bg, 1.5)
+
+        so = ScreenString(text.center(self.width-2),
                           fg=self.fg,
-                          bg=self.bg,
+                          bg=bg,
                           alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
 
-        y += 2
+        y += 1
 
-        self.con.default_fg = Palette.dim_hsl(self.fg, 0.5)
-        self.con.hline(1, y, self.width - 2)
+        # Draw a divider
+        divider.render(self.con, 0, y)
 
         y += 2
 
@@ -2459,12 +2495,12 @@ class SpellBookView(View):
             so.render(self.con, cx, y)
             y += 1
 
-        # Print current utilisation of e3ach spell frequency
+        # Print current utilisation of each spell frequency
         text=""
         self.con.default_fg = self.fg
         y+=1
 
-        # For each frequency
+        # For each frequency...
         for i, property in enumerate(model.Spell.FREQUENCIES):
 
             # Find the current limit
@@ -2481,13 +2517,14 @@ class SpellBookView(View):
         # Print the info
         libtcod.console_print_ex(self.con, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=text)
 
-        # If a spell is sleected then print its full details...
+        # If a spell is selected then print its full details...
         if self.selected_spell is not None:
             x = cx
             y = self.height - 8
 
             self.con.default_fg = self.fg
-            self.con.hline(1, y, self.width - 2)
+            # Draw a divider
+            divider.render(self.con, 0, y)
 
             y += 1
 
@@ -2496,13 +2533,13 @@ class SpellBookView(View):
             bg = Palette.dim_hsl(self.bg,1.5)
             self.con.default_fg = fg
             self.con.default_bg = bg
-            text = f'{self.selected_spell.name} (level:{self.selected_spell.level} {self.selected_spell.frequency})'
+            text = f'{self.selected_spell.name} [Level {self.selected_spell.level} - {self.selected_spell.frequency}]'
             libtcod.console_print_ex(self.con, x, y, flag=libtcod.BKGND_SET, alignment=libtcod.CENTER, fmt=f'{text: ^{self.width-2}}')
 
             y += 1
             self.con.default_fg = self.fg
-            self.con.hline(1, y, self.width - 2)
-            self.con.default_fg = self.fg
+            # Draw a divider
+            divider.render(self.con, 0, y)
 
             y += 1
 

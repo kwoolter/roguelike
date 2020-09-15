@@ -16,6 +16,7 @@ from . combat import CombatClassFactory
 from . spells import SpellFactory
 from . spells import Spell
 from . spells import SpellBook
+from .entity_factory import Level, LevelFactory
 from . themes import ThemeManager
 from . themes import Palette
 from . entity_factory import text_to_color

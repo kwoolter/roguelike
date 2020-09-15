@@ -954,7 +954,7 @@ class Floor():
 
             stats.sort(key=operator.itemgetter(1))
             print(stats)
-            # Pick the ability that has the lowest diffculty score
+            # Pick the ability that has the lowest difficulty score
             ability, score = stats[0]
             print(f'Chosen check = {stats[0]}')
 
@@ -2828,6 +2828,7 @@ class AbilityCheck:
             # did we pass the check?
             if self.difficulty_value <= (random.randint(1, 20) + ability_modifier):
                 success = True
+                self.entity.set_property("IsCheckable", False)
                 if len(self.success_rewards) > 0:
                     reward_name = random.choice(self.success_rewards)
                     self.success_reward = EntityFactory.get_entity_by_name(reward_name)
