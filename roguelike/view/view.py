@@ -2372,6 +2372,7 @@ class SpellBookView(View):
 
         y += 2
 
+        # Print the list of memorised spells
         for i in range(spell_book.max_memorised_spells):
 
             fg = self.memorised_spell_fg
@@ -2430,6 +2431,7 @@ class SpellBookView(View):
 
             so.render(self.con, cx, y)
 
+        # Print the list of selected spells
         for i, spell in enumerate(self.selection_list):
 
             bg = self.bg
@@ -2457,16 +2459,29 @@ class SpellBookView(View):
             so.render(self.con, cx, y)
             y += 1
 
-        properties = ["At Will","Encounter","Daily","Utility"]
+        # Print current utilisation of e3ach spell frequency
         text=""
         self.con.default_fg = self.fg
-        y+=2
-        for property in properties:
+        y+=1
+
+        # For each frequency
+        for i, property in enumerate(model.Spell.FREQUENCIES):
+
+            # Find the current limit
             val = self.game.player.get_property(property)
-            text += f"{property}={val} "
+
+            # Find how many spells of this type of frequency have we already learned
+            matching_spell_count = len([spell for spell in spell_book.learned_spells.values() if spell.frequency == property])
+
+            # Build a formatted string of the collated information
+            if i > 0:
+                text += " " + chr(179) + " "
+            text += f"{property}={matching_spell_count}/{val}"
+
+        # Print the info
         libtcod.console_print_ex(self.con, cx, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=text)
 
-
+        # If a spell is sleected then print its full details...
         if self.selected_spell is not None:
             x = cx
             y = self.height - 8

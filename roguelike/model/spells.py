@@ -99,21 +99,23 @@ class SpellBook:
         # Properties
         self.class_name = class_name
         self.level = level
-        self.max_learned_spells = 10
-        self.max_memorised_spells = 4
         self.max_per_frequency={}
 
         # Components
         self.learned_spells = {}
         self.memorised_spells = []
 
+    @property
+    def max_memorised_spells(self):
+        spell_count = sum(self.max_per_frequency.values())
+        return spell_count
 
     def level_up(self, new_level_id:int, new_max_frequency:dict=None):
         self.level = new_level_id
         if new_max_frequency is not None:
             self.max_per_frequency.update(new_max_frequency)
 
-        print(f'Spell Limits {self,self.max_per_frequency}')
+        #print(f'Spell Limits {self,self.max_per_frequency}')
 
     def reset(self, frequency: str):
 
@@ -123,7 +125,7 @@ class SpellBook:
 
     def learn_spell(self, new_spell: Spell) -> bool:
         """
-        Attempt to learn a new spell
+        Attempt to learn a new spell.
         Args:
             new_spell: the new Spell object that you want to learn
 
@@ -146,8 +148,6 @@ class SpellBook:
             raise SpellBookException(f'You need to be level {new_spell.level} or above to learn this spell')
         elif matching_spell_count >= max_count_for_frequency:
             raise SpellBookException(f"You can't learn any more {new_spell.frequency} spells - max={max_count_for_frequency}")
-        elif len(self.learned_spells) >= self.max_learned_spells:
-            raise SpellBookException(f"No more free spell pages in your book - max={self.max_learned_spells}")
         else:
             self.learned_spells[new_spell.name] = new_spell
             success = True

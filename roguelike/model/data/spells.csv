@@ -35,5 +35,5 @@ Wizard,Icy Terrain,With frosty breath you utter a single arcane work that create
 Wizard,Ray of Enfeeblement,Weird green mist streams from your enemy's flesh carrying away its strength,INT,FORT,1d10,,10,1,Encounter
 Wizard,Chill Strike,A bolt of frigid purple energy,INT,FORT,2d8,,10,1,Encounter
 Wizard,Color Spray,A brilliant blast of lashing colours springs from your outstretched fingers knocking nearby enemies senseless,INT,WILL,1d6,,5,3,Encounter
-Wizard,Fire Shroud,With a sublt gesture you wreathe nearby enemies in flames,INT,FORT,1d8,,3,3,Encounter
-Wizard,Fireball,A global of orange flame colaesces in you hane.  You hurl is at your enemies,INT,REF,3d6,,3,3,Daily
+Wizard,Fire Shroud,With a subtle gesture you wreathe nearby enemies in flames,INT,FORT,1d8,,3,3,Encounter
+Wizard,Fireball,A globe of orange flame colaesces in your hand.  You hurl it at your enemies,INT,REF,3d6,,3,3,Daily
