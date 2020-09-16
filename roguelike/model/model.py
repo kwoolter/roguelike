@@ -1453,11 +1453,15 @@ class Model():
         self.events = EventQueue()
         self.item_user = None
 
-    def initialise(self):
+    def initialise(self, floor_width=50, floor_height=50):
         """
         Initialise an instance of the Model.
 
         """
+
+        self.floor_width = floor_width
+        self.floor_height = floor_height
+
 
         # Load game data from specified files
         ThemeManager.load_room_names("room_names.csv")
@@ -1544,6 +1548,7 @@ class Model():
         target = self.current_floor.auto_target()
         print(f'nearest target={str(target)}')
         self.player.fighter.last_target = target
+        self.current_floor.print()
 
     def debug(self):
         self.player.print()
@@ -1848,7 +1853,8 @@ class Model():
             # Create a new floor and initialise it
             floor_name = ThemeManager.get_random_history("Floor")
             self.current_floor = Floor(floor_name,
-                                       50, 50,
+                                       self.floor_width,
+                                       self.floor_height,
                                        level=self.dungeon_level,
                                        params=game_parameters)
 

@@ -35,7 +35,7 @@ class Controller():
 
     def initialise(self):
         self.model = model.Model(self.name)
-        self.model.initialise()
+        self.model.initialise(Controller.GAME_FLOOR_WIDTH, Controller.GAME_FLOOR_HEIGHT)
         self.events = self.model.events
 
         self.view = view.MainFrame(Controller.GAME_FLOOR_WIDTH,
