@@ -1666,6 +1666,7 @@ class Model():
             for spell in level_spells:
                 try:
                     new_player.fighter.learn_spell(spell)
+                    new_player.fighter.memorise_spell(spell)
                 except SpellBookException as e:
                     pass
 

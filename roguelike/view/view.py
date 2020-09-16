@@ -2274,7 +2274,6 @@ class SpellBookView(View):
         self.border = None
 
         self.mode = SpellBookView.MODE_ACTIVE
-        self.mode = SpellBookView.MODE_CATALOGUE
 
         # Components
         self.con = None
@@ -2326,7 +2325,6 @@ class SpellBookView(View):
         # print("*** SpellBookView: building lists...")
 
         player_level = self.game.player.fighter.get_property("Level")
-        player_level = None
         spell_book = self.game.player.fighter.spell_book
 
         self.memorised_spells = spell_book.get_memorised_spells()
