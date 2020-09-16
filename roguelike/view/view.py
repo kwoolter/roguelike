@@ -52,7 +52,7 @@ class MainFrame(View):
     MODE_GAME_OVER = "game over"
 
     CONSOLE_MESSAGE_PANEL_HEIGHT = 13
-    CONSOLE_MESSAGE_PANEL_WIDTH = 50
+
 
     CONSOLE_FONT_SIZES = [8, 10, 12, 14, 16, 18, 20]
     CONSOLE_FONT_NAME = "cp437"
@@ -73,8 +73,8 @@ class MainFrame(View):
 
         self.floor_view = FloorView(self.width, self.height, bg=libtcod.black)
 
-        self.message_panel = MessagePanel(MainFrame.CONSOLE_MESSAGE_PANEL_WIDTH,
-                                          MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
+        self.message_panel = MessagePanel(width=self.width,
+                                          height=MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT,
                                           fg=libtcod.white,
                                           bg=libtcod.black,
                                           border_fg=libtcod.dark_green,
@@ -1255,6 +1255,7 @@ class ShopView(View):
         # Get some short cuts to the data that we are going to display
         self.character = self.game.player
         self.sell_list = self.character.inventory.get_other_items()
+        self.sell_list.extend(list(self.character.inventory.get_stackable_items().keys()))
 
         # Create a box divider
         divider_box = Boxes.get_box_divider(length=self.width, border_type=self.border_type)

@@ -11,7 +11,6 @@
 [KW] Use A* to generate tunnels between rooms
 [KW] Cycle through available targets rather than picking closest all the time
 [KW] May need to allow tabbing through Level filters in SpellBookView if number of spells in catalog gets large
-[KW] allow selling of stackable items in shop
 
 # Bugs
 [OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves
@@ -42,3 +41,4 @@
 [KW] Leveling-up - what about the rest of the stats in the file? Now using these so you can learn more spells
 Bug:Checked items need to be made uncheckable FIXED
 Bug leveling up allows many times!! FIXED
+[KW] allow selling of stackable items in shop
