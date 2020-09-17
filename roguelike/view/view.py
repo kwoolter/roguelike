@@ -2320,6 +2320,7 @@ class SpellBookView(View):
         # If we have just got focus then rebuild lists that we are going to display
         if new_event.name == model.Event.GAME_MODE_CHANGED:
             self.mode = SpellBookView.MODE_ACTIVE
+            self.confirm_spells.change_selection(-1)
             self.build_lists()
 
     def toggle_mode(self) -> str:
