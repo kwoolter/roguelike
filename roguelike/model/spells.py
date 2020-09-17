@@ -99,6 +99,7 @@ class SpellBook:
         # Properties
         self.class_name = class_name
         self.level = level
+        self.is_locked = False
         self.max_per_frequency={}
 
         # Components
@@ -134,6 +135,9 @@ class SpellBook:
         """
         success = False
 
+        if self.is_locked is True:
+            raise SpellBookException(f"You you cannot learn any new spells at this time")
+
         # How many spells of this type of frequency have we already learned?
         matching_spell_count = len([spell for spell in self.learned_spells.values() if spell.frequency == new_spell.frequency])
 
@@ -160,6 +164,9 @@ class SpellBook:
         :param old_spell: the spell to unlearn
         """
         if self.is_learned(old_spell.name):
+
+            if self.is_locked is True:
+                raise SpellBookException(f"You you cannot unlearn any spells at this time")
 
             if self.is_memorised(old_spell.name):
                 self.forget_spell(old_spell)

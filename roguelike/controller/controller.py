@@ -312,15 +312,30 @@ class Controller():
                         #                             name=model.Event.ACTION_FAILED,
                         #                             description=f"No item selected!"))
 
-            # If we are in spellbook mode
+            # If we are in spell book mode
             elif self.mode == Controller.GAME_MODE_SPELLBOOK:
                 learn = action.get('learn')
                 memorise = action.get('memorise')
                 toggle = action.get('toggle')
+                confirm = action.get('confirm')
 
                 if move:
                     dx, dy = move
                     self.view.spellbook_view.change_selection(dy)
+                elif exit:
+                    # If the spell book is not locked and you are trying to exit then go into confirm mode
+                    if self.model.player.fighter.spell_book.is_locked is False:
+                        self.view.spellbook_view.confirm()
+                        exit = False
+                elif confirm:
+                    v = self.view.spellbook_view
+                    # If we are checking user wants to exit
+                    if v.mode == view.SpellBookView.MODE_CONFIRM_SPELLS:
+                            # If they confirmed that they wanted to save then lock spell book and exit
+                            if v.save is True:
+                                exit = True
+                                self.model.player.fighter.spell_book.is_locked = True
+                            v.mode = view.SpellBookView.MODE_ACTIVE
                 else:
                     if toggle:
                         self.view.spellbook_view.toggle_mode()
@@ -697,6 +712,8 @@ class Controller():
             return {'learn': True}
         elif key_char == 't':
             return {'toggle': True}
+        elif key.vk == libtcod.KEY_ENTER:
+            return {'confirm':True}
         elif key.vk == libtcod.KEY_ESCAPE or key_char == 'k':
             return {'exit': True}
 

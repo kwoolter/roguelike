@@ -1840,6 +1840,11 @@ class Model():
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
                                             description=f"You rest from your adventuring and heal your wounds"))
+                # Unlock the spell book
+                self.player.fighter.spell_book.is_locked = False
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You can learn new spells"))
 
         # Increase the dungeon level
         self.dungeon_level += 1

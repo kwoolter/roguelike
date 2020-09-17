@@ -148,7 +148,7 @@ class MainFrame(View):
         self.game_name = chr(206) + chr(205) * 2 + "  "
         for c in self.game.name:
             self.game_name += f'{c} '
-        self.game_name += chr(205) * 2 + chr(206) + " "
+        self.game_name += " " + chr(205) * 2 + chr(206) + " "
 
         self.set_font()
 
@@ -185,11 +185,13 @@ class MainFrame(View):
         w = self.width
         h = self.height
         cx, cy = self.center
-        instructions = ("U:1|R:1|" * 4) + ("R:1|D:1|" * 3) + f'R:{cx + 4}|' + ("U:1|R:1|" * 3) + (
-                "R:1|D:1|" * 4) + f"D:{cy - 10}|"
-        instructions += ("d:1|L:1|") * 4 + ("l:1|U:1|") * 3 + f"l:{cx + 4}|" + ("d:1|l:1|" * 3) + (
-                "l:1|u:1|" * 4) + f'U:{cy - 10}'
-        instructions += f"|d:{cy - 21}|l:2|R:{cx + 22}"
+        bw = self.width - 28
+        bh = self.height - 45
+        instructions = ("U:1|R:1|" * 4) + ("R:1|D:1|" * 3) + f'R:{bw}|' + ("U:1|R:1|" * 3) + (
+                "R:1|D:1|" * 4) + f"D:{bh}|"
+        instructions += ("d:1|L:1|") * 4 + ("l:1|U:1|") * 3 + f"l:{bw}|" + ("d:1|l:1|" * 3) + (
+                "l:1|u:1|" * 4) + f'U:{bh}'
+        instructions += f"|d:{int(bh/2)}|l:2|R:{bw+18}"
         frame_template = Boxes.turtle_to_box(instructions)
         self.frame1 = Boxes.array_to_border(frame_template, border_type=ShopView.BORDER_TYPE2)
 
@@ -396,7 +398,7 @@ class MainFrame(View):
             bx = int((self.width - bw) / 2)
             by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT + 10
             # Draw the border
-            border = Boxes.get_box(width=bw, height=bh, border_type=Boxes.BORDER_TYPE_1)
+            border = Boxes.get_box(width=bw, height=bh, border_type=Boxes.BORDER_TYPE_1, fill_char=ord(" "))
             bo = ScreenObject2DArray(border, fg=fg, bg=bg)
             bo.render(0, bx, by)
 
@@ -407,7 +409,7 @@ class MainFrame(View):
 
             so = ScreenString(panel_text,
                               fg=libtcod.dark_yellow,
-                              bg=libtcod.black)
+                              bg=bg)
             so.render(0, cx, by + 2, alignment=libtcod.CENTER)
 
             # Add game title
@@ -418,13 +420,14 @@ class MainFrame(View):
             bh = 5
             bx = int((self.width - bw) / 2)
             by = cy - MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT - bh + 3
-            box = Boxes.get_box(bw, bh, border_type=Boxes.BORDER_TYPE_1)
+
+            box = Boxes.get_box(bw, bh, border_type=Boxes.BORDER_TYPE_1, fill_char=ord(" "))
             bo = ScreenObject2DArray(box, fg=fg, bg=bg)
             bo.render(0, bx, by)
 
             so = ScreenString(panel_text,
-                              fg=fg,
-                              bg=libtcod.black)
+                              fg=libtcod.green,
+                              bg=bg)
             so.render(0, int(self.width / 2), by + 2, alignment=libtcod.CENTER)
 
         # Blit the message panel
@@ -447,10 +450,10 @@ class MainFrame(View):
 
         max_hp = self.game.player.fighter.get_max_HP()
         status = f'F={self.game.dungeon_level}{chr(179)}AC={ac}'
-        stats = ["STR", "DEX", "INT", "WIS", "CHA", "Level"]
+        stats = ["STR", "CON", "DEX", "INT", "WIS", "CHA", "Level"]
         for stat in stats:
             stat_value = self.game.player.get_property(stat)
-            status += f'{chr(179)}{stat[0]}={stat_value}'
+            status += f'{chr(179)}{stat}={stat_value}'
 
         libtcod.console_set_default_foreground(0, libtcod.lightest_grey)
         libtcod.console_print(0, x, y, f'{status:<{self.width}}')
@@ -1837,7 +1840,7 @@ class CreateCharacterView(View):
         self.character = None
 
         self.character_view = CharacterView(width=self.width - 4,
-                                            height=40,
+                                            height=self.height - 11,
                                             fg=dim_rgb(self.fg, 30),
                                             bg=dim_rgb(self.bg, 30),
                                             border_bg=self.border_bg,
@@ -2253,6 +2256,7 @@ class JournalView(View):
 class SpellBookView(View):
     MODE_ACTIVE = "active spells"
     MODE_CATALOGUE = "available spells"
+    MODE_CONFIRM_SPELLS = "confirm spell selection"
 
     BORDER_TYPE1 = "type1"
     BORDER_TYPE2 = "type2"
@@ -2282,6 +2286,17 @@ class SpellBookView(View):
         self.spellbook = None
         self.selected_item = -1
         self.selected_spell = None
+        self.confirm_spells = ItemPickerView(width=self.width,
+                                          height=self.height,
+                                          fg=libtcod.silver,
+                                          bg=libtcod.black,
+                                          border_bg=border_bg,
+                                          border_fg=border_fg)
+
+    @property
+    def save(self):
+        s = self.confirm_spells.get_selected_item()
+        return s == "Yes"
 
     def initialise(self, game: model.Model):
 
@@ -2290,6 +2305,15 @@ class SpellBookView(View):
 
         self.con = libtcod.console_new(self.width, self.height)
         self.border = Boxes.get_box(self.width, self.height, border_type=self.border_type)
+
+        self.confirm_spells.initialise("Save changes and exit?",["No","Yes"])
+
+    def confirm(self):
+
+        spell_book = self.game.player.fighter.spell_book
+
+        if spell_book is not None and spell_book.is_locked is False:
+            self.mode = SpellBookView.MODE_CONFIRM_SPELLS
 
     def process_event(self, new_event: model.Event):
 
@@ -2313,14 +2337,14 @@ class SpellBookView(View):
         return self.selected_spell
 
     def change_selection(self, d: int, relative=True):
-
-        if relative is True:
-
-            self.selected_item += d
-            self.selected_item = min(max(0, self.selected_item), len(self.selection_list) - 1)
-
+        if self.mode == SpellBookView.MODE_CONFIRM_SPELLS:
+            self.confirm_spells.change_selection(d)
         else:
-            self.selected_item = min(max(0, d), len(self.game.player.fighter.spell_book.get_learned_spells()) - 1)
+            if relative is True:
+                self.selected_item += d
+                self.selected_item = min(max(0, self.selected_item), len(self.selection_list) - 1)
+            else:
+                self.selected_item = min(max(0, d), len(self.game.player.fighter.spell_book.get_learned_spells()) - 1)
 
     def build_lists(self):
         # print("*** SpellBookView: building lists...")
@@ -2361,7 +2385,7 @@ class SpellBookView(View):
 
         # Colour the title area background
         self.con.default_bg = title_bg
-        self.con.rect(0, 0, self.width, 4, False, libtcod.BKGND_SET)
+        self.con.rect(0, 0, self.width, 4 + (spell_book.is_locked == True), False, libtcod.BKGND_SET)
 
         cx, cy = self.center
 
@@ -2382,6 +2406,17 @@ class SpellBookView(View):
                           alignment=libtcod.CENTER)
 
         so.render(self.con, cx, y)
+
+        if spell_book.is_locked is True:
+            y += 1
+            text = f"Spell Book is LOCKED!"
+
+            so = ScreenString(text,
+                              fg=libtcod.red,
+                              bg=title_bg,
+                              alignment=libtcod.CENTER)
+
+            so.render(self.con, cx, y)
 
         y += 2
 
@@ -2557,6 +2592,13 @@ class SpellBookView(View):
                    f'DMG={self.selected_spell.damage}, HP={self.selected_spell.heal}'
             libtcod.console_print_ex(self.con, x, y, flag=libtcod.BKGND_NONE, alignment=libtcod.CENTER, fmt=text)
 
+        if self.mode == SpellBookView.MODE_CONFIRM_SPELLS:
+            self.confirm_spells.draw()
+            libtcod.console_blit(self.confirm_spells.con,
+                                 0, 0, self.confirm_spells.width, self.confirm_spells.height,
+                                 self.con,
+                                 int((self.width - self.confirm_spells.width) / 2),
+                                 int((self.height - self.confirm_spells.height) / 2))
 
 class EventView(View):
     # Type to colour map
