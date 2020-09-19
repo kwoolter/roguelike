@@ -110,6 +110,11 @@ Game Over Screen
 
 ### What is this game again?????
 Features:
+* DnD-like classes, abilities, monsters and combat rules
+* DnD-like armour, melee weapons, ranged weapons and other items
+* Dnd-like spells and spellbook
+* DnD-like ability checks
+* XP and Leveling-up
 * Random dungeon floor generation with more rooms per floor as you get deeper
 * Field of View (FoV) lighting
 * "Fog of War" unexplored map 
@@ -118,10 +123,6 @@ Features:
 * Potions and Scrolls have randomised effects
 * Random colour palettes and random room and dungeon level names
 * Random Lore generation
-* DnD-like classes, abilities, monsters and combat rules
-* DnD-like armour, weapons and other items
-* Dnd-like spells and spellbook
-* DnD-like ability checks
 * Inventory and Shop features
 * Perma-death
 

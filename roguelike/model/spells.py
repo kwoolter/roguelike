@@ -20,6 +20,7 @@ class Spell:
     FREQUENCY_AT_WILL = "At Will"
     FREQUENCY_PER_FLOOR = "Encounter"
     FREQUENCY_PER_LEVEL = "Daily"
+    FREQUENCIES = (FREQUENCY_AT_WILL, FREQUENCY_PER_FLOOR, FREQUENCY_PER_LEVEL)
 
     def __init__(self,
                  class_name: str,
@@ -98,12 +99,24 @@ class SpellBook:
         # Properties
         self.class_name = class_name
         self.level = level
-        self.max_learned_spells = 10
-        self.max_memorised_spells = 4
+        self.is_locked = False
+        self.max_per_frequency={}
 
         # Components
         self.learned_spells = {}
         self.memorised_spells = []
+
+    @property
+    def max_memorised_spells(self):
+        spell_count = sum(self.max_per_frequency.values())
+        return spell_count
+
+    def level_up(self, new_level_id:int, new_max_frequency:dict=None):
+        self.level = new_level_id
+        if new_max_frequency is not None:
+            self.max_per_frequency.update(new_max_frequency)
+
+        #print(f'Spell Limits {self,self.max_per_frequency}')
 
     def reset(self, frequency: str):
 
@@ -113,7 +126,7 @@ class SpellBook:
 
     def learn_spell(self, new_spell: Spell) -> bool:
         """
-        Attempt to learn a new spell
+        Attempt to learn a new spell.
         Args:
             new_spell: the new Spell object that you want to learn
 
@@ -122,12 +135,23 @@ class SpellBook:
         """
         success = False
 
+        if self.is_locked is True:
+            raise SpellBookException(f"You you cannot learn any new spells at this time")
+
+        # How many spells of this type of frequency have we already learned?
+        matching_spell_count = len([spell for spell in self.learned_spells.values() if spell.frequency == new_spell.frequency])
+
+        # What is the maximum of this frequency that we are allowed?
+        max_count_for_frequency = self.max_per_frequency.get(new_spell.frequency,1)
+
+        print(f'frequency={new_spell.frequency}: current={matching_spell_count}, max={max_count_for_frequency}')
+
         if new_spell.class_name != self.class_name:
             raise SpellBookException(f"You are a {self.class_name}, you cannot learn {new_spell.class_name} spells")
         elif new_spell.level > self.level:
             raise SpellBookException(f'You need to be level {new_spell.level} or above to learn this spell')
-        elif len(self.learned_spells) >= self.max_learned_spells:
-            raise SpellBookException(f"No more free spell pages in your book - max={self.max_learned_spells}")
+        elif matching_spell_count >= max_count_for_frequency:
+            raise SpellBookException(f"You can't learn any more {new_spell.frequency} spells - max={max_count_for_frequency}")
         else:
             self.learned_spells[new_spell.name] = new_spell
             success = True
@@ -140,6 +164,9 @@ class SpellBook:
         :param old_spell: the spell to unlearn
         """
         if self.is_learned(old_spell.name):
+
+            if self.is_locked is True:
+                raise SpellBookException(f"You you cannot unlearn any spells at this time")
 
             if self.is_memorised(old_spell.name):
                 self.forget_spell(old_spell)

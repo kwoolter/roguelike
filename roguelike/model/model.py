@@ -954,7 +954,7 @@ class Floor():
 
             stats.sort(key=operator.itemgetter(1))
             print(stats)
-            # Pick the ability that has the lowest diffculty score
+            # Pick the ability that has the lowest difficulty score
             ability, score = stats[0]
             print(f'Chosen check = {stats[0]}')
 
@@ -1453,11 +1453,15 @@ class Model():
         self.events = EventQueue()
         self.item_user = None
 
-    def initialise(self):
+    def initialise(self, floor_width=50, floor_height=50):
         """
         Initialise an instance of the Model.
 
         """
+
+        self.floor_width = floor_width
+        self.floor_height = floor_height
+
 
         # Load game data from specified files
         ThemeManager.load_room_names("room_names.csv")
@@ -1544,6 +1548,7 @@ class Model():
         target = self.current_floor.auto_target()
         print(f'nearest target={str(target)}')
         self.player.fighter.last_target = target
+        self.current_floor.print()
 
     def debug(self):
         self.player.print()
@@ -1666,6 +1671,7 @@ class Model():
             for spell in level_spells:
                 try:
                     new_player.fighter.learn_spell(spell)
+                    new_player.fighter.memorise_spell(spell)
                 except SpellBookException as e:
                     pass
 
@@ -1834,6 +1840,11 @@ class Model():
                 self.events.add_event(Event(type=Event.GAME,
                                             name=Event.ACTION_SUCCEEDED,
                                             description=f"You rest from your adventuring and heal your wounds"))
+                # Unlock the spell book
+                self.player.fighter.spell_book.is_locked = False
+                self.events.add_event(Event(type=Event.GAME,
+                                            name=Event.ACTION_SUCCEEDED,
+                                            description=f"You can learn new spells"))
 
         # Increase the dungeon level
         self.dungeon_level += 1
@@ -1847,7 +1858,8 @@ class Model():
             # Create a new floor and initialise it
             floor_name = ThemeManager.get_random_history("Floor")
             self.current_floor = Floor(floor_name,
-                                       50, 50,
+                                       self.floor_width,
+                                       self.floor_height,
                                        level=self.dungeon_level,
                                        params=game_parameters)
 
@@ -2828,6 +2840,7 @@ class AbilityCheck:
             # did we pass the check?
             if self.difficulty_value <= (random.randint(1, 20) + ability_modifier):
                 success = True
+                self.entity.set_property("IsCheckable", False)
                 if len(self.success_rewards) > 0:
                     reward_name = random.choice(self.success_rewards)
                     self.success_reward = EntityFactory.get_entity_by_name(reward_name)

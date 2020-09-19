@@ -10,10 +10,12 @@
 [KW] Use A* algo for monster movements towards player
 [KW] Use A* to generate tunnels between rooms
 [KW] Cycle through available targets rather than picking closest all the time
-[KW] Leveling-up - what about the rest of the stats in teh file?
+[KW] May need to allow tabbing through Level filters in SpellBookView if number of spells in catalog gets large
+
 
 # Bugs
 [OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves
+
 
 # Ideas DONE!
 01/09/2020
@@ -21,7 +23,7 @@
 [KW] Floor colours - add colour boundary around a room so that exits are highlighted
 [KW] Journal that summarises what you did or found on each level e.g. Lore.  Takes events and converts to journal logs.
 [KW] Configurable number of allowable attempts at an ability check
-- Added stairs up gp back up to prior level but you don't get and completion rewards for exting again
+- Added stairs up go back up to prior level but you don't get and completion rewards for exting again
 
 06/09/2020
 - Added SpellBook and SpellBookView basics.
@@ -37,4 +39,8 @@
 [KW] Add ranged melee weapons - bows, etc
 - Changed leveling-up system to be file driven
 - Added Ability Points that a player gains to increase abilities
-
+[KW] Leveling-up - what about the rest of the stats in the file? Now using these so you can learn more spells
+Bug:Checked items need to be made uncheckable FIXED
+Bug leveling up allows many times!! FIXED
+[KW] allow selling of stackable items in shop
+[KW] You can only change your spells once per level

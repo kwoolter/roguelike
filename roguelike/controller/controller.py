@@ -20,6 +20,9 @@ class Controller():
     GAME_MODE_SPELLBOOK = "spellbook"
     GAME_MODE_SHOP = "shop"
 
+    GAME_FLOOR_WIDTH = 80
+    GAME_FLOOR_HEIGHT = 50
+
     def __init__(self, name: str):
         # Properties
         self.name = name
@@ -32,10 +35,11 @@ class Controller():
 
     def initialise(self):
         self.model = model.Model(self.name)
-        self.model.initialise()
+        self.model.initialise(Controller.GAME_FLOOR_WIDTH, Controller.GAME_FLOOR_HEIGHT)
         self.events = self.model.events
 
-        self.view = view.MainFrame(50, 66)
+        self.view = view.MainFrame(Controller.GAME_FLOOR_WIDTH,
+                                   Controller.GAME_FLOOR_HEIGHT + view.MainFrame.CONSOLE_MESSAGE_PANEL_HEIGHT+ 4)
         self.view.initialise(self.model)
         self.view.set_event_queue(self.model.events)
         self.set_mode(Controller.GAME_MODE_START)
@@ -308,15 +312,30 @@ class Controller():
                         #                             name=model.Event.ACTION_FAILED,
                         #                             description=f"No item selected!"))
 
-            # If we are in spellbook mode
+            # If we are in spell book mode
             elif self.mode == Controller.GAME_MODE_SPELLBOOK:
                 learn = action.get('learn')
                 memorise = action.get('memorise')
                 toggle = action.get('toggle')
+                confirm = action.get('confirm')
 
                 if move:
                     dx, dy = move
                     self.view.spellbook_view.change_selection(dy)
+                elif exit:
+                    # If the spell book is not locked and you are trying to exit then go into confirm mode
+                    if self.model.player.fighter.spell_book.is_locked is False:
+                        self.view.spellbook_view.confirm()
+                        exit = False
+                elif confirm:
+                    v = self.view.spellbook_view
+                    # If we are checking user wants to exit
+                    if v.mode == view.SpellBookView.MODE_CONFIRM_SPELLS:
+                            # If they confirmed that they wanted to save then lock spell book and exit
+                            if v.save is True:
+                                exit = True
+                                self.model.player.fighter.spell_book.is_locked = True
+                            v.mode = view.SpellBookView.MODE_ACTIVE
                 else:
                     if toggle:
                         self.view.spellbook_view.toggle_mode()
@@ -423,7 +442,10 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_CHARACTER_CREATION:
             keys_help = 'N=Change name|C=change class|R=change race|?=Randomise|Enter/Space=Confirm|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_PLAYING:
-            keys_help = '^v<> / WASD=Move/attack/examine|Ctrl=attack|G/Space=Get item|U/Q=use equipped item|X=examine|Z=wait|I/R=show inventory|C=show character sheet|J=show journal|Enter=take stairs|Esc=Pause'
+            keys_help = '^v<> / WASD=Move/attack/examine|Ctrl=attack|G/Space=Get item|U/Q=use equipped item|' \
+                        'X=examine|Z=wait|' \
+                        'I/C/K/J=show inventory,spell book, character sheet,journal|' \
+                        'Enter=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
             keys_help = 'Esc=continue|Q=quit the game'
         elif self.mode == Controller.GAME_MODE_INVENTORY:
@@ -690,6 +712,8 @@ class Controller():
             return {'learn': True}
         elif key_char == 't':
             return {'toggle': True}
+        elif key.vk == libtcod.KEY_ENTER:
+            return {'confirm':True}
         elif key.vk == libtcod.KEY_ESCAPE or key_char == 'k':
             return {'exit': True}
 

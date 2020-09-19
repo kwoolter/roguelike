@@ -452,8 +452,9 @@ class Fighter():
         # Recalculate our Max HP
         self.set_property("MaxHP", self.get_max_HP())
 
-        # Update our spell book with the new level
-        self.spell_book.level = level
+        # Update our spell book with the new level and allowed number of spells
+        spell_caps = {frequency:self.get_property(frequency) for frequency in Spell.FREQUENCIES}
+        self.spell_book.level_up(level, spell_caps)
 
         return success
 
@@ -728,14 +729,12 @@ class LevelFactory:
         df = LevelFactory.levels
         df.set_index("Level", drop=True, inplace=True)
 
-
-
     @staticmethod
     def row_to_level(level_id:int, row)->Level:
-        xp = row["XP"]
 
+        xp = row["XP"]
         new_level = Level(level_id=level_id, xp=xp)
-        new_level.add_properties(row.iloc[:].to_dict())
+        new_level.add_properties(row.iloc[1:].to_dict())
 
         return new_level
 
@@ -758,7 +757,6 @@ class LevelFactory:
         df = LevelFactory.levels
         i = df.loc[df.XP > xp,['XP']].min()
         return i['XP']
-
 
 
 class Inventory:
