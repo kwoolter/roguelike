@@ -1662,7 +1662,7 @@ class Model():
             for i in range(v):
                 new_player.take_item(eq)
 
-        for i in range(10):
+        for i in range(1):
             new_player.level_up()
 
         # Learn some spells

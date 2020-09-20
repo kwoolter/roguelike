@@ -445,7 +445,7 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_PLAYING:
             keys_help = '^v<> / WASD=Move/attack/examine|Ctrl=attack|G/Space=Get item|U/Q=use equipped item|' \
                         'X=examine|Z=wait|' \
-                        'I/C/K/J=show inventory,spell book, character sheet,journal|' \
+                        'I/K/C/J=show inventory,spell book, character sheet,journal|' \
                         'Enter=take stairs|Esc=Pause'
         elif self.mode == Controller.GAME_MODE_PAUSED:
             keys_help = 'Esc=continue|Q=quit the game'
@@ -467,7 +467,7 @@ class Controller():
 
         for key_help in keys_help.split('|'):
             key_, help_text = key_help.split('=')
-            text = f' * {key_:<14}: {help_text.capitalize()}'
+            text = f' * {key_:<12}: {help_text.capitalize()}'
 
             self.events.add_event(model.Event(type=model.Event.CONTROL,
                                               name=self.mode,
