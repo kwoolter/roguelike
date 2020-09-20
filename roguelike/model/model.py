@@ -1009,7 +1009,7 @@ class Floor():
                         self.events.add_event(
                             Event(type=Event.GAME,
                                   name=Event.ACTION_FOUND_LORE,
-                                  description=f"[Lore] {v}:'{text}'"))
+                                  description=f"[Lore] {v}:{text}"))
 
                 # Update any stats with any rewards
                 for stat, value in check.success_stats.items():

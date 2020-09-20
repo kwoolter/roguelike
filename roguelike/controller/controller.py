@@ -336,7 +336,7 @@ class Controller():
                             if v.save is True:
                                 exit = True
                                 self.model.player.fighter.spell_book.is_locked = True
-                            v.mode = view.SpellBookView.MODE_ACTIVE
+                            v.mode = view.SpellBookView.MODE_CATALOGUE
                 else:
                     if toggle:
                         self.view.spellbook_view.toggle_mode()
