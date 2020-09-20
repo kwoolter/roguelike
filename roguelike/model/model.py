@@ -1009,7 +1009,7 @@ class Floor():
                         self.events.add_event(
                             Event(type=Event.GAME,
                                   name=Event.ACTION_FOUND_LORE,
-                                  description=f"[Lore] {v}:'{text}'"))
+                                  description=f"[Lore] {v}:{text}"))
 
                 # Update any stats with any rewards
                 for stat, value in check.success_stats.items():
@@ -1662,7 +1662,8 @@ class Model():
             for i in range(v):
                 new_player.take_item(eq)
 
-        new_player.level_up()
+        for i in range(1):
+            new_player.level_up()
 
         # Learn some spells
         if new_player.combat_class_name in SpellFactory.get_available_class_names():
