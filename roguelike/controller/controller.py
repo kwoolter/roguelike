@@ -322,6 +322,7 @@ class Controller():
                 if move:
                     dx, dy = move
                     self.view.spellbook_view.change_selection(dy)
+                    self.view.spellbook_view.change_level_filter(dx)
                 elif exit:
                     # If the spell book is not locked and you are trying to exit then go into confirm mode
                     if self.model.player.fighter.spell_book.is_locked is False:
@@ -451,14 +452,14 @@ class Controller():
         elif self.mode == Controller.GAME_MODE_INVENTORY:
             keys_help = '^v<> / WASD=Change selected item|E=equip selected item|F=drop selected item|U/Q=use equipped item|Esc/I=Exit'
         elif self.mode == Controller.GAME_MODE_CHARACTER:
-            keys_help = '^v / WA=Change selected ability|L/E=level-up|U=upgrade selected ability|Esc/C=Exit'
+            keys_help = '^v / WS=Change selected ability|L/E=level-up|U=upgrade selected ability|Esc/C=Exit'
         elif self.mode == Controller.GAME_MODE_JOURNAL:
-            keys_help = '^v / WA=Change selected level|Esc/J=Exit'
+            keys_help = '^v / WS=Change selected level|Esc/J=Exit'
         elif self.mode == Controller.GAME_MODE_SHOP:
-            keys_help = '^v / WA=Change selected item|B/E=change to BUY tab|Q/V=change to SELL tab|' \
+            keys_help = '^v / WS=Change selected item|B/E=change to BUY tab|Q/V=change to SELL tab|' \
                         '<> / AD=change selected buy item category|Enter/Space=Buy or sell selected item|Esc=Exit'
         elif self.mode == Controller.GAME_MODE_SPELLBOOK:
-            keys_help = "M=Memorise/Forget|L=Learn/unlearn|T=Toggle Spell catalog|Esc/K=Exit"
+            keys_help = "^v / WS=Change selected spell|<> / AD=change selected spell level|M=Memorise/Forget|L=Learn/unlearn|T=Toggle Spell catalog|Esc/K=Exit"
         elif self.mode == Controller.GAME_MODE_GAME_OVER:
             keys_help = 'SPACE=continue'
         else:
@@ -706,6 +707,10 @@ class Controller():
             return {'move': (0, -1)}
         elif key.vk == libtcod.KEY_DOWN or key_char == 's':
             return {'move': (0, 1)}
+        elif key.vk == libtcod.KEY_LEFT or key_char == 'a':
+            return {'move': (-1, 0)}
+        elif key.vk == libtcod.KEY_RIGHT or key_char == 'd':
+            return {'move': (1, 0)}
         elif key_char == 'm':
             return {'memorise': True}
         elif key_char == 'l':

@@ -2274,6 +2274,7 @@ class SpellBookView(View):
         self.border_bg = border_bg
         self.memorised_spell_fg = libtcod.green
         self.unknown_spell_fg = Palette.dim_hsl(self.fg, 0.6)
+        self.spell_level_filter = 1
 
         self.border_type = SpellBookView.BORDER_TYPE1
         self.border = None
@@ -2320,8 +2321,8 @@ class SpellBookView(View):
         # If we have just got focus then rebuild lists that we are going to display
         if new_event.name == model.Event.GAME_MODE_CHANGED:
             self.mode = SpellBookView.MODE_ACTIVE
-            self.confirm_spells.change_selection(-1)
             self.build_lists()
+            self.confirm_spells.change_selection(-1)
 
     def toggle_mode(self) -> str:
 
@@ -2343,13 +2344,43 @@ class SpellBookView(View):
         else:
             if relative is True:
                 self.selected_item += d
-                self.selected_item = min(max(0, self.selected_item), len(self.selection_list) - 1)
+                self.selected_item = min(max(0, self.selected_item), len(self.filtered_selection_list) - 1)
             else:
-                self.selected_item = min(max(0, d), len(self.game.player.fighter.spell_book.get_learned_spells()) - 1)
+                self.selected_item = min(max(0, d), len(self.filtered_selection_list) - 1)
+
+    def change_level_filter(self, d : int):
+        """
+        Change the level filter for the list of spells that are going to be displayed
+        :param d: How much you want to change the spell filter by e.g. +1 goes ot next higher level spell list
+        """
+        # Only do this when you are not trying to confirm saved spells
+        if self.mode != SpellBookView.MODE_CONFIRM_SPELLS:
+
+            # Build a list of teh unique levels that are available
+            available_spell_levels = set()
+            for spell in self.selection_list:
+                available_spell_levels.add(spell.level)
+            available_spell_levels = list(available_spell_levels)
+            available_spell_levels.sort()
+
+            try:
+                # Find out where in that list the current filter is
+                idx = available_spell_levels.index(self.spell_level_filter)
+
+            except ValueError as err:
+                idx = 0
+
+            # Change the index by the specified amount
+            idx += d
+
+            #  Calculate what the new level filter is
+            idx = min(max(0,idx), len(available_spell_levels)-1)
+            self.spell_level_filter = available_spell_levels[idx]
 
     def build_lists(self):
-        # print("*** SpellBookView: building lists...")
-
+        """
+        Build the lists of memorised spells and other spells to be displayed
+        """
         player_level = self.game.player.fighter.get_property("Level")
         spell_book = self.game.player.fighter.spell_book
 
@@ -2361,13 +2392,16 @@ class SpellBookView(View):
 
         self.class_spells = model.SpellFactory.get_spells_by_class(spell_book.class_name, player_level)
 
+        # We are just displaying the learned spells
         if self.mode == SpellBookView.MODE_ACTIVE:
             self.selection_list = self.learned_spells
+        # Else we are displayed all spells available to this class and level
         else:
             self.selection_list = self.class_spells
 
-        # Sort selection list by spell level and name
-        self.selection_list.sort(key=lambda x: f'{x.level:0>4}:{x.name}')
+        # Filter and Sort selection list by spell level and name
+        self.filtered_selection_list = [spell for spell in self.selection_list if spell.level == self.spell_level_filter]
+        self.filtered_selection_list.sort(key=lambda x: f'{x.level:0>4}:{x.name}')
 
     def draw(self):
 
@@ -2473,9 +2507,9 @@ class SpellBookView(View):
         y += 1
 
         if self.mode == SpellBookView.MODE_ACTIVE:
-            text = f"Spells Learned:"
+            text = f"Level {self.spell_level_filter} Spells Learned:"
         else:
-            text = "All Class Spells:"
+            text = f"Level {self.spell_level_filter} Class Spells:"
 
         bg = Palette.dim_hsl(self.bg, 1.5)
 
@@ -2493,7 +2527,7 @@ class SpellBookView(View):
 
         y += 2
 
-        if len(self.selection_list) == 0:
+        if len(self.filtered_selection_list) == 0:
             text = f"None"
             so = ScreenString(text,
                               fg=self.fg,
@@ -2501,9 +2535,10 @@ class SpellBookView(View):
                               alignment=libtcod.CENTER)
 
             so.render(self.con, cx, y)
+            y+=1
 
         # Print the list of selected spells
-        for i, spell in enumerate(self.selection_list):
+        for i, spell in enumerate(self.filtered_selection_list):
 
             bg = self.bg
             fg = self.fg

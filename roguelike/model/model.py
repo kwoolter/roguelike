@@ -1662,7 +1662,8 @@ class Model():
             for i in range(v):
                 new_player.take_item(eq)
 
-        new_player.level_up()
+        for i in range(10):
+            new_player.level_up()
 
         # Learn some spells
         if new_player.combat_class_name in SpellFactory.get_available_class_names():

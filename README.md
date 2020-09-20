@@ -69,7 +69,8 @@ Inventory Screen
 * `Esc` or `R` exit screen
 
 Spellbook Screen
-* Arrow keys or `WS` change selected spell
+* UP/DOWN Arrow keys or `WS` change selected spell
+* LEFT/RIGHT Arrow keys or `AD` change selected spell level filter
 * `M` memorise/forget spell
 * `L` learn/unlearn spell
 * `Esc` or `K` exit screen
