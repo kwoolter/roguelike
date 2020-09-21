@@ -12,8 +12,7 @@
 [KW] Cycle through available targets rather than picking closest all the time
 
 # Bugs
-[OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves
-
+Don't display a property if its value is Nan
 
 # Ideas DONE!
 01/09/2020
@@ -43,3 +42,4 @@ Bug leveling up allows many times!! FIXED
 [KW] allow selling of stackable items in shop
 [KW] You can only change your spells once per level
 [KW] May need to allow tabbing through Level filters in SpellBookView if number of spells in catalog gets large
+[OF] When you kill an enemy the FOV does not update to reflect the fact that their corpse is transparent until teh player moves - Fixed

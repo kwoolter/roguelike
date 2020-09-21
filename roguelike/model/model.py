@@ -908,6 +908,9 @@ class Floor():
                 corpse = EntityFactory.get_entity_by_name("Corpse")
                 self.swap_entity(target, corpse)
 
+                # Recalculate the current FOV using sight radius of combat class
+                self.recompute_fov(radius=self.player.fighter.combat_class.get_property("SightRange"))
+
                 self.events.add_event(
                     Event(type=Event.GAME,
                           name=Event.ACTION_KILL,
