@@ -1686,7 +1686,9 @@ class Model():
 
         self.events.add_event(Event(type=Event.GAME,
                                     name=Event.GAME_NEW_PLAYER,
-                                    description=f"{self.player.combat_class_name} {self.player.name} joined {self.name}!"))
+                                    description=f"{self.player.fighter.race.name} "
+                                                f"{self.player.combat_class_name} "
+                                                f"{self.player.name} joined {self.name}!"))
 
         if self.current_floor is not None:
             self.current_floor.add_player(self.player)

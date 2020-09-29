@@ -757,33 +757,3 @@ class Controller():
 
         return {}
 
-
-class TextEntry:
-    def __init__(self):
-        self.mask = np.concatenate((np.arange(ord('a'), ord('z')),
-                                    np.arange(ord('A'), ord('Z')),
-                                    np.arange(ord('0'), ord('9'))), axis=0)
-
-    def get_text(self, max_length=30):
-
-        print(f"Getting some text (max {max_length} chars")
-        print(f'Using mask {self.mask}')
-
-        key = libtcod.Key()
-        mouse = libtcod.Mouse()
-
-        text = ""
-
-        typing = True
-        while typing:
-            libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS, key, mouse)
-            if key.vk == libtcod.KEY_ENTER:
-                typing = False
-            elif len(text) < max_length and key.c in self.mask:
-                text += chr(key.c)
-                print(text)
-            elif key.vk == libtcod.KEY_BACKSPACE:
-                text = text[:-1]
-                print(text)
-
-        return text

@@ -1849,14 +1849,14 @@ class CreateCharacterView(View):
         self.class_picker = ItemPickerView(width=self.width,
                                            height=self.height,
                                            fg=libtcod.silver,
-                                           bg=libtcod.black,
+                                           bg=libtcod.darkest_grey,
                                            border_bg=border_bg,
                                            border_fg=border_fg)
 
         self.race_picker = ItemPickerView(width=self.width,
                                           height=self.height,
                                           fg=libtcod.silver,
-                                          bg=libtcod.black,
+                                          bg=libtcod.darkest_grey,
                                           border_bg=border_bg,
                                           border_fg=border_fg)
 
@@ -1875,10 +1875,10 @@ class CreateCharacterView(View):
         self.character_view.initialise(self.game)
 
         self.available_classes = model.CombatClassFactory.get_playable_classes()
-        self.class_picker.initialise("Choose Combat Class:", self.available_classes)
+        self.class_picker.initialise("Choose Combat Class:", self.available_classes, self.character_class)
 
         self.available_races = model.RaceFactory.get_available_races()
-        self.race_picker.initialise("Choose Race:", self.available_races)
+        self.race_picker.initialise("Choose Race:", self.available_races, self.character_race)
 
         self.text_entry = TextEntryBox(width=15, parent=self.con)
 
@@ -2024,10 +2024,18 @@ class ItemPickerView(View):
         self.selected_item = -1
         self.border = None
 
-    def initialise(self, title: str, item_list: list):
+    def initialise(self, title: str, item_list: list, initial_selection: str = None):
 
         self.title = title
         self.item_list = item_list
+
+        # Set the initially selected item if specified
+        if initial_selection is not None and initial_selection in item_list:
+            self.selected_item = item_list.index(initial_selection)
+
+        # Otherwise pick the first item in the list
+        else:
+            self.selected_item = 0
 
         # Calculate the height and width of the view
         self.height = len(item_list) + 6
