@@ -1316,7 +1316,7 @@ class ShopView(View):
         # Print the sell tab label
         side = "S E L L"
         so = ScreenString(f"{side:^16}", fg=fg, bg=bg, alignment=libtcod.CENTER)
-        so.render(self.con, int(x=cx / 2) - 1, y=y)
+        so.render(self.con, x=int(cx / 2) - 1, y=y)
 
         # BUY mode processing
         fg = self.buy_fg
